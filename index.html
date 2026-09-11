@@ -25,18 +25,18 @@
         if ('caches' in window) {
             caches.keys().then(function(keys) {
                 keys.forEach(function(key) {
-                    if (key !== 'cubofacil-v8') caches.delete(key);
+                    if (key !== 'cubofacil-v9') caches.delete(key);
                 });
             });
         }
     </script>
 
     <!-- Motores do Cubo & Algoritmos -->
-    <script type="text/javascript" src='rubiks.js?v=8'></script>
-    <script type="text/javascript" src='solver.js?v=8'></script>
-    <script type="text/javascript" src='flat.js?v=8'></script>
-    <script type="text/javascript" src='camera_scanner.js?v=8'></script>
-    <script type="text/javascript" src='speed_timer.js?v=8'></script>
+    <script type="text/javascript" src='rubiks.js?v=9'></script>
+    <script type="text/javascript" src='solver.js?v=9'></script>
+    <script type="text/javascript" src='flat.js?v=9'></script>
+    <script type="text/javascript" src='camera_scanner.js?v=9'></script>
+    <script type="text/javascript" src='speed_timer.js?v=9'></script>
     
     <style type="text/css">
         :root {
@@ -185,6 +185,149 @@
 
         .header-btn.btn-timer:hover {
             box-shadow: 0 6px 20px rgba(99, 102, 241, 0.55);
+        }
+
+        /* ==================== CONTROLES DE RECOLHER/EXPANDIR O CABEÇALHO ==================== */
+        #header {
+            transition: padding 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .header-toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 12px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(255, 255, 255, 0.08);
+            color: #cbd5e1;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .header-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.16);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .header-collapse-handle {
+            position: absolute;
+            bottom: -11px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            padding: 1px 18px;
+            font-size: 0.65rem;
+            color: #94a3b8;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+            transition: all 0.2s ease;
+            z-index: 60;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-collapse-handle:hover {
+            color: #fff;
+            background: var(--brand-indigo);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        #header.collapsed .header-collapse-handle i {
+            transform: rotate(180deg);
+        }
+
+        /* Estado Recolhido do Cabeçalho */
+        #header.collapsed {
+            padding: 6px 16px;
+            background: rgba(15, 23, 42, 0.96);
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+        }
+
+        #header.collapsed .header-inner {
+            flex-direction: row !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            flex-wrap: nowrap !important;
+            gap: 8px;
+        }
+
+        #header.collapsed .header-title-box {
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: 8px;
+        }
+
+        #header.collapsed .header-logo-icon {
+            width: 28px;
+            height: 28px;
+            font-size: 0.9rem;
+            border-radius: 8px;
+        }
+
+        #header.collapsed .header-title-group h1 {
+            font-size: 0.95rem;
+            margin: 0;
+            gap: 6px;
+        }
+
+        #header.collapsed .header-title-group p,
+        #header.collapsed .header-badge {
+            display: none !important;
+        }
+
+        #header.collapsed .header-actions {
+            width: auto !important;
+            justify-content: flex-end !important;
+            gap: 6px;
+            flex-wrap: nowrap !important;
+        }
+
+        #header.collapsed .header-btn {
+            padding: 6px 10px;
+            font-size: 0.78rem;
+            border-radius: 8px;
+            gap: 5px;
+        }
+
+        #header.collapsed .header-toggle-btn {
+            padding: 6px 10px;
+            font-size: 0.78rem;
+            border-radius: 8px;
+            background: rgba(99, 102, 241, 0.25);
+            border-color: rgba(99, 102, 241, 0.45);
+            color: #c7d2fe;
+        }
+
+        @media (max-width: 650px) {
+            #header.collapsed {
+                padding: 5px 8px;
+            }
+            #header.collapsed .header-btn .btn-label {
+                display: none;
+            }
+            #header.collapsed .header-btn {
+                padding: 6px 9px;
+                min-width: 32px;
+                justify-content: center;
+            }
+            #header.collapsed .header-toggle-btn .toggle-btn-text {
+                display: none;
+            }
+            #header.collapsed .header-toggle-btn {
+                padding: 6px 9px;
+                min-width: 32px;
+                justify-content: center;
+            }
         }
 
         /* ==================== CONTAINER & CARDS ==================== */
@@ -1251,15 +1394,21 @@
 
             <div class="header-actions">
                 <button id="btnOpenScanner" class="header-btn btn-scanner" title="Escanear as faces com a Câmera">
-                    <i class="fas fa-camera"></i> Escanear Câmera
+                    <i class="fas fa-camera"></i> <span class="btn-label">Escanear Câmera</span>
                 </button>
                 <button id="btnOpenTimer" class="header-btn btn-timer" title="Cronômetro de Speedcubing">
-                    <i class="fas fa-stopwatch"></i> Timer WCA
+                    <i class="fas fa-stopwatch"></i> <span class="btn-label">Timer WCA</span>
                 </button>
                 <button id="btnOpenHelp" class="header-btn" title="Instruções de Uso">
-                    <i class="fas fa-circle-question"></i> Ajuda
+                    <i class="fas fa-circle-question"></i> <span class="btn-label">Ajuda</span>
+                </button>
+                <button id="btnToggleHeader" class="header-toggle-btn" title="Recolher Cabeçalho">
+                    <i class="fas fa-chevron-up"></i> <span class="toggle-btn-text">Recolher</span>
                 </button>
             </div>
+        </div>
+        <div class="header-collapse-handle" id="headerCollapseHandle" title="Toque para recolher ou expandir">
+            <i class="fas fa-chevron-up"></i>
         </div>
     </header>
 
@@ -1605,6 +1754,74 @@
                     window.speedTimer.open();
                 });
             }
+
+            // ==================== CONTROLE DE RECOLHER / EXPANDIR CABEÇALHO ====================
+            var headerEl = document.getElementById('header');
+            var btnToggleHeader = document.getElementById('btnToggleHeader');
+            var headerHandle = document.getElementById('headerCollapseHandle');
+
+            function updateHeaderUI(isCollapsed) {
+                if (btnToggleHeader) {
+                    var icon = btnToggleHeader.querySelector('i');
+                    var text = btnToggleHeader.querySelector('.toggle-btn-text');
+                    if (icon) icon.className = isCollapsed ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+                    if (text) text.textContent = isCollapsed ? 'Expandir' : 'Recolher';
+                    btnToggleHeader.title = isCollapsed ? 'Expandir Cabeçalho' : 'Recolher Cabeçalho';
+                }
+                if (headerHandle) {
+                    var hIcon = headerHandle.querySelector('i');
+                    if (hIcon) hIcon.className = isCollapsed ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+                    headerHandle.title = isCollapsed ? 'Toque para expandir o cabeçalho' : 'Toque para recolher o cabeçalho';
+                }
+            }
+
+            function toggleHeaderCollapse(forceState) {
+                if (!headerEl) return;
+                var willCollapse = (typeof forceState === 'boolean') 
+                    ? forceState 
+                    : !headerEl.classList.contains('collapsed');
+                
+                if (willCollapse) {
+                    headerEl.classList.add('collapsed');
+                } else {
+                    headerEl.classList.remove('collapsed');
+                }
+                
+                try {
+                    localStorage.setItem('cubofacil_header_collapsed', willCollapse ? 'true' : 'false');
+                } catch(e) {}
+                
+                updateHeaderUI(willCollapse);
+
+                // Dispara recálculo de altura e posições imediatamente e após a transição CSS
+                window.dispatchEvent(new Event('resize'));
+                setTimeout(function() {
+                    window.dispatchEvent(new Event('resize'));
+                }, 150);
+                setTimeout(function() {
+                    window.dispatchEvent(new Event('resize'));
+                }, 300);
+            }
+
+            if (btnToggleHeader) {
+                btnToggleHeader.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleHeaderCollapse();
+                });
+            }
+            if (headerHandle) {
+                headerHandle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleHeaderCollapse();
+                });
+            }
+
+            try {
+                var savedHeaderState = localStorage.getItem('cubofacil_header_collapsed');
+                if (savedHeaderState === 'true') {
+                    toggleHeaderCollapse(true);
+                }
+            } catch(e) {}
         };
 
         window.addEventListener('load', init, false);
@@ -1679,10 +1896,10 @@
         // Registro correto do Service Worker com caminho relativo e versão
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
-                navigator.serviceWorker.register('./sw.js?v=8')
+                navigator.serviceWorker.register('./sw.js?v=9')
                     .then(function(reg) {
                         reg.update();
-                        console.log('CuboFácil Service Worker v8 atualizado:', reg.scope);
+                        console.log('CuboFácil Service Worker v9 atualizado:', reg.scope);
                     })
                     .catch(function(err) {
                         console.log('Falha ao registrar Service Worker:', err);
