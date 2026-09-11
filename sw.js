@@ -1,58 +1,54 @@
-const CACHE_NAME = 'cubofacil-v2';
+const CACHE_NAME = 'cubofacil-v6';
 const FILES_TO_CACHE = [
   './',
   'index.html',
-  'rubiks.js',
-  'solver.js',
-  'flat.js',
-  'camera_scanner.js',
-  'speed_timer.js',
+  'rubiks.js?v=6',
+  'solver.js?v=6',
+  'flat.js?v=6',
+  'camera_scanner.js?v=6',
+  'speed_timer.js?v=6',
   'manifest.json',
   'icons/icon-192x192.png',
   'icons/icon-512x512.png'
 ];
 
-// 1. Instala o Service Worker e armazena os arquivos em cache
+// 1. Instala o Service Worker e força ativação imediata
 self.addEventListener('install', (evt) => {
-  console.log('[ServiceWorker] Instalando...');
-  
+  self.skipWaiting();
   evt.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[ServiceWorker] Armazenando arquivos no cache...');
       return cache.addAll(FILES_TO_CACHE);
     })
   );
-
-  self.skipWaiting();
 });
 
 // 2. Ativa o Service Worker e limpa caches antigos
 self.addEventListener('activate', (evt) => {
-  console.log('[ServiceWorker] Ativando...');
-  
   evt.waitUntil(
     caches.keys().then((keyList) => {
       return Promise.all(keyList.map((key) => {
         if (key !== CACHE_NAME) {
-          console.log('[ServiceWorker] Removendo cache antigo', key);
+          console.log('[ServiceWorker] Removendo cache antigo:', key);
           return caches.delete(key);
         }
       }));
-    })
+    }).then(() => self.clients.claim())
   );
-
-  self.clients.claim();
 });
 
-// 3. Intercepta requisições de rede (Fetch)
+// 3. Estratégia Network-First: busca na rede primeiro, com fallback para cache offline
 self.addEventListener('fetch', (evt) => {
-  console.log('[ServiceWorker] Buscando', evt.request.url);
-  
-  // Estratégia: Cache-First
-  // Responde com o cache. Se falhar, tenta buscar na rede.
+  if (evt.request.method !== 'GET') return;
+
   evt.respondWith(
-    caches.match(evt.request).then((response) => {
-      return response || fetch(evt.request);
-    })
+    fetch(evt.request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(evt.request, responseClone));
+        }
+        return networkResponse;
+      })
+      .catch(() => caches.match(evt.request))
   );
 });

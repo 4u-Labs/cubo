@@ -122,6 +122,8 @@ class CuboCameraScanner {
         this.compassLeft = document.getElementById('compassLeft');
         this.compassRight = document.getElementById('compassRight');
         this.compassCenter = document.getElementById('compassCenter');
+        this.guideFrontText = document.getElementById('guideFrontText');
+        this.guideTopText = document.getElementById('guideTopText');
 
         if (this.btnClose) {
             this.btnClose.addEventListener('click', () => this.close());
@@ -315,40 +317,53 @@ class CuboCameraScanner {
     }
 
     drawOrientationPills(startX, startY, boxSize, step) {
-        if (!this.ctx) return;
+        if (!this.ctx || !this.canvasOverlay) return;
         this.ctx.save();
-        this.ctx.font = 'bold 12px Inter, sans-serif';
+        const w = this.canvasOverlay.width;
+        const h = this.canvasOverlay.height;
+        
+        const fontSize = Math.max(13, Math.min(22, Math.round(boxSize * 0.058)));
+        this.ctx.font = `bold ${fontSize}px Inter, -apple-system, sans-serif`;
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
 
-        // Pílula Superior (CIMA)
-        this.drawBadge(startX + boxSize / 2, startY - 14, `▲ CIMA: ${step.top.label}`, step.top.hex);
+        // Pílula Superior (CIMA) - centralizada na faixa preta superior
+        const topY = Math.max(fontSize * 1.1, startY / 2);
+        this.drawBadge(startX + boxSize / 2, topY, `▲ CIMA: ${step.top.label}`, step.top.hex, fontSize);
 
-        // Pílula Inferior (BAIXO)
-        this.drawBadge(startX + boxSize / 2, startY + boxSize + 14, `▼ BAIXO: ${step.bottom.label}`, step.bottom.hex);
+        // Pílula Inferior (BAIXO) - centralizada na faixa preta inferior
+        const botY = Math.min(h - fontSize * 1.1, (startY + boxSize) + (h - (startY + boxSize)) / 2);
+        this.drawBadge(startX + boxSize / 2, botY, `▼ BAIXO: ${step.bottom.label}`, step.bottom.hex, fontSize);
 
-        // Pílula Esquerda (ESQ)
-        this.drawBadge(startX - 38, startY + boxSize / 2, `◀ ${step.left.label}`, step.left.hex);
+        // Pílula Esquerda (ESQ) - centralizada na faixa preta esquerda
+        const leftX = Math.max(fontSize * 2.2, startX / 2);
+        this.drawBadge(leftX, startY + boxSize / 2, `◀ ${step.left.label}`, step.left.hex, fontSize);
 
-        // Pílula Direita (DIR)
-        this.drawBadge(startX + boxSize + 38, startY + boxSize / 2, `${step.right.label} ▶`, step.right.hex);
+        // Pílula Direita (DIR) - centralizada na faixa preta direita
+        const rightX = Math.min(w - fontSize * 2.2, (startX + boxSize) + (w - (startX + boxSize)) / 2);
+        this.drawBadge(rightX, startY + boxSize / 2, `${step.right.label} ▶`, step.right.hex, fontSize);
 
         this.ctx.restore();
     }
 
-    drawBadge(x, y, text, colorHex) {
+    drawBadge(x, y, text, colorHex, fontSize = 13) {
+        this.ctx.font = `bold ${fontSize}px Inter, -apple-system, sans-serif`;
         const textWidth = this.ctx.measureText(text).width;
-        const padX = 8, padY = 5;
-        this.ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+        const padX = fontSize * 0.6;
+        const padY = fontSize * 0.45;
+        const badgeW = textWidth + padX * 2;
+        const badgeH = fontSize + padY * 2;
+
+        this.ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
         this.ctx.strokeStyle = colorHex;
-        this.ctx.lineWidth = 1.5;
+        this.ctx.lineWidth = Math.max(2, fontSize * 0.12);
 
         this.ctx.beginPath();
-        this.ctx.roundRect(x - textWidth / 2 - padX, y - 10, textWidth + padX * 2, 20, 6);
+        this.ctx.roundRect(x - badgeW / 2, y - badgeH / 2, badgeW, badgeH, 6);
         this.ctx.fill();
         this.ctx.stroke();
 
-        this.ctx.fillStyle = colorHex === '#ffff00' || colorHex === '#ffffff' ? '#ffffff' : colorHex;
+        this.ctx.fillStyle = (colorHex === '#ffff00' || colorHex === '#ffffff') ? '#ffffff' : colorHex;
         this.ctx.fillText(text, x, y);
     }
 
@@ -486,6 +501,25 @@ class CuboCameraScanner {
             this.compassCenter.innerHTML = `🎯 CENTRO: ${dotStyle(centerInfo.hex)}<strong>${centerInfo.name.toUpperCase()}</strong>`;
             this.compassCenter.style.borderColor = centerInfo.hex;
             this.compassCenter.style.boxShadow = `0 0 12px ${centerInfo.hex}55`;
+        }
+
+        const getTextColor = (hex) => {
+            if (hex === '#000099') return '#60a5fa'; // Azul claro para alto contraste
+            if (hex === '#ffff00') return '#fef08a'; // Amarelo claro
+            if (hex === '#009900') return '#4ade80'; // Verde claro
+            if (hex === '#cc0000') return '#f87171'; // Vermelho claro
+            if (hex === '#ff8000') return '#fb923c'; // Laranja claro
+            return '#ffffff';
+        };
+
+        if (this.guideFrontText) {
+            const centerInfo = this.CUBE_COLORS[step.centerColor];
+            this.guideFrontText.textContent = centerInfo.name.toUpperCase();
+            this.guideFrontText.style.color = getTextColor(centerInfo.hex);
+        }
+        if (this.guideTopText) {
+            this.guideTopText.textContent = step.top.name.toUpperCase();
+            this.guideTopText.style.color = getTextColor(step.top.hex);
         }
 
         if (this.btnPrev) {

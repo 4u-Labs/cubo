@@ -20,12 +20,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
+    <!-- Limpeza proativa de caches antigos de Service Worker -->
+    <script>
+        if ('caches' in window) {
+            caches.keys().then(function(keys) {
+                keys.forEach(function(key) {
+                    if (key !== 'cubofacil-v6') caches.delete(key);
+                });
+            });
+        }
+    </script>
+
     <!-- Motores do Cubo & Algoritmos -->
-    <script type="text/javascript" src='rubiks.js'></script>
-    <script type="text/javascript" src='solver.js'></script>
-    <script type="text/javascript" src='flat.js'></script>
-    <script type="text/javascript" src='camera_scanner.js'></script>
-    <script type="text/javascript" src='speed_timer.js'></script>
+    <script type="text/javascript" src='rubiks.js?v=6'></script>
+    <script type="text/javascript" src='solver.js?v=6'></script>
+    <script type="text/javascript" src='flat.js?v=6'></script>
+    <script type="text/javascript" src='camera_scanner.js?v=6'></script>
+    <script type="text/javascript" src='speed_timer.js?v=6'></script>
     
     <style type="text/css">
         :root {
@@ -642,6 +653,58 @@
             text-align: center;
         }
 
+        /* Barra de Alinhamento Rápido */
+        .scanner-quick-guide {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            width: 100%;
+            max-width: 340px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .quick-guide-pill {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 10px;
+            border-radius: 12px;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .quick-guide-pill.guide-front {
+            border-color: rgba(16, 185, 129, 0.5);
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.15) 0%, rgba(15, 23, 42, 0.85) 100%);
+        }
+
+        .quick-guide-pill.guide-top {
+            border-color: rgba(99, 102, 241, 0.5);
+            background: linear-gradient(180deg, rgba(99, 102, 241, 0.15) 0%, rgba(15, 23, 42, 0.85) 100%);
+        }
+
+        .guide-label {
+            font-size: 0.72rem;
+            color: #94a3b8;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 2px;
+        }
+
+        .guide-val {
+            font-size: 1.05rem;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            color: #ffffff;
+        }
+
         .scanner-action-tip {
             font-size: 0.78rem;
             color: var(--text-muted);
@@ -1025,6 +1088,18 @@
                     </div>
                 </div>
 
+                <!-- Barra de Alinhamento Rápido em Destaque -->
+                <div class="scanner-quick-guide">
+                    <div class="quick-guide-pill guide-front">
+                        <span class="guide-label">🎯 Na Câmera:</span>
+                        <span id="guideFrontText" class="guide-val">BRANCO</span>
+                    </div>
+                    <div class="quick-guide-pill guide-top">
+                        <span class="guide-label">⬆️ Virado p/ Teto:</span>
+                        <span id="guideTopText" class="guide-val">VERDE</span>
+                    </div>
+                </div>
+
                 <div class="scanner-camera-wrapper">
                     <video id="scannerVideo" playsinline autoplay muted></video>
                     <canvas id="scannerCanvasOverlay"></canvas>
@@ -1344,12 +1419,13 @@
             }
         });
 
-        // Registro correto do Service Worker com caminho relativo
+        // Registro correto do Service Worker com caminho relativo e versão
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
-                navigator.serviceWorker.register('./sw.js')
+                navigator.serviceWorker.register('./sw.js?v=6')
                     .then(function(reg) {
-                        console.log('CuboFácil Service Worker registrado com sucesso:', reg.scope);
+                        reg.update();
+                        console.log('CuboFácil Service Worker v6 atualizado:', reg.scope);
                     })
                     .catch(function(err) {
                         console.log('Falha ao registrar Service Worker:', err);
