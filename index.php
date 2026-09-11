@@ -1,3 +1,17 @@
+<?php
+// =========================================================================
+// ANTI-CACHE AGRESSIVO HTTP (Servidor Hostinger / Apache / Nginx)
+// Impede que navegadores, proxies e CDNs armazenem cache desta página
+// =========================================================================
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+header("Expires: Sat, 26 Jul 1997 05:00:00 GMT");
+header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+
+// Timestamp dinâmico para garantir que todos os scripts sempre recebam versão 100% atualizada
+$antiCache = time();
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6,7 +20,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
     <meta name="description" content="Solucionador 3D inteligente de Cubo Mágico com escaneamento de cores por câmera, visualizador interativo e cronômetro oficial de Speedcubing (WCA).">
 
-    <link rel="manifest" href="manifest.json">
+    <!-- Anti-Cache Meta Tags -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <link rel="manifest" href="manifest.json?v=<?= $antiCache ?>">
     <meta name="theme-color" content="#4f46e5"/>
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
@@ -20,23 +39,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Limpeza proativa de caches antigos de Service Worker -->
+    <!-- Limpeza proativa de qualquer cache no navegador do usuário -->
     <script>
         if ('caches' in window) {
             caches.keys().then(function(keys) {
                 keys.forEach(function(key) {
-                    if (key !== 'cubofacil-v10') caches.delete(key);
+                    caches.delete(key);
                 });
+            });
+        }
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for (let registration of registrations) {
+                    registration.unregister();
+                }
             });
         }
     </script>
 
-    <!-- Motores do Cubo & Algoritmos -->
-    <script type="text/javascript" src='rubiks.js?v=10'></script>
-    <script type="text/javascript" src='solver.js?v=10'></script>
-    <script type="text/javascript" src='flat.js?v=10'></script>
-    <script type="text/javascript" src='camera_scanner.js?v=10'></script>
-    <script type="text/javascript" src='speed_timer.js?v=10'></script>
+    <!-- Motores do Cubo & Algoritmos com Anti-Cache Dinâmico -->
+    <script type="text/javascript" src='rubiks.js?v=<?= $antiCache ?>'></script>
+    <script type="text/javascript" src='solver.js?v=<?= $antiCache ?>'></script>
+    <script type="text/javascript" src='flat.js?v=<?= $antiCache ?>'></script>
+    <script type="text/javascript" src='camera_scanner.js?v=<?= $antiCache ?>'></script>
+    <script type="text/javascript" src='speed_timer.js?v=<?= $antiCache ?>'></script>
     
     <style type="text/css">
         :root {
@@ -1892,20 +1918,6 @@
                 window.cameraScanner.flatCube = flatCube;
             }
         });
-
-        // Registro correto do Service Worker com caminho relativo e versão
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('./sw.js?v=9')
-                    .then(function(reg) {
-                        reg.update();
-                        console.log('CuboFácil Service Worker v9 atualizado:', reg.scope);
-                    })
-                    .catch(function(err) {
-                        console.log('Falha ao registrar Service Worker:', err);
-                    });
-            });
-        }
     </script>
 </body>
 </html>

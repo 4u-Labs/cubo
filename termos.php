@@ -60,7 +60,7 @@
 </head>
 <body>
     <div class="container">
-        <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Voltar ao CuboFácil</a>
+        <a href="index.php" class="back-btn"><i class="fas fa-arrow-left"></i> Voltar ao CuboFácil</a>
         <h1>Termos de Uso — CuboFácil 4U</h1>
         <p>Ao utilizar a aplicação <strong>CuboFácil 4U</strong>, você concorda com os seguintes termos:</p>
 

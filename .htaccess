@@ -1,0 +1,19 @@
+# =========================================================================
+# CuboFácil 4U - Configurações Apache & Anti-Cache
+# =========================================================================
+
+# 1. Prioriza index.php como página principal do app
+DirectoryIndex index.php index.html
+
+# 2. Cabeçalhos HTTP Anti-Cache agressivos
+<IfModule mod_headers.c>
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header set Pragma "no-cache"
+    Header set Expires "Sat, 26 Jul 1997 05:00:00 GMT"
+</IfModule>
+
+# 3. Redirecionamento 302 de index.html para index.php
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^index\.html$ index.php [R=302,L]
+</IfModule>
