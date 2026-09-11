@@ -25,18 +25,18 @@
         if ('caches' in window) {
             caches.keys().then(function(keys) {
                 keys.forEach(function(key) {
-                    if (key !== 'cubofacil-v9') caches.delete(key);
+                    if (key !== 'cubofacil-v10') caches.delete(key);
                 });
             });
         }
     </script>
 
     <!-- Motores do Cubo & Algoritmos -->
-    <script type="text/javascript" src='rubiks.js?v=9'></script>
-    <script type="text/javascript" src='solver.js?v=9'></script>
-    <script type="text/javascript" src='flat.js?v=9'></script>
-    <script type="text/javascript" src='camera_scanner.js?v=9'></script>
-    <script type="text/javascript" src='speed_timer.js?v=9'></script>
+    <script type="text/javascript" src='rubiks.js?v=10'></script>
+    <script type="text/javascript" src='solver.js?v=10'></script>
+    <script type="text/javascript" src='flat.js?v=10'></script>
+    <script type="text/javascript" src='camera_scanner.js?v=10'></script>
+    <script type="text/javascript" src='speed_timer.js?v=10'></script>
     
     <style type="text/css">
         :root {
@@ -1064,7 +1064,7 @@
             position: relative;
             width: 100%;
             max-width: 290px;
-            height: 195px;
+            height: 205px;
             margin: 0 auto 6px auto;
             border-radius: 16px;
             overflow: hidden;

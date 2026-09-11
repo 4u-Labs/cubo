@@ -316,33 +316,77 @@ class CuboCameraScanner {
     scanLoop() {
         if (!this.isScanning || !this.video || !this.canvasOverlay || !this.ctx) return;
 
-        const w = this.canvasOverlay.width = this.video.videoWidth || 480;
-        const h = this.canvasOverlay.height = this.video.videoHeight || 480;
+        // Dimensões CSS reais de exibição do elemento no DOM
+        const displayW = this.canvasOverlay.clientWidth || 290;
+        const displayH = this.canvasOverlay.clientHeight || 205;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        this.dpr = dpr;
 
-        // Desenhar frame do vídeo
-        this.ctx.drawImage(this.video, 0, 0, w, h);
+        const targetW = Math.round(displayW * dpr);
+        const targetH = Math.round(displayH * dpr);
 
-        // Geometria da mira 3x3 no centro (com margem suficiente para os badges HUD)
-        const boxSize = Math.min(w, h) * 0.62;
-        const startX = (w - boxSize) / 2;
-        const startY = (h - boxSize) / 2;
+        if (this.canvasOverlay.width !== targetW || this.canvasOverlay.height !== targetH) {
+            this.canvasOverlay.width = targetW;
+            this.canvasOverlay.height = targetH;
+        }
+
+        this.ctx.save();
+        this.ctx.scale(dpr, dpr);
+
+        // Desenhar frame do vídeo mantendo a proporção exata (object-fit: cover) sem distorcer
+        const vW = this.video.videoWidth || 640;
+        const vH = this.video.videoHeight || 480;
+        const vRatio = vW / vH;
+        const cRatio = displayW / displayH;
+
+        let dw, dh, dx, dy;
+        if (vRatio > cRatio) {
+            dh = displayH;
+            dw = displayH * vRatio;
+            dx = (displayW - dw) / 2;
+            dy = 0;
+        } else {
+            dw = displayW;
+            dh = displayW / vRatio;
+            dx = 0;
+            dy = (displayH - dh) / 2;
+        }
+
+        this.ctx.drawImage(this.video, dx, dy, dw, dh);
+
+        // Geometria da mira 3x3 no centro: QUADRADO PERFEITO COM OS 4 LADOS IGUAIS
+        const boxSize = Math.round(Math.min(displayW, displayH) * 0.64);
+        const startX = Math.round((displayW - boxSize) / 2);
+        const startY = Math.round((displayH - boxSize) / 2);
         const cellSize = boxSize / 3;
 
         // Overlay escuro fora da área do cubo
-        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
-        this.ctx.fillRect(0, 0, w, startY);
-        this.ctx.fillRect(0, startY + boxSize, w, h - (startY + boxSize));
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.48)';
+        this.ctx.fillRect(0, 0, displayW, startY);
+        this.ctx.fillRect(0, startY + boxSize, displayW, displayH - (startY + boxSize));
         this.ctx.fillRect(0, startY, startX, boxSize);
-        this.ctx.fillRect(startX + boxSize, startY, w - (startX + boxSize), boxSize);
+        this.ctx.fillRect(startX + boxSize, startY, displayW - (startX + boxSize), boxSize);
 
-        // Grade 3x3 estilizada
-        this.ctx.strokeStyle = 'rgba(16, 185, 129, 0.85)';
-        this.ctx.lineWidth = 3;
+        // Grade 3x3 estilizada: Quadrado com os 4 lados rigorosamente iguais
+        this.ctx.strokeStyle = 'rgba(16, 185, 129, 0.9)';
+        this.ctx.lineWidth = 2.5;
         this.ctx.strokeRect(startX, startY, boxSize, boxSize);
+
+        // Linhas internas da grade
+        this.ctx.strokeStyle = 'rgba(16, 185, 129, 0.45)';
+        this.ctx.lineWidth = 1;
+        this.ctx.beginPath();
+        for (let i = 1; i < 3; i++) {
+            this.ctx.moveTo(startX + i * cellSize, startY);
+            this.ctx.lineTo(startX + i * cellSize, startY + boxSize);
+            this.ctx.moveTo(startX, startY + i * cellSize);
+            this.ctx.lineTo(startX + boxSize, startY + i * cellSize);
+        }
+        this.ctx.stroke();
 
         // Desenhar rótulos das referências nos 4 cantos da mira
         const step = this.FACE_STEPS[this.currentStep];
-        this.drawOrientationPills(startX, startY, boxSize, step);
+        this.drawOrientationPills(startX, startY, boxSize, step, displayW, displayH);
 
         const detectedColors = [];
 
@@ -352,16 +396,15 @@ class CuboCameraScanner {
                 const cellX = startX + col * cellSize;
                 const cellY = startY + row * cellSize;
 
-                // Desenhar borda de cada célula
-                this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
-                this.ctx.lineWidth = 1.5;
-                this.ctx.strokeRect(cellX, cellY, cellSize, cellSize);
-
                 const sampleCenterX = Math.floor(cellX + cellSize / 2);
                 const sampleCenterY = Math.floor(cellY + cellSize / 2);
-                const sampleRadius = Math.max(4, Math.floor(cellSize * 0.12));
+                const sampleRadius = Math.max(3, Math.floor(cellSize * 0.12));
 
                 const rgb = this.getAverageRGB(sampleCenterX, sampleCenterY, sampleRadius);
+                if (row === 1 && col === 1) {
+                    this.currentCenterRawRgb = { ...rgb };
+                }
+
                 const matchedColor = this.classifyColorHSV(rgb.r, rgb.g, rgb.b);
                 detectedColors.push(matchedColor);
 
@@ -371,10 +414,12 @@ class CuboCameraScanner {
                 this.ctx.arc(sampleCenterX, sampleCenterY, sampleRadius, 0, Math.PI * 2);
                 this.ctx.fill();
                 this.ctx.strokeStyle = '#ffffff';
-                this.ctx.lineWidth = 2;
+                this.ctx.lineWidth = 1.5;
                 this.ctx.stroke();
             }
         }
+
+        this.ctx.restore();
 
         // Centro é sempre fixo na cor da face atual
         const currentTargetCenter = this.CUBE_COLORS[step.centerColor].hex;
@@ -386,41 +431,44 @@ class CuboCameraScanner {
         this.animFrameId = requestAnimationFrame(() => this.scanLoop());
     }
 
-    drawOrientationPills(startX, startY, boxSize, step) {
+    formatSideLabel(label) {
+        if (label === 'Amarelo') return 'Aml';
+        if (label === 'Branco') return 'Bco';
+        return label;
+    }
+
+    drawOrientationPills(startX, startY, boxSize, step, w, h) {
         if (!this.ctx || !this.canvasOverlay) return;
-        this.ctx.save();
-        const w = this.canvasOverlay.width;
-        const h = this.canvasOverlay.height;
         
-        const fontSize = Math.max(12, Math.min(20, Math.round(boxSize * 0.052)));
+        const fontSize = Math.max(11, Math.min(14, Math.round(boxSize * 0.088)));
         this.ctx.font = `bold ${fontSize}px Inter, -apple-system, sans-serif`;
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
 
-        // Pílula Superior (CIMA) - centralizada na faixa preta superior
+        // Pílula Superior (CIMA) - Cima Verde deixado como está
         const topY = startY / 2;
         this.drawBadge(startX + boxSize / 2, topY, `▲ CIMA: ${step.top.label}`, step.top.hex, fontSize);
 
-        // Pílula Inferior (BAIXO) - centralizada na faixa preta inferior
+        // Pílula Inferior (BAIXO) - Baixo Azul deixado como está
         const botY = (startY + boxSize) + (h - (startY + boxSize)) / 2;
         this.drawBadge(startX + boxSize / 2, botY, `▼ BAIXO: ${step.bottom.label}`, step.bottom.hex, fontSize);
 
-        // Pílula Esquerda (ESQ) - centralizada na faixa preta esquerda
+        // Pílula Esquerda (ESQ) - com seta e abreviação ("◀ Aml" / "◀ Bco")
         const leftX = startX / 2;
-        this.drawBadge(leftX, startY + boxSize / 2, `◀ ${step.left.label}`, step.left.hex, fontSize);
+        const leftText = `◀ ${this.formatSideLabel(step.left.label)}`;
+        this.drawBadge(leftX, startY + boxSize / 2, leftText, step.left.hex, fontSize);
 
-        // Pílula Direita (DIR) - centralizada na faixa preta direita
+        // Pílula Direita (DIR) - com seta e abreviação ("Bco ▶" / "Aml ▶")
         const rightX = (startX + boxSize) + (w - (startX + boxSize)) / 2;
-        this.drawBadge(rightX, startY + boxSize / 2, `${step.right.label} ▶`, step.right.hex, fontSize);
-
-        this.ctx.restore();
+        const rightText = `${this.formatSideLabel(step.right.label)} ▶`;
+        this.drawBadge(rightX, startY + boxSize / 2, rightText, step.right.hex, fontSize);
     }
 
-    drawBadge(x, y, text, colorHex, fontSize = 13) {
+    drawBadge(x, y, text, colorHex, fontSize = 12) {
         this.ctx.font = `bold ${fontSize}px Inter, -apple-system, sans-serif`;
         const textWidth = this.ctx.measureText(text).width;
-        const padX = fontSize * 0.55;
-        const padY = fontSize * 0.40;
+        const padX = fontSize * 0.45;
+        const padY = fontSize * 0.32;
         const badgeW = textWidth + padX * 2;
         const badgeH = fontSize + padY * 2;
 
@@ -447,7 +495,11 @@ class CuboCameraScanner {
     getAverageRGB(cx, cy, radius) {
         let r = 0, g = 0, b = 0, count = 0;
         try {
-            const imgData = this.ctx.getImageData(cx - radius, cy - radius, radius * 2, radius * 2);
+            const dpr = this.dpr || 1;
+            const pX = Math.round(cx * dpr);
+            const pY = Math.round(cy * dpr);
+            const pR = Math.max(2, Math.round(radius * dpr));
+            const imgData = this.ctx.getImageData(pX - pR, pY - pR, pR * 2, pR * 2);
             const d = imgData.data;
             for (let i = 0; i < d.length; i += 4) {
                 r += d[i];
@@ -459,9 +511,9 @@ class CuboCameraScanner {
             return { r: 255, g: 255, b: 255 };
         }
         return {
-            r: Math.round(r / (count || 1)),
-            g: Math.round(g / (count || 1)),
-            b: Math.round(b / (count || 1))
+            r: count ? Math.round(r / count) : 255,
+            g: count ? Math.round(g / count) : 255,
+            b: count ? Math.round(b / count) : 255
         };
     }
 
@@ -570,16 +622,7 @@ class CuboCameraScanner {
 
         // Calibração Adaptativa do centro sob a luz real da câmera
         if (this.ctx && this.canvasOverlay) {
-            const w = this.canvasOverlay.width;
-            const h = this.canvasOverlay.height;
-            const boxSize = Math.min(w, h) * 0.62;
-            const startX = (w - boxSize) / 2;
-            const startY = (h - boxSize) / 2;
-            const cellSize = boxSize / 3;
-            const sampleCenterX = Math.floor(startX + 1.5 * cellSize);
-            const sampleCenterY = Math.floor(startY + 1.5 * cellSize);
-            const sampleRadius = Math.max(4, Math.floor(cellSize * 0.12));
-            const centerRgb = this.getAverageRGB(sampleCenterX, sampleCenterY, sampleRadius);
+            const centerRgb = this.currentCenterRawRgb || { r: 255, g: 255, b: 255 };
             const centerHsv = this.rgbToHsv(centerRgb.r, centerRgb.g, centerRgb.b);
 
             this.calibratedCenters[step.centerColor] = {
@@ -623,6 +666,16 @@ class CuboCameraScanner {
             this.stepTip.innerHTML = `<strong>Orientação Obrigatória:</strong><br>${step.instruction}`;
         }
 
+        // Indicador de progresso (pontos)
+        if (this.stepperDots) {
+            this.stepperDots.innerHTML = '';
+            for (let i = 0; i < this.FACE_STEPS.length; i++) {
+                const dot = document.createElement('span');
+                dot.className = 'stepper-dot' + (i === this.currentStep ? ' active' : (i < this.currentStep ? ' done' : ''));
+                this.stepperDots.appendChild(dot);
+            }
+        }
+
         const getTextColor = (hex) => {
             if (hex === '#000099') return '#60a5fa'; // Azul claro
             if (hex === '#ffff00') return '#fef08a'; // Amarelo claro
@@ -634,12 +687,17 @@ class CuboCameraScanner {
 
         // Atualizar bússola visual compacta no HTML
         const dotStyle = (hex) => `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${hex};border:1px solid rgba(255,255,255,0.7);margin-right:4px;vertical-align:middle;"></span>`;
+        const formatCompassName = (name) => {
+            if (name === 'Amarelo') return 'Aml';
+            if (name === 'Branco') return 'Bco';
+            return name;
+        };
         if (this.compassTop) {
             this.compassTop.innerHTML = `▲ Cima: ${dotStyle(step.top.hex)}<span style="color:${getTextColor(step.top.hex)}">${step.top.name}</span>`;
             this.compassTop.style.borderColor = step.top.hex;
         }
         if (this.compassRight) {
-            this.compassRight.innerHTML = `▶ Dir: ${dotStyle(step.right.hex)}<span style="color:${getTextColor(step.right.hex)}">${step.right.name}</span>`;
+            this.compassRight.innerHTML = `▶ Dir: ${dotStyle(step.right.hex)}<span style="color:${getTextColor(step.right.hex)}">${formatCompassName(step.right.name)}</span>`;
             this.compassRight.style.borderColor = step.right.hex;
         }
         if (this.compassBottom) {
@@ -647,7 +705,7 @@ class CuboCameraScanner {
             this.compassBottom.style.borderColor = step.bottom.hex;
         }
         if (this.compassLeft) {
-            this.compassLeft.innerHTML = `◀ Esq: ${dotStyle(step.left.hex)}<span style="color:${getTextColor(step.left.hex)}">${step.left.name}</span>`;
+            this.compassLeft.innerHTML = `◀ Esq: ${dotStyle(step.left.hex)}<span style="color:${getTextColor(step.left.hex)}">${formatCompassName(step.left.name)}</span>`;
             this.compassLeft.style.borderColor = step.left.hex;
         }
         if (this.compassCenter) {
@@ -682,6 +740,8 @@ class CuboCameraScanner {
             this.currentFacePreviewColors[4] = targetHex;
         }
 
+        // Atualizar cor inicial do centro no preview
+        this.currentFacePreviewColors[4] = this.CUBE_COLORS[step.centerColor].hex;
         this.renderPreviewGrid();
         this.renderStepperDots();
     }
@@ -696,13 +756,33 @@ class CuboCameraScanner {
         reader.onload = (e) => {
             img.onload = () => {
                 if (this.canvasOverlay && this.ctx) {
-                    this.canvasOverlay.width = img.width;
-                    this.canvasOverlay.height = img.height;
-                    this.ctx.drawImage(img, 0, 0);
+                    const displayW = this.canvasOverlay.clientWidth || 290;
+                    const displayH = this.canvasOverlay.clientHeight || 205;
+                    const dpr = this.dpr || 1;
+                    this.canvasOverlay.width = Math.round(displayW * dpr);
+                    this.canvasOverlay.height = Math.round(displayH * dpr);
+                    this.ctx.save();
+                    this.ctx.scale(dpr, dpr);
 
-                    const boxSize = Math.min(img.width, img.height) * 0.70;
-                    const startX = (img.width - boxSize) / 2;
-                    const startY = (img.height - boxSize) / 2;
+                    const imgRatio = img.width / img.height;
+                    const cRatio = displayW / displayH;
+                    let dw, dh, dx, dy;
+                    if (imgRatio > cRatio) {
+                        dh = displayH;
+                        dw = displayH * imgRatio;
+                        dx = (displayW - dw) / 2;
+                        dy = 0;
+                    } else {
+                        dw = displayW;
+                        dh = displayW / imgRatio;
+                        dx = 0;
+                        dy = (displayH - dh) / 2;
+                    }
+                    this.ctx.drawImage(img, dx, dy, dw, dh);
+
+                    const boxSize = Math.round(Math.min(displayW, displayH) * 0.64);
+                    const startX = Math.round((displayW - boxSize) / 2);
+                    const startY = Math.round((displayH - boxSize) / 2);
                     const cellSize = boxSize / 3;
                     const colors = [];
 
@@ -710,10 +790,12 @@ class CuboCameraScanner {
                         for (let c = 0; c < 3; c++) {
                             const cx = Math.floor(startX + (c + 0.5) * cellSize);
                             const cy = Math.floor(startY + (r + 0.5) * cellSize);
-                            const rgb = this.getAverageRGB(cx, cy, 10);
+                            const rgb = this.getAverageRGB(cx, cy, 6);
                             colors.push(this.classifyColorHSV(rgb.r, rgb.g, rgb.b));
                         }
                     }
+
+                    this.ctx.restore();
 
                     const step = this.FACE_STEPS[this.currentStep];
                     colors[4] = this.CUBE_COLORS[step.centerColor].hex;
