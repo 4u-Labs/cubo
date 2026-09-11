@@ -630,6 +630,18 @@
             font-weight: 800;
         }
 
+        .compass-hint-text {
+            font-size: 0.76rem;
+            color: #93c5fd;
+            margin-top: 10px;
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px dashed rgba(99, 102, 241, 0.35);
+            border-radius: 8px;
+            padding: 6px 10px;
+            line-height: 1.35;
+            text-align: center;
+        }
+
         .scanner-action-tip {
             font-size: 0.78rem;
             color: var(--text-muted);
@@ -989,7 +1001,7 @@
 
                 <div class="scanner-info-card">
                     <h3 id="scannerStepTitle">Passo 1/6: Face Branca (Topo / U)</h3>
-                    <p id="scannerStepTip">Aponte para a face com centro Branco e enquadre na mira</p>
+                    <p id="scannerStepTip"><strong>Orientação Obrigatória:</strong><br>Centro BRANCO de frente • CIMA: Verde • DIREITA: Laranja</p>
                 </div>
 
                 <!-- Bússola de Referências Espaciais -->
@@ -1007,6 +1019,9 @@
                         <div class="compass-row compass-bottom">
                             <span id="compassBottom" class="compass-pill">▼ BAIXO: Azul</span>
                         </div>
+                    </div>
+                    <div class="compass-hint-text">
+                        💡 <strong>Regra de Ouro:</strong> Ajuste apenas a cor da <strong>CÂMERA</strong> e a de <strong>CIMA (teto)</strong>. Os outros lados se alinham sozinhos!
                     </div>
                 </div>
 
