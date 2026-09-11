@@ -252,8 +252,8 @@ class CuboCameraScanner {
         // Desenhar frame do vídeo
         this.ctx.drawImage(this.video, 0, 0, w, h);
 
-        // Geometria da mira 3x3 no centro
-        const boxSize = Math.min(w, h) * 0.70;
+        // Geometria da mira 3x3 no centro (com margem suficiente para os badges HUD)
+        const boxSize = Math.min(w, h) * 0.62;
         const startX = (w - boxSize) / 2;
         const startY = (h - boxSize) / 2;
         const cellSize = boxSize / 3;
@@ -322,25 +322,25 @@ class CuboCameraScanner {
         const w = this.canvasOverlay.width;
         const h = this.canvasOverlay.height;
         
-        const fontSize = Math.max(13, Math.min(22, Math.round(boxSize * 0.058)));
+        const fontSize = Math.max(12, Math.min(20, Math.round(boxSize * 0.052)));
         this.ctx.font = `bold ${fontSize}px Inter, -apple-system, sans-serif`;
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
 
         // Pílula Superior (CIMA) - centralizada na faixa preta superior
-        const topY = Math.max(fontSize * 1.1, startY / 2);
+        const topY = startY / 2;
         this.drawBadge(startX + boxSize / 2, topY, `▲ CIMA: ${step.top.label}`, step.top.hex, fontSize);
 
         // Pílula Inferior (BAIXO) - centralizada na faixa preta inferior
-        const botY = Math.min(h - fontSize * 1.1, (startY + boxSize) + (h - (startY + boxSize)) / 2);
+        const botY = (startY + boxSize) + (h - (startY + boxSize)) / 2;
         this.drawBadge(startX + boxSize / 2, botY, `▼ BAIXO: ${step.bottom.label}`, step.bottom.hex, fontSize);
 
         // Pílula Esquerda (ESQ) - centralizada na faixa preta esquerda
-        const leftX = Math.max(fontSize * 2.2, startX / 2);
+        const leftX = startX / 2;
         this.drawBadge(leftX, startY + boxSize / 2, `◀ ${step.left.label}`, step.left.hex, fontSize);
 
         // Pílula Direita (DIR) - centralizada na faixa preta direita
-        const rightX = Math.min(w - fontSize * 2.2, (startX + boxSize) + (w - (startX + boxSize)) / 2);
+        const rightX = (startX + boxSize) + (w - (startX + boxSize)) / 2;
         this.drawBadge(rightX, startY + boxSize / 2, `${step.right.label} ▶`, step.right.hex, fontSize);
 
         this.ctx.restore();
@@ -349,21 +349,28 @@ class CuboCameraScanner {
     drawBadge(x, y, text, colorHex, fontSize = 13) {
         this.ctx.font = `bold ${fontSize}px Inter, -apple-system, sans-serif`;
         const textWidth = this.ctx.measureText(text).width;
-        const padX = fontSize * 0.6;
-        const padY = fontSize * 0.45;
+        const padX = fontSize * 0.55;
+        const padY = fontSize * 0.40;
         const badgeW = textWidth + padX * 2;
         const badgeH = fontSize + padY * 2;
 
-        this.ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+        this.ctx.fillStyle = 'rgba(15, 23, 42, 0.94)';
         this.ctx.strokeStyle = colorHex;
-        this.ctx.lineWidth = Math.max(2, fontSize * 0.12);
+        this.ctx.lineWidth = Math.max(1.8, fontSize * 0.12);
 
         this.ctx.beginPath();
         this.ctx.roundRect(x - badgeW / 2, y - badgeH / 2, badgeW, badgeH, 6);
         this.ctx.fill();
         this.ctx.stroke();
 
-        this.ctx.fillStyle = (colorHex === '#ffff00' || colorHex === '#ffffff') ? '#ffffff' : colorHex;
+        let textColor = '#ffffff';
+        if (colorHex === '#000099') textColor = '#60a5fa';
+        else if (colorHex === '#ffff00') textColor = '#fef08a';
+        else if (colorHex === '#009900') textColor = '#4ade80';
+        else if (colorHex === '#cc0000') textColor = '#f87171';
+        else if (colorHex === '#ff8000') textColor = '#fb923c';
+
+        this.ctx.fillStyle = textColor;
         this.ctx.fillText(text, x, y);
     }
 
@@ -478,39 +485,38 @@ class CuboCameraScanner {
             this.stepTip.innerHTML = `<strong>Orientação Obrigatória:</strong><br>${step.instruction}`;
         }
 
-        // Atualizar bússola visual no HTML
-        const dotStyle = (hex) => `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${hex};border:1px solid rgba(255,255,255,0.7);margin:0 4px;vertical-align:middle;"></span>`;
-        if (this.compassTop) {
-            this.compassTop.innerHTML = `▲ CIMA: ${dotStyle(step.top.hex)}${step.top.name}`;
-            this.compassTop.style.borderColor = step.top.hex;
-        }
-        if (this.compassBottom) {
-            this.compassBottom.innerHTML = `▼ BAIXO: ${dotStyle(step.bottom.hex)}${step.bottom.name}`;
-            this.compassBottom.style.borderColor = step.bottom.hex;
-        }
-        if (this.compassLeft) {
-            this.compassLeft.innerHTML = `◀ ESQ: ${dotStyle(step.left.hex)}${step.left.name}`;
-            this.compassLeft.style.borderColor = step.left.hex;
-        }
-        if (this.compassRight) {
-            this.compassRight.innerHTML = `DIR: ${dotStyle(step.right.hex)}${step.right.name} ▶`;
-            this.compassRight.style.borderColor = step.right.hex;
-        }
-        if (this.compassCenter) {
-            const centerInfo = this.CUBE_COLORS[step.centerColor];
-            this.compassCenter.innerHTML = `🎯 CENTRO: ${dotStyle(centerInfo.hex)}<strong>${centerInfo.name.toUpperCase()}</strong>`;
-            this.compassCenter.style.borderColor = centerInfo.hex;
-            this.compassCenter.style.boxShadow = `0 0 12px ${centerInfo.hex}55`;
-        }
-
         const getTextColor = (hex) => {
-            if (hex === '#000099') return '#60a5fa'; // Azul claro para alto contraste
+            if (hex === '#000099') return '#60a5fa'; // Azul claro
             if (hex === '#ffff00') return '#fef08a'; // Amarelo claro
             if (hex === '#009900') return '#4ade80'; // Verde claro
             if (hex === '#cc0000') return '#f87171'; // Vermelho claro
             if (hex === '#ff8000') return '#fb923c'; // Laranja claro
             return '#ffffff';
         };
+
+        // Atualizar bússola visual compacta no HTML
+        const dotStyle = (hex) => `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${hex};border:1px solid rgba(255,255,255,0.7);margin-right:4px;vertical-align:middle;"></span>`;
+        if (this.compassTop) {
+            this.compassTop.innerHTML = `▲ Cima: ${dotStyle(step.top.hex)}<span style="color:${getTextColor(step.top.hex)}">${step.top.name}</span>`;
+            this.compassTop.style.borderColor = step.top.hex;
+        }
+        if (this.compassRight) {
+            this.compassRight.innerHTML = `▶ Dir: ${dotStyle(step.right.hex)}<span style="color:${getTextColor(step.right.hex)}">${step.right.name}</span>`;
+            this.compassRight.style.borderColor = step.right.hex;
+        }
+        if (this.compassBottom) {
+            this.compassBottom.innerHTML = `▼ Baixo: ${dotStyle(step.bottom.hex)}<span style="color:${getTextColor(step.bottom.hex)}">${step.bottom.name}</span>`;
+            this.compassBottom.style.borderColor = step.bottom.hex;
+        }
+        if (this.compassLeft) {
+            this.compassLeft.innerHTML = `◀ Esq: ${dotStyle(step.left.hex)}<span style="color:${getTextColor(step.left.hex)}">${step.left.name}</span>`;
+            this.compassLeft.style.borderColor = step.left.hex;
+        }
+        if (this.compassCenter) {
+            const centerInfo = this.CUBE_COLORS[step.centerColor];
+            this.compassCenter.innerHTML = `🎯 Centro: ${dotStyle(centerInfo.hex)}<span style="color:${getTextColor(centerInfo.hex)}">${centerInfo.name}</span>`;
+            this.compassCenter.style.borderColor = centerInfo.hex;
+        }
 
         if (this.guideFrontText) {
             const centerInfo = this.CUBE_COLORS[step.centerColor];

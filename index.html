@@ -25,18 +25,18 @@
         if ('caches' in window) {
             caches.keys().then(function(keys) {
                 keys.forEach(function(key) {
-                    if (key !== 'cubofacil-v6') caches.delete(key);
+                    if (key !== 'cubofacil-v7') caches.delete(key);
                 });
             });
         }
     </script>
 
     <!-- Motores do Cubo & Algoritmos -->
-    <script type="text/javascript" src='rubiks.js?v=6'></script>
-    <script type="text/javascript" src='solver.js?v=6'></script>
-    <script type="text/javascript" src='flat.js?v=6'></script>
-    <script type="text/javascript" src='camera_scanner.js?v=6'></script>
-    <script type="text/javascript" src='speed_timer.js?v=6'></script>
+    <script type="text/javascript" src='rubiks.js?v=7'></script>
+    <script type="text/javascript" src='solver.js?v=7'></script>
+    <script type="text/javascript" src='flat.js?v=7'></script>
+    <script type="text/javascript" src='camera_scanner.js?v=7'></script>
+    <script type="text/javascript" src='speed_timer.js?v=7'></script>
     
     <style type="text/css">
         :root {
@@ -508,23 +508,145 @@
         }
 
         .modal-body {
-            padding: 24px;
+            padding: 16px 20px;
             overflow-y: auto;
             flex: 1;
         }
 
+        @media (max-width: 600px) {
+            .modal-window {
+                width: 95% !important;
+                max-height: 94vh !important;
+            }
+            .modal-body {
+                padding: 10px 12px !important;
+            }
+            .modal-header {
+                padding: 10px 14px !important;
+            }
+        }
+
         /* ==================== CAMERA SCANNER UI ==================== */
+        /* Painel Superior Unificado de Orientação */
+        .scanner-orient-card {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 14px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .orient-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .orient-step-title {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+
+        .scanner-stepper {
+            display: flex;
+            gap: 5px;
+        }
+
+        .step-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .step-dot.active {
+            transform: scale(1.3);
+            background: #60a5fa !important;
+            box-shadow: 0 0 8px #60a5fa;
+        }
+
+        .orient-dual-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .orient-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 8px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1.5px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .orient-box-front {
+            border-color: rgba(16, 185, 129, 0.4);
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.12) 0%, rgba(15, 23, 42, 0.5) 100%);
+        }
+
+        .orient-box-top {
+            border-color: rgba(99, 102, 241, 0.4);
+            background: linear-gradient(180deg, rgba(99, 102, 241, 0.12) 0%, rgba(15, 23, 42, 0.5) 100%);
+        }
+
+        .orient-sub {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: #94a3b8;
+            margin-bottom: 2px;
+        }
+
+        .orient-val {
+            font-size: 1.05rem;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            color: #ffffff;
+        }
+
+        .orient-neighbors-strip {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            padding-top: 2px;
+        }
+
+        .orient-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #e2e8f0;
+            white-space: nowrap;
+        }
+
         .scanner-camera-wrapper {
             position: relative;
             width: 100%;
             max-width: 320px;
-            height: 250px;
-            margin: 0 auto 14px auto;
-            border-radius: 18px;
+            height: 220px;
+            margin: 0 auto 8px auto;
+            border-radius: 16px;
             overflow: hidden;
             background: #000;
             border: 2px solid rgba(16, 185, 129, 0.4);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
         }
 
         #scannerVideo {
@@ -543,216 +665,39 @@
             pointer-events: none;
         }
 
-        .scanner-stepper {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 14px;
-        }
-
-        .step-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            transition: all 0.25s ease;
-        }
-
-        .step-dot.active {
-            transform: scale(1.35);
-            box-shadow: 0 0 10px #60a5fa;
-        }
-
-        .scanner-info-card {
-            text-align: center;
-            margin-bottom: 16px;
-        }
-
-        .scanner-info-card h3 {
-            font-size: 1.15rem;
-            color: #fff;
-            margin-bottom: 4px;
-        }
-
-        .scanner-info-card p {
-            font-size: 0.88rem;
-            color: var(--text-muted);
-        }
-
-        /* Bússola de Referências Espaciais */
-        .scanner-compass-card {
-            background: rgba(15, 23, 42, 0.75);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: 14px;
-            padding: 10px 14px;
-            margin: 0 auto 16px auto;
-            max-width: 360px;
-            text-align: center;
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-        }
-
-        .compass-title {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            color: var(--brand-primary, #10b981);
-            font-weight: 700;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-
-        .compass-layout {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .compass-row {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 6px;
-            width: 100%;
-        }
-
-        .compass-pill {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.78rem;
-            font-weight: 700;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1.5px solid rgba(255, 255, 255, 0.2);
-            color: #f8fafc;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-        }
-
-        .compass-pill.compass-center {
-            background: rgba(255, 255, 255, 0.12);
-            border: 2px solid #ffffff;
-            padding: 5px 12px;
-            font-weight: 800;
-        }
-
-        .compass-hint-text {
-            font-size: 0.76rem;
-            color: #93c5fd;
-            margin-top: 10px;
-            background: rgba(59, 130, 246, 0.12);
-            border: 1px dashed rgba(99, 102, 241, 0.35);
-            border-radius: 8px;
-            padding: 6px 10px;
-            line-height: 1.35;
-            text-align: center;
-        }
-
-        /* Barra de Alinhamento Rápido */
-        .scanner-quick-guide {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 12px;
-            width: 100%;
-            max-width: 340px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .quick-guide-pill {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 8px 10px;
-            border-radius: 12px;
-            background: rgba(15, 23, 42, 0.85);
-            border: 1.5px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-        }
-
-        .quick-guide-pill.guide-front {
-            border-color: rgba(16, 185, 129, 0.5);
-            background: linear-gradient(180deg, rgba(16, 185, 129, 0.15) 0%, rgba(15, 23, 42, 0.85) 100%);
-        }
-
-        .quick-guide-pill.guide-top {
-            border-color: rgba(99, 102, 241, 0.5);
-            background: linear-gradient(180deg, rgba(99, 102, 241, 0.15) 0%, rgba(15, 23, 42, 0.85) 100%);
-        }
-
-        .guide-label {
-            font-size: 0.72rem;
-            color: #94a3b8;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            margin-bottom: 2px;
-        }
-
-        .guide-val {
-            font-size: 1.05rem;
-            font-weight: 900;
-            letter-spacing: 0.05em;
-            color: #ffffff;
-        }
-
-        .scanner-action-tip {
-            font-size: 0.78rem;
-            color: var(--text-muted);
-            text-align: center;
-            margin-top: 14px;
-            line-height: 1.4;
-            padding: 6px 12px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 8px;
-        }
-
-        .scanner-action-tip strong {
-            color: #10b981;
-        }
-
         .scanner-preview-box {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 20px;
+            gap: 4px;
+            margin-bottom: 10px;
         }
 
         .scanner-preview-title {
-            font-size: 0.78rem;
+            font-size: 0.72rem;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.04em;
             color: var(--text-muted);
             font-weight: 700;
         }
 
         .scanner-preview-grid {
             display: grid;
-            grid-template-columns: repeat(3, 36px);
-            grid-gap: 5px;
-            padding: 8px;
+            grid-template-columns: repeat(3, 26px);
+            grid-gap: 4px;
+            padding: 5px;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
+            border-radius: 8px;
         }
 
         .scanner-preview-cell {
-            width: 36px;
-            height: 36px;
-            border-radius: 6px;
-            border: 1.5px solid rgba(0, 0, 0, 0.5);
+            width: 26px;
+            height: 26px;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 0, 0, 0.5);
             cursor: pointer;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
             transition: transform 0.15s ease;
         }
 
@@ -764,7 +709,8 @@
         .scanner-controls {
             display: flex;
             justify-content: center;
-            gap: 10px;
+            align-items: center;
+            gap: 8px;
             flex-wrap: wrap;
         }
 
@@ -1060,43 +1006,33 @@
             <div class="modal-body">
                 <div id="scannerCameraStatus" style="display:none; padding:10px 14px; background:rgba(239, 68, 68, 0.2); border:1px solid rgba(239, 68, 68, 0.4); border-radius:12px; font-size:0.85rem; margin-bottom:12px; color:#fca5a5;"></div>
 
-                <div class="scanner-stepper" id="scannerStepperDots"></div>
+                <!-- Painel Superior Unificado de Orientação -->
+                <div class="scanner-orient-card">
+                    <div class="orient-card-header">
+                        <span id="scannerStepTitle" class="orient-step-title">1. Face Branca (Topo)</span>
+                        <div class="scanner-stepper" id="scannerStepperDots"></div>
+                    </div>
 
-                <div class="scanner-info-card">
-                    <h3 id="scannerStepTitle">Passo 1/6: Face Branca (Topo / U)</h3>
-                    <p id="scannerStepTip"><strong>Orientação Obrigatória:</strong><br>Centro BRANCO de frente • CIMA: Verde • DIREITA: Laranja</p>
-                </div>
-
-                <!-- Bússola de Referências Espaciais -->
-                <div class="scanner-compass-card">
-                    <div class="compass-title"><i class="fas fa-compass"></i> Posição Obrigatória do Cubo (Alinhe com as Cores Vizinhas):</div>
-                    <div class="compass-layout">
-                        <div class="compass-row compass-top">
-                            <span id="compassTop" class="compass-pill">▲ CIMA: Verde</span>
+                    <!-- Foco Principal: Frente + Cima -->
+                    <div class="orient-dual-grid">
+                        <div class="orient-box orient-box-front">
+                            <div class="orient-sub">📷 CÂMERA (FRENTE)</div>
+                            <div id="guideFrontText" class="orient-val">BRANCO</div>
                         </div>
-                        <div class="compass-row compass-middle">
-                            <span id="compassLeft" class="compass-pill">◀ ESQ: Vermelho</span>
-                            <span id="compassCenter" class="compass-pill compass-center">🎯 CENTRO: BRANCO</span>
-                            <span id="compassRight" class="compass-pill">DIR: Laranja ▶</span>
-                        </div>
-                        <div class="compass-row compass-bottom">
-                            <span id="compassBottom" class="compass-pill">▼ BAIXO: Azul</span>
+                        <div class="orient-box orient-box-top">
+                            <div class="orient-sub">⬆️ TETO (CIMA)</div>
+                            <div id="guideTopText" class="orient-val">VERDE</div>
                         </div>
                     </div>
-                    <div class="compass-hint-text">
-                        💡 <strong>Regra de Ouro:</strong> Ajuste apenas a cor da <strong>CÂMERA</strong> e a de <strong>CIMA (teto)</strong>. Os outros lados se alinham sozinhos!
-                    </div>
-                </div>
 
-                <!-- Barra de Alinhamento Rápido em Destaque -->
-                <div class="scanner-quick-guide">
-                    <div class="quick-guide-pill guide-front">
-                        <span class="guide-label">🎯 Na Câmera:</span>
-                        <span id="guideFrontText" class="guide-val">BRANCO</span>
-                    </div>
-                    <div class="quick-guide-pill guide-top">
-                        <span class="guide-label">⬆️ Virado p/ Teto:</span>
-                        <span id="guideTopText" class="guide-val">VERDE</span>
+                    <!-- 4 Vizinhas em Linha Compacta -->
+                    <div class="orient-neighbors-strip">
+                        <span id="compassTop" class="orient-pill">▲ Cima: Verde</span>
+                        <span id="compassRight" class="orient-pill">▶ Dir: Laranja</span>
+                        <span id="compassBottom" class="orient-pill">▼ Baixo: Azul</span>
+                        <span id="compassLeft" class="orient-pill">◀ Esq: Vermelho</span>
+                        <span id="compassCenter" style="display:none;"></span>
+                        <span id="scannerStepTip" style="display:none;"></span>
                     </div>
                 </div>
 
@@ -1422,10 +1358,10 @@
         // Registro correto do Service Worker com caminho relativo e versão
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
-                navigator.serviceWorker.register('./sw.js?v=6')
+                navigator.serviceWorker.register('./sw.js?v=7')
                     .then(function(reg) {
                         reg.update();
-                        console.log('CuboFácil Service Worker v6 atualizado:', reg.scope);
+                        console.log('CuboFácil Service Worker v7 atualizado:', reg.scope);
                     })
                     .catch(function(err) {
                         console.log('Falha ao registrar Service Worker:', err);
