@@ -453,9 +453,19 @@ $antiCache = time();
         }
 
         .rc-move-button {
-            background-color: rgba(30, 41, 59, 0.85);
+            background-color: rgba(15, 23, 42, 0.92);
             border-radius: 50% !important;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+            background-repeat: no-repeat !important;
+            background-position: center !important;
+            background-size: 60% 60% !important;
+            cursor: pointer;
+        }
+
+        .rc-move-button:hover {
+            transform: translateY(-2px) scale(1.08);
+            filter: brightness(1.2);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6);
         }
 
         .rc-solve-button {
