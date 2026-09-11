@@ -836,22 +836,27 @@ $antiCache = time();
         }
 
         .scanner-parity-bar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 4px;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 3px;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .parity-pill {
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            gap: 3px;
-            padding: 2px 4px;
+            justify-content: center;
+            gap: 2px;
+            padding: 3px 1px;
             border-radius: 6px;
             background: rgba(255, 255, 255, 0.05);
             border: 1.5px solid rgba(255, 255, 255, 0.15);
-            font-size: 0.68rem;
+            font-size: 0.64rem;
             color: #e2e8f0;
+            min-width: 0;
+            white-space: nowrap;
+            box-sizing: border-box;
             transition: all 0.2s ease;
         }
 
@@ -868,8 +873,9 @@ $antiCache = time();
         }
 
         .parity-color-dot {
-            width: 7px;
-            height: 7px;
+            width: 6px;
+            height: 6px;
+            flex-shrink: 0;
             border-radius: 50%;
             display: inline-block;
             border: 1px solid rgba(255,255,255,0.7);
@@ -889,7 +895,8 @@ $antiCache = time();
             display: none;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 12px 8px;
+            box-sizing: border-box;
             opacity: 0;
             transition: opacity 0.25s ease;
         }
@@ -906,12 +913,13 @@ $antiCache = time();
             border-radius: 24px;
             box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
             color: #fff;
-            max-width: 680px;
+            max-width: 440px;
             width: 100%;
             max-height: 94vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            box-sizing: border-box;
             animation: modalScale 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
@@ -921,7 +929,7 @@ $antiCache = time();
         }
 
         .modal-header {
-            padding: 12px 20px;
+            padding: 12px 16px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
@@ -958,21 +966,30 @@ $antiCache = time();
         }
 
         .modal-body {
-            padding: 12px 18px;
+            padding: 10px 12px;
             overflow-y: auto;
+            overflow-x: hidden;
             flex: 1;
+            box-sizing: border-box;
+            width: 100%;
         }
 
         @media (max-width: 600px) {
+            .modal-backdrop {
+                padding: 6px 4px !important;
+            }
             .modal-window {
-                width: 95% !important;
-                max-height: 94vh !important;
+                width: 98% !important;
+                max-width: 100% !important;
+                max-height: 96vh !important;
+                border-radius: 16px !important;
             }
             .modal-body {
-                padding: 10px 12px !important;
+                padding: 8px 6px !important;
+                overflow-x: hidden !important;
             }
             .modal-header {
-                padding: 10px 14px !important;
+                padding: 8px 12px !important;
             }
         }
 
@@ -1157,33 +1174,34 @@ $antiCache = time();
         }
 
         .scanner-controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 4px;
         }
 
         .scanner-btn {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 12px 20px;
-            border-radius: 12px;
-            font-size: 0.9rem;
+            justify-content: center;
+            gap: 6px;
+            padding: 9px 8px;
+            border-radius: 10px;
+            font-size: 0.82rem;
             font-weight: 700;
             cursor: pointer;
             border: none;
             color: #fff;
+            width: 100%;
+            box-sizing: border-box;
             transition: all 0.2s ease;
         }
 
         .scanner-btn.capture {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
-            flex: 1;
-            justify-content: center;
-            max-width: 220px;
         }
 
         .scanner-btn.secondary {
@@ -1195,6 +1213,20 @@ $antiCache = time();
             background: rgba(99, 102, 241, 0.2);
             border: 1px solid rgba(99, 102, 241, 0.4);
             color: #a5b4fc;
+        }
+
+        .scanner-action-tip {
+            font-size: 0.72rem;
+            color: #94a3b8;
+            text-align: center;
+            line-height: 1.35;
+            margin-top: 6px;
+            padding: 6px 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            width: 100%;
+            box-sizing: border-box;
         }
 
         /* ==================== SPEED TIMER UI ==================== */
@@ -1521,7 +1553,7 @@ $antiCache = time();
                         </div>
                         <div class="parity-pill" id="parityPill-GREEN" style="border-color:#009900;" title="Verde">
                             <span class="parity-color-dot" style="background:#009900;"></span>
-                            <span>Ver:</span>
+                            <span>Vde:</span>
                             <strong id="parityCount-GREEN">0/9</strong>
                         </div>
                         <div class="parity-pill" id="parityPill-BLUE" style="border-color:#000099;" title="Azul">

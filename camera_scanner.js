@@ -434,6 +434,8 @@ class CuboCameraScanner {
     formatSideLabel(label) {
         if (label === 'Amarelo') return 'Aml';
         if (label === 'Branco') return 'Bco';
+        if (label === 'Laranja') return 'Lar';
+        if (label === 'Vermelho') return 'Ver';
         return label;
     }
 
@@ -690,6 +692,8 @@ class CuboCameraScanner {
         const formatCompassName = (name) => {
             if (name === 'Amarelo') return 'Aml';
             if (name === 'Branco') return 'Bco';
+            if (name === 'Laranja') return 'Lar';
+            if (name === 'Vermelho') return 'Ver';
             return name;
         };
         if (this.compassTop) {
