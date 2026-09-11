@@ -338,6 +338,65 @@ FlatColorPicker.prototype.getColor = function(){
 	return this.selection < 0 ? '' : this.colors[this.selection];
 }
 
+// ======================================================
+//   DICIONÁRIO DE MOVIMENTOS EM PORTUGUÊS PARA LEIGOS
+// ======================================================
+var HUMAN_FACE_MAP = {
+	'U': { name: 'CIMA / TOPO', color: '#ffffff', textColor: '#111', ptColor: 'Branca' },
+	'D': { name: 'BASE / BAIXO', color: '#ffff00', textColor: '#111', ptColor: 'Amarela' },
+	'F': { name: 'FRENTE', color: '#000099', textColor: '#fff', ptColor: 'Azul' },
+	'B': { name: 'ATRÁS', color: '#009900', textColor: '#fff', ptColor: 'Verde' },
+	'L': { name: 'ESQUERDA', color: '#cc0000', textColor: '#fff', ptColor: 'Vermelha' },
+	'R': { name: 'DIREITA', color: '#ff8000', textColor: '#111', ptColor: 'Laranja' }
+};
+
+function parseMoveDetails(move, cube) {
+	if (!move) return null;
+	var faceLetter = move.charAt(0).toUpperCase();
+	var faceInfo = HUMAN_FACE_MAP[faceLetter] || { name: faceLetter, color: '#334155', textColor: '#fff', ptColor: '' };
+	
+	var color = faceInfo.color;
+	if (cube && typeof cube.getFaceColor === 'function') {
+		try {
+			var dynamicColor = cube.getFaceColor(faceLetter);
+			if (dynamicColor) color = dynamicColor;
+		} catch (e) {}
+	}
+
+	var isLightBg = (color === '#ffffff' || color === '#ffff00' || color === '#ff8000' || color.toLowerCase() === '#fff');
+	var textColor = isLightBg ? '#111111' : '#ffffff';
+
+	var rotationTitle = '';
+	var instruction = '';
+	var icon = '';
+
+	if (move.endsWith('2')) {
+		rotationTitle = 'Giro 180° (Meia Volta)';
+		instruction = 'Olhe para a face <strong>' + faceInfo.name + '</strong> e dê <strong>meia volta 🔄 (180°)</strong> em qualquer direção.';
+		icon = '🔄';
+	} else if (move.endsWith("'")) {
+		rotationTitle = 'Anti-Horário ↺ (90°)';
+		instruction = 'Olhe para a face <strong>' + faceInfo.name + '</strong> e gire <strong>ANTI-HORÁRIO ↺</strong> (para a esquerda).';
+		icon = '↺';
+	} else {
+		rotationTitle = 'Horário ↻ (90°)';
+		instruction = 'Olhe para a face <strong>' + faceInfo.name + '</strong> e gire <strong>HORÁRIO ↻</strong> (para a direita, como o relógio).';
+		icon = '↻';
+	}
+
+	return {
+		move: move,
+		faceLetter: faceLetter,
+		faceName: faceInfo.name,
+		ptColor: faceInfo.ptColor,
+		color: color,
+		textColor: textColor,
+		isLightBg: isLightBg,
+		rotationTitle: rotationTitle,
+		instruction: instruction,
+		icon: icon
+	};
+}
 
 var RubiksCubeControls = function(id, cube, width, controlsTop){
 	var me = this;
@@ -421,14 +480,124 @@ var RubiksCubeControls = function(id, cube, width, controlsTop){
 		}
 	}
 
+	this.solutionMoves = [];
+	this.currentStepIndex = 0;
+	this.isAutoPlaying = false;
+	this.autoPlayInterval = null;
+	this.autoPlaySpeed = 1500;
+
 	this.overlay = document.createElement('div');
 	this.overlay.className = 'rc-overlay';
+	this.overlay.style.display = 'none';
 
-	this.stepButton = document.createElement('div');
-	this.stepButton.className = 'rc-button rc-step-button';
-	this.stepButton.addEventListener('click', function(){
+	var playerWrap = document.createElement('div');
+	playerWrap.className = 'step-player-inner';
+	playerWrap.style.cssText = 'display:flex;flex-direction:column;justify-content:space-between;height:100%;width:100%;';
+
+	// 1. Header do Player
+	var header = document.createElement('div');
+	header.className = 'step-player-header';
+	header.innerHTML = 
+		'<div class="step-player-title-wrap">' +
+			'<i class="fas fa-puzzle-piece"></i>' +
+			'<span>Passo a Passo</span>' +
+		'</div>' +
+		'<div class="step-player-counter" id="stepCounterBadge">Passo 1 de 1</div>' +
+		'<button class="step-player-close" id="stepBtnClose" title="Fechar passo a passo">' +
+			'<i class="fas fa-times"></i> Fechar' +
+		'</button>';
+	playerWrap.appendChild(header);
+
+	// 2. Barra de Progresso
+	var progressTrack = document.createElement('div');
+	progressTrack.className = 'step-progress-track';
+	var progressFill = document.createElement('div');
+	progressFill.className = 'step-progress-fill';
+	progressFill.id = 'stepProgressBar';
+	progressTrack.appendChild(progressFill);
+	playerWrap.appendChild(progressTrack);
+
+	// 3. Card Principal do Passo
+	var mainCard = document.createElement('div');
+	mainCard.className = 'step-main-card';
+	mainCard.id = 'stepMainCard';
+
+	var moveBadge = document.createElement('div');
+	moveBadge.className = 'step-move-badge';
+	moveBadge.id = 'stepMoveBadge';
+
+	var detailsBox = document.createElement('div');
+	detailsBox.className = 'step-details';
+	detailsBox.innerHTML = 
+		'<div class="step-face-name" id="stepFaceName">Face ...</div>' +
+		'<div class="step-rotation-title" id="stepRotationTitle">...</div>' +
+		'<div class="step-instruction" id="stepInstruction">...</div>';
+
+	mainCard.appendChild(moveBadge);
+	mainCard.appendChild(detailsBox);
+	playerWrap.appendChild(mainCard);
+
+	// 3b. Card de Conclusão (após finalizar o último passo)
+	var completedCard = document.createElement('div');
+	completedCard.className = 'step-completed-card';
+	completedCard.id = 'stepCompletedCard';
+	completedCard.style.display = 'none';
+	completedCard.innerHTML = 
+		'<div class="step-completed-icon">🏆</div>' +
+		'<div class="step-completed-title">Cubo Resolvido!</div>' +
+		'<div class="step-completed-desc">Parabéns! Todos os passos da solução foram concluídos com sucesso.</div>' +
+		'<button class="step-act-btn btn-next" id="stepBtnFinish" style="margin-top:6px;max-width:180px;">' +
+			'<i class="fas fa-check"></i> Concluir' +
+		'</button>';
+	playerWrap.appendChild(completedCard);
+
+	// 4. Barra de Ações Interativas
+	var actions = document.createElement('div');
+	actions.className = 'step-player-actions';
+	actions.id = 'stepActions';
+
+	var btnPrev = document.createElement('button');
+	btnPrev.className = 'step-act-btn btn-prev';
+	btnPrev.id = 'stepBtnPrev';
+	btnPrev.innerHTML = '<i class="fas fa-chevron-left"></i> Voltar';
+
+	var btnAuto = document.createElement('button');
+	btnAuto.className = 'step-act-btn btn-auto';
+	btnAuto.id = 'stepBtnAuto';
+	btnAuto.innerHTML = '<i class="fas fa-play"></i> Auto (1.5s)';
+
+	var btnNext = document.createElement('button');
+	btnNext.className = 'step-act-btn btn-next';
+	btnNext.id = 'stepBtnNext';
+	btnNext.innerHTML = 'Avançar <i class="fas fa-chevron-right"></i>';
+
+	actions.appendChild(btnPrev);
+	actions.appendChild(btnAuto);
+	actions.appendChild(btnNext);
+	playerWrap.appendChild(actions);
+
+	this.overlay.appendChild(playerWrap);
+
+	// Listeners do Player
+	header.querySelector('#stepBtnClose').addEventListener('click', function(){
+		me.closeStepPlayer();
+	});
+	completedCard.querySelector('#stepBtnFinish').addEventListener('click', function(){
+		me.closeStepPlayer();
+	});
+	btnPrev.addEventListener('click', function(){
+		me.prevMove();
+	});
+	btnAuto.addEventListener('click', function(){
+		me.toggleAutoPlay();
+	});
+	btnNext.addEventListener('click', function(){
 		me.nextMove();
 	});
+
+	// Stub para retrocompatibilidade
+	this.stepButton = document.createElement('div');
+	this.stepButton.style.display = 'none';
 
 	this.scrambleButton = document.createElement('div');
 	this.scrambleButton.className = 'rc-button rc-scramble-button';
@@ -438,14 +607,13 @@ var RubiksCubeControls = function(id, cube, width, controlsTop){
 		me.cube.scramble();
 	});
 
-	// MODIFICAÇÃO: Criação do botão "Reiniciar"
+	// Botão Reiniciar
 	this.resetButton = document.createElement('div');
 	this.resetButton.className = 'rc-button rc-reset-button';
 	this.resetButton.appendChild(document.createTextNode('Reiniciar'));
 	this.resetButton.addEventListener('click', function(){
 		window.location.reload();
 	});
-
 
 	this.progress = document.createElement('div');
 	this.progress.className = 'rc-progress';
@@ -455,9 +623,8 @@ var RubiksCubeControls = function(id, cube, width, controlsTop){
 	this.progress.style.bottom = 0;
 	this.progress.style.width = '0%';
 
-	this.overlay.appendChild(this.stepButton);
 	this.container.appendChild(this.scrambleButton);
-	this.container.appendChild(this.resetButton); // MODIFICAÇÃO: Adiciona o botão ao container
+	this.container.appendChild(this.resetButton);
 	this.container.appendChild(this.overlay);
 	this.container.appendChild(this.progress);
 	this.container.appendChild(this.solveButton);
@@ -467,73 +634,181 @@ var RubiksCubeControls = function(id, cube, width, controlsTop){
 	}
 }
 
+RubiksCubeControls.prototype.getInverseMove = function(move) {
+	if (!move) return '';
+	if (move.endsWith('2')) return move;
+	if (move.endsWith("'")) return move.slice(0, -1);
+	return move + "'";
+};
+
 RubiksCubeControls.prototype.setSolution = function(solution) {
-	if(solution.length > 0){
-		this.solution = solution.split(' ');
-		this.updateStepButton();
-		this.overlay.style.display = '';
+	this.stopAutoPlay();
+	if (solution && typeof solution === 'string' && solution.trim().length > 0) {
+		this.solutionMoves = solution.trim().split(/\s+/).filter(function(m){ return m.length > 0; });
+		this.currentStepIndex = 0;
+		this.solution = this.solutionMoves;
+		this.overlay.style.display = 'flex';
+		this.updateStepPlayer();
 	} else {
+		this.solutionMoves = [];
+		this.currentStepIndex = 0;
 		this.solution = [];
 		this.overlay.style.display = 'none';
 	}
-}
+};
 
-RubiksCubeControls.prototype.updateStepButton = function() {
-	if(this.solution && this.solution.length > 0){
-		var move = this.solution[0];
-		var color = this.cube.getFaceColor(move.substr(0,1));
-		this.stepButton.style.backgroundColor = color;
+RubiksCubeControls.prototype.updateStepPlayer = function() {
+	var total = this.solutionMoves.length;
+	var idx = this.currentStepIndex;
 
-		// ======================================================
-		//      CORREÇÃO COR TEXTO EM FUNDO BRANCO/AMARELO (Goal 2)
-		// ======================================================
-		// Adiciona/remove a classe CSS em vez de estilos inline
-		if (color === '#ffffff' || color === '#ffff00') {
-			this.stepButton.classList.add('light-bg');
-		} else {
-			this.stepButton.classList.remove('light-bg');
-		}
-		// ======================================================
+	var mainCard = this.overlay.querySelector('#stepMainCard');
+	var completedCard = this.overlay.querySelector('#stepCompletedCard');
+	var actionsBar = this.overlay.querySelector('#stepActions');
+	var counterBadge = this.overlay.querySelector('#stepCounterBadge');
+	var progressBar = this.overlay.querySelector('#stepProgressBar');
 
+	if (!mainCard || !completedCard) return;
 
-		this.stepButton.innerHTML = ''; 
-		this.stepButton.classList.remove('move-clock', 'move-counter', 'move-180');
-
-		if (move.length == 1) { 
-			this.stepButton.classList.add('move-clock');
-		} else if (move[1] == '2') { 
-			this.stepButton.classList.add('move-180');
-		} else { 
-			this.stepButton.classList.add('move-counter');
-		}
-
-		var spanCount = document.createElement('span');
-		spanCount.className = 'step-count';
-		spanCount.textContent = this.solution.length;
-		this.stepButton.appendChild(spanCount);
-
-		var spanMove = document.createElement('span');
-		spanMove.className = 'step-move';
-		spanMove.textContent = move; 
-		this.stepButton.appendChild(spanMove);
+	if (idx >= total && total > 0) {
+		mainCard.style.display = 'none';
+		actionsBar.style.display = 'none';
+		completedCard.style.display = 'flex';
+		if (counterBadge) counterBadge.textContent = '100% Concluído';
+		if (progressBar) progressBar.style.width = '100%';
+		this.stopAutoPlay();
+		return;
 	}
-}
+
+	mainCard.style.display = 'flex';
+	actionsBar.style.display = 'flex';
+	completedCard.style.display = 'none';
+
+	var percent = Math.round((idx / total) * 100);
+	if (counterBadge) {
+		counterBadge.textContent = 'Passo ' + (idx + 1) + ' de ' + total + ' (' + percent + '%)';
+	}
+	if (progressBar) {
+		progressBar.style.width = ((idx / total) * 100) + '%';
+	}
+
+	var move = this.solutionMoves[idx];
+	var info = parseMoveDetails(move, this.cube);
+
+	var moveBadge = this.overlay.querySelector('#stepMoveBadge');
+	var faceNameEl = this.overlay.querySelector('#stepFaceName');
+	var rotTitleEl = this.overlay.querySelector('#stepRotationTitle');
+	var instEl = this.overlay.querySelector('#stepInstruction');
+
+	if (moveBadge && info) {
+		moveBadge.style.backgroundColor = info.color;
+		moveBadge.style.color = info.textColor;
+		moveBadge.style.borderColor = info.isLightBg ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.7)';
+		moveBadge.innerHTML = 
+			'<span class="step-move-badge-letter">' + info.move + '</span>' +
+			'<span class="step-move-badge-icon">' + info.icon + '</span>';
+	}
+
+	if (faceNameEl && info) {
+		var ptLabel = info.ptColor ? ' (' + info.ptColor + ')' : '';
+		faceNameEl.innerHTML = '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + info.color + ';margin-right:6px;border:1px solid rgba(255,255,255,0.6);vertical-align:middle;"></span>Face ' + info.faceName + ptLabel;
+	}
+
+	if (rotTitleEl && info) {
+		rotTitleEl.textContent = info.rotationTitle;
+	}
+
+	if (instEl && info) {
+		instEl.innerHTML = info.instruction;
+	}
+
+	var btnPrev = this.overlay.querySelector('#stepBtnPrev');
+	var btnNext = this.overlay.querySelector('#stepBtnNext');
+	if (btnPrev) {
+		btnPrev.disabled = (idx === 0);
+	}
+	if (btnNext) {
+		btnNext.innerHTML = (idx === total - 1) 
+			? 'Finalizar <i class="fas fa-check"></i>' 
+			: 'Avançar <i class="fas fa-chevron-right"></i>';
+	}
+};
 
 RubiksCubeControls.prototype.nextMove = function() {
-	var move = this.solution.shift();
-	
-	this.cube.makeMove(move);
-	if(this.solution.length > 0){
-		this.updateStepButton();
-	} else {
-		this.overlay.style.display = 'none';
+	if (this.currentStepIndex < this.solutionMoves.length) {
+		var move = this.solutionMoves[this.currentStepIndex];
+		this.cube.makeMove(move);
+		this.currentStepIndex++;
+		this.updateStepPlayer();
 	}
-}
+};
+
+RubiksCubeControls.prototype.prevMove = function() {
+	if (this.currentStepIndex > 0) {
+		this.stopAutoPlay();
+		this.currentStepIndex--;
+		var move = this.solutionMoves[this.currentStepIndex];
+		var inv = this.getInverseMove(move);
+		this.cube.makeMove(inv);
+		this.updateStepPlayer();
+	}
+};
+
+RubiksCubeControls.prototype.toggleAutoPlay = function() {
+	if (this.isAutoPlaying) {
+		this.stopAutoPlay();
+	} else {
+		this.startAutoPlay();
+	}
+};
+
+RubiksCubeControls.prototype.startAutoPlay = function() {
+	var me = this;
+	if (this.currentStepIndex >= this.solutionMoves.length) {
+		this.currentStepIndex = 0;
+	}
+	this.isAutoPlaying = true;
+	var btnAuto = this.overlay.querySelector('#stepBtnAuto');
+	if (btnAuto) {
+		btnAuto.innerHTML = '<i class="fas fa-pause"></i> Pausar';
+		btnAuto.classList.add('active-playing');
+	}
+	this.autoPlayInterval = setInterval(function(){
+		if (me.currentStepIndex < me.solutionMoves.length) {
+			me.nextMove();
+		} else {
+			me.stopAutoPlay();
+		}
+	}, this.autoPlaySpeed);
+};
+
+RubiksCubeControls.prototype.stopAutoPlay = function() {
+	this.isAutoPlaying = false;
+	if (this.autoPlayInterval) {
+		clearInterval(this.autoPlayInterval);
+		this.autoPlayInterval = null;
+	}
+	var btnAuto = this.overlay.querySelector('#stepBtnAuto');
+	if (btnAuto) {
+		btnAuto.innerHTML = '<i class="fas fa-play"></i> Auto (1.5s)';
+		btnAuto.classList.remove('active-playing');
+	}
+};
+
+RubiksCubeControls.prototype.closeStepPlayer = function() {
+	this.stopAutoPlay();
+	this.setSolution('');
+};
+
+RubiksCubeControls.prototype.updateStepButton = function() {
+	this.updateStepPlayer();
+};
+
 RubiksCubeControls.prototype.setWidth = function(width, controlsTop) {
+	var controlsHeight = Math.max(Math.round(width * 15 / 28), 230);
 	this.container.style.width = (width-2) + 'px';
-	this.container.style.height = (width*15/28 - 2) + 'px';
-	this.container.style.left = '15px'; // Padrão de padding-left
-	this.container.style.top = controlsTop + 'px'; // Posição calculada no index.html
+	this.container.style.height = (controlsHeight - 2) + 'px';
+	this.container.style.left = '15px';
+	this.container.style.top = controlsTop + 'px';
 
 	var buttonWidth = width/8;
 	var current = 0;
@@ -558,13 +833,10 @@ RubiksCubeControls.prototype.setWidth = function(width, controlsTop) {
 
 	styleSolve(this.solveButton, width/28);
 	styleSolve(this.solveSlowButton, width*29/56);
-
-	// MODIFICAÇÃO: Posiciona os botões "Embaralhar" e "Reiniciar"
 	styleSolve(this.scrambleButton, width/28, width/58);
 	styleSolve(this.resetButton, width*29/56, width/58);
 
-
-	if(!this.solution || this.solution.length == 0){
+	if(!this.solutionMoves || this.solutionMoves.length == 0){
 		this.overlay.style.display = 'none';
 	}
 	this.overlay.style.position = 'absolute';
@@ -572,14 +844,4 @@ RubiksCubeControls.prototype.setWidth = function(width, controlsTop) {
 	this.overlay.style.right = 0;
 	this.overlay.style.top = 0;
 	this.overlay.style.bottom = 0;
-
-
-	this.stepButton.style.backgroundSize = 'contain';
-	this.stepButton.style.position = 'absolute';
-	// this.stepButton.style.border = '1px solid black'; // Controlado por CSS
-	this.stepButton.style.width = buttonWidth * 16/7 - 2 + 'px';
-	this.stepButton.style.height = buttonWidth * 16/7 - 2 + 'px';
-	this.stepButton.style.top = width/28 + 'px';
-	this.stepButton.style.left = width/28 + (buttonWidth + width/28)*2 + 'px';
-	this.stepButton.style.fontSize = (buttonWidth / 2.2) + 'px';
 };

@@ -25,18 +25,18 @@
         if ('caches' in window) {
             caches.keys().then(function(keys) {
                 keys.forEach(function(key) {
-                    if (key !== 'cubofacil-v7') caches.delete(key);
+                    if (key !== 'cubofacil-v8') caches.delete(key);
                 });
             });
         }
     </script>
 
     <!-- Motores do Cubo & Algoritmos -->
-    <script type="text/javascript" src='rubiks.js?v=7'></script>
-    <script type="text/javascript" src='solver.js?v=7'></script>
-    <script type="text/javascript" src='flat.js?v=7'></script>
-    <script type="text/javascript" src='camera_scanner.js?v=7'></script>
-    <script type="text/javascript" src='speed_timer.js?v=7'></script>
+    <script type="text/javascript" src='rubiks.js?v=8'></script>
+    <script type="text/javascript" src='solver.js?v=8'></script>
+    <script type="text/javascript" src='flat.js?v=8'></script>
+    <script type="text/javascript" src='camera_scanner.js?v=8'></script>
+    <script type="text/javascript" src='speed_timer.js?v=8'></script>
     
     <style type="text/css">
         :root {
@@ -309,66 +309,270 @@
             color: white !important;
         }
 
-        .rc-step-button {
-            border-radius: 16px;
-            font-size: 18px;
-            color: white;
-            position: relative;
-            background-color: rgba(30, 41, 59, 0.9);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        /* ==================== STEP-BY-STEP PLAYER (PASSO A PASSO) ==================== */
+        .rc-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.95) !important;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55);
+            padding: 10px 12px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 50;
+            animation: fadeInStep 0.25s ease-out;
         }
 
-        .rc-step-button::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100%;
-            height: 100%;
+        @keyframes fadeInStep {
+            from { opacity: 0; transform: scale(0.97); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .step-player-header {
             display: flex;
             align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .step-player-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: #f8fafc;
+        }
+
+        .step-player-title-wrap i {
+            color: var(--brand-primary);
+        }
+
+        .step-player-counter {
+            font-size: 0.74rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            white-space: nowrap;
+        }
+
+        .step-player-close {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #94a3b8;
+            border-radius: 8px;
+            padding: 3px 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .step-player-close:hover {
+            background: rgba(239, 68, 68, 0.25);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+
+        .step-progress-track {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 4px 0;
+        }
+
+        .step-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #10b981, #3b82f6);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .step-main-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 6px 10px;
+            flex: 1;
+            margin: 3px 0;
+        }
+
+        .step-move-badge {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             justify-content: center;
-            font-size: 2.8em;
-            color: white;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-            pointer-events: none;
-            z-index: 1;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            user-select: none;
         }
 
-        .rc-step-button.clockwise::before { content: '↻'; }
-        .rc-step-button.counter-clockwise::before { content: '↺'; }
-        .rc-step-button.degree-180::before { content: '180°'; font-size: 1.5em; font-weight: 700; }
-
-        .rc-step-button .step-count,
-        .rc-step-button .step-move {
-            position: relative;
-            z-index: 2;
+        .step-move-badge-letter {
+            font-size: 1.15rem;
+            font-weight: 900;
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.1;
         }
 
-        .rc-step-button .step-count {
-            position: absolute;
-            bottom: 0.33em;
-            right: 0.5em;
-            font-size: 1.0em;
+        .step-move-badge-icon {
+            font-size: 0.8rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .step-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            text-align: left;
+            min-width: 0;
+        }
+
+        .step-face-name {
+            font-size: 0.84rem;
+            font-weight: 800;
+            color: #f8fafc;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .step-rotation-title {
+            font-size: 0.75rem;
             font-weight: 700;
-            color: rgba(255, 255, 255, 0.9);
+            color: #60a5fa;
         }
 
-        .rc-step-button .step-move {
-            position: absolute;
-            top: 0.33em;
-            left: 0.5em;
-            font-size: 1.2em; 
+        .step-instruction {
+            font-size: 0.72rem;
+            color: #cbd5e1;
+            line-height: 1.25;
+        }
+
+        .step-player-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .step-act-btn {
+            flex: 1;
+            padding: 7px 8px;
+            border-radius: 10px;
+            font-size: 0.78rem;
             font-weight: 700;
-            font-family: 'JetBrains Mono', Courier, monospace;
-            color: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
         }
 
-        .rc-step-button.light-bg { color: #111 !important; }
-        .rc-step-button.light-bg .step-count,
-        .rc-step-button.light-bg .step-move { color: #111 !important; }
-        .rc-step-button.light-bg::before { color: #111 !important; filter: none !important; }
+        .step-act-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        .step-act-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .step-act-btn.btn-prev {
+            background: rgba(148, 163, 184, 0.15);
+            color: #cbd5e1;
+        }
+
+        .step-act-btn.btn-auto {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.4);
+            color: #a5b4fc;
+        }
+
+        .step-act-btn.btn-auto.active-playing {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: #fff;
+            border-color: rgba(239, 68, 68, 0.6);
+            animation: pulsePlay 1.2s infinite;
+        }
+
+        @keyframes pulsePlay {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .step-act-btn.btn-next {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-color: rgba(16, 185, 129, 0.5);
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(16, 185, 129, 0.35);
+        }
+
+        .step-completed-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 10px;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .step-completed-icon {
+            font-size: 2rem;
+            animation: bounceTrophy 0.8s ease infinite alternate;
+        }
+
+        @keyframes bounceTrophy {
+            from { transform: translateY(0); }
+            to { transform: translateY(-5px); }
+        }
+
+        .step-completed-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #34d399;
+        }
+
+        .step-completed-desc {
+            font-size: 0.78rem;
+            color: #94a3b8;
+            max-width: 250px;
+        }
 
         /* ==================== CUBO 2D STICKERS ==================== */
         .rc-sticker {
@@ -413,16 +617,93 @@
             text-shadow: 0 2px 8px rgba(0,0,0,0.8);
         }
 
-        .rc-overlay {
-            border-radius: 16px; 
-            background: rgba(0, 0, 0, 0.25) !important;
-            backdrop-filter: blur(8px);
-        }
-
         .rc-progress {
             background: linear-gradient(90deg, #10b981, #06b6d4) !important;
             opacity: 0.85;
             border-radius: 16px 0 0 16px;
+        }
+
+        /* ==================== PARITY TRACKER SCANNER ==================== */
+        .scanner-parity-container {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            padding: 6px 10px;
+            margin-bottom: 8px;
+            max-width: 320px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .scanner-parity-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #94a3b8;
+            margin-bottom: 4px;
+        }
+
+        .parity-status-tag {
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #f1f5f9;
+        }
+
+        .parity-status-tag.valid {
+            background: rgba(16, 185, 129, 0.25);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .parity-status-tag.warning {
+            background: rgba(245, 158, 11, 0.25);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.4);
+        }
+
+        .scanner-parity-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 4px;
+        }
+
+        .parity-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 4px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            font-size: 0.68rem;
+            color: #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .parity-pill.complete {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: #10b981 !important;
+            color: #34d399;
+        }
+
+        .parity-pill.overflow {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444 !important;
+            color: #f87171;
+        }
+
+        .parity-color-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+            border: 1px solid rgba(255,255,255,0.7);
         }
 
         /* ==================== MODAL BASE ==================== */
@@ -458,7 +739,7 @@
             color: #fff;
             max-width: 680px;
             width: 100%;
-            max-height: 90vh;
+            max-height: 94vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -471,7 +752,7 @@
         }
 
         .modal-header {
-            padding: 18px 24px;
+            padding: 12px 20px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
@@ -479,7 +760,7 @@
         }
 
         .modal-title {
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             font-weight: 800;
             display: flex;
             align-items: center;
@@ -490,14 +771,14 @@
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.15);
             color: #cbd5e1;
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             transition: all 0.2s ease;
         }
 
@@ -508,7 +789,7 @@
         }
 
         .modal-body {
-            padding: 16px 20px;
+            padding: 12px 18px;
             overflow-y: auto;
             flex: 1;
         }
@@ -639,9 +920,9 @@
         .scanner-camera-wrapper {
             position: relative;
             width: 100%;
-            max-width: 320px;
-            height: 220px;
-            margin: 0 auto 8px auto;
+            max-width: 290px;
+            height: 195px;
+            margin: 0 auto 6px auto;
             border-radius: 16px;
             overflow: hidden;
             background: #000;
@@ -1046,6 +1327,46 @@
                     <div id="scannerPreviewGrid" class="scanner-preview-grid"></div>
                 </div>
 
+                <!-- Contador de Paridade 54 Peças (9 de cada cor) -->
+                <div class="scanner-parity-container">
+                    <div class="scanner-parity-header">
+                        <span><i class="fas fa-balance-scale"></i> Verificação (54 Peças):</span>
+                        <span id="scannerParityStatus" class="parity-status-tag">0/54 lidas</span>
+                    </div>
+                    <div class="scanner-parity-bar" id="scannerParityBar">
+                        <div class="parity-pill" id="parityPill-WHITE" style="border-color:#ffffff;" title="Branco">
+                            <span class="parity-color-dot" style="background:#ffffff;"></span>
+                            <span>Bra:</span>
+                            <strong id="parityCount-WHITE">0/9</strong>
+                        </div>
+                        <div class="parity-pill" id="parityPill-YELLOW" style="border-color:#ffff00;" title="Amarelo">
+                            <span class="parity-color-dot" style="background:#ffff00;"></span>
+                            <span>Ama:</span>
+                            <strong id="parityCount-YELLOW">0/9</strong>
+                        </div>
+                        <div class="parity-pill" id="parityPill-GREEN" style="border-color:#009900;" title="Verde">
+                            <span class="parity-color-dot" style="background:#009900;"></span>
+                            <span>Ver:</span>
+                            <strong id="parityCount-GREEN">0/9</strong>
+                        </div>
+                        <div class="parity-pill" id="parityPill-BLUE" style="border-color:#000099;" title="Azul">
+                            <span class="parity-color-dot" style="background:#000099;"></span>
+                            <span>Azu:</span>
+                            <strong id="parityCount-BLUE">0/9</strong>
+                        </div>
+                        <div class="parity-pill" id="parityPill-RED" style="border-color:#cc0000;" title="Vermelho">
+                            <span class="parity-color-dot" style="background:#cc0000;"></span>
+                            <span>Ver:</span>
+                            <strong id="parityCount-RED">0/9</strong>
+                        </div>
+                        <div class="parity-pill" id="parityPill-ORANGE" style="border-color:#ff8000;" title="Laranja">
+                            <span class="parity-color-dot" style="background:#ff8000;"></span>
+                            <span>Lar:</span>
+                            <strong id="parityCount-ORANGE">0/9</strong>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="scanner-controls">
                     <button id="scannerBtnPrev" class="scanner-btn secondary"><i class="fas fa-arrow-left"></i> Anterior</button>
                     <button id="scannerBtnCapture" class="scanner-btn capture"><i class="fas fa-camera"></i> Capturar Face</button>
@@ -1209,12 +1530,12 @@
 
             if (down) {
                 controlsTop = 20 + width + 15;
-                var controlsHeight = (width * 15 / 28);
+                var controlsHeight = Math.max(Math.round(width * 15 / 28), 230);
                 flatCubeTop = controlsTop + controlsHeight + 15;
                 appHeight = flatCubeTop + flatCubeHeight + 20;
             } else {
                 controlsTop = 20 + width + 15;
-                var controlsHeight = (width * 15 / 28);
+                var controlsHeight = Math.max(Math.round(width * 15 / 28), 230);
                 var leftColHeight = controlsTop + controlsHeight;
                 flatCubeTop = 20;
                 var rightColHeight = flatCubeTop + flatCubeHeight;
@@ -1315,12 +1636,12 @@
 
             if (down) {
                 controlsTop = 20 + width + 15;
-                var controlsHeight = (width * 15 / 28);
+                var controlsHeight = Math.max(Math.round(width * 15 / 28), 230);
                 flatCubeTop = controlsTop + controlsHeight + 15;
                 appHeight = flatCubeTop + flatCubeHeight + 20;
             } else {
                 controlsTop = 20 + width + 15;
-                var controlsHeight = (width * 15 / 28);
+                var controlsHeight = Math.max(Math.round(width * 15 / 28), 230);
                 var leftColHeight = controlsTop + controlsHeight;
                 flatCubeTop = 20;
                 var rightColHeight = flatCubeTop + flatCubeHeight;
@@ -1358,10 +1679,10 @@
         // Registro correto do Service Worker com caminho relativo e versão
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', function() {
-                navigator.serviceWorker.register('./sw.js?v=7')
+                navigator.serviceWorker.register('./sw.js?v=8')
                     .then(function(reg) {
                         reg.update();
-                        console.log('CuboFácil Service Worker v7 atualizado:', reg.scope);
+                        console.log('CuboFácil Service Worker v8 atualizado:', reg.scope);
                     })
                     .catch(function(err) {
                         console.log('Falha ao registrar Service Worker:', err);

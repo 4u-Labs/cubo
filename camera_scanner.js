@@ -91,6 +91,7 @@ class CuboCameraScanner {
 
         this.currentStep = 0;
         this.scannedFaces = {};
+        this.calibratedCenters = {};
         this.stream = null;
         this.animFrameId = null;
         this.isScanning = false;
@@ -144,6 +145,7 @@ class CuboCameraScanner {
 
         this.renderPreviewGrid();
         this.renderStepperDots();
+        this.updateParityTracker();
     }
 
     renderStepperDots() {
@@ -176,10 +178,11 @@ class CuboCameraScanner {
             
             this.previewGrid.appendChild(cell);
         }
+        this.updateParityTracker();
     }
 
     cycleCellColor(index) {
-        if (index === 4) return; // Centro é a referência da face
+        if (index === 4) return;
         const hexList = Object.values(this.CUBE_COLORS).map(c => c.hex);
         const currentIdx = hexList.indexOf(this.currentFacePreviewColors[index]);
         const nextIdx = (currentIdx + 1) % hexList.length;
@@ -187,12 +190,79 @@ class CuboCameraScanner {
         this.renderPreviewGrid();
     }
 
+    getParityCounts() {
+        const counts = { WHITE: 0, YELLOW: 0, GREEN: 0, BLUE: 0, RED: 0, ORANGE: 0 };
+        const hexMap = {
+            '#ffffff': 'WHITE',
+            '#ffff00': 'YELLOW',
+            '#009900': 'GREEN',
+            '#000099': 'BLUE',
+            '#cc0000': 'RED',
+            '#ff8000': 'ORANGE'
+        };
+
+        const currentFaceIdx = (this.FACE_STEPS && this.FACE_STEPS[this.currentStep]) ? this.FACE_STEPS[this.currentStep].faceIndex : -1;
+
+        for (let f = 0; f < 6; f++) {
+            const colors = (f === currentFaceIdx) 
+                ? this.currentFacePreviewColors 
+                : this.scannedFaces[f];
+            if (colors && colors.length === 9) {
+                colors.forEach(hex => {
+                    const key = hexMap[hex.toLowerCase()];
+                    if (key) counts[key]++;
+                });
+            }
+        }
+        return counts;
+    }
+
+    updateParityTracker() {
+        const counts = this.getParityCounts();
+        let totalCount = 0;
+        let isAllNine = true;
+
+        const colorKeys = ['WHITE', 'YELLOW', 'GREEN', 'BLUE', 'RED', 'ORANGE'];
+        colorKeys.forEach(k => {
+            const cnt = counts[k] || 0;
+            totalCount += cnt;
+            if (cnt !== 9) isAllNine = false;
+
+            const countEl = document.getElementById(`parityCount-${k}`);
+            const pillEl = document.getElementById(`parityPill-${k}`);
+            if (countEl) {
+                countEl.textContent = `${cnt}/9`;
+            }
+            if (pillEl) {
+                pillEl.classList.remove('complete', 'overflow');
+                if (cnt === 9) pillEl.classList.add('complete');
+                else if (cnt > 9) pillEl.classList.add('overflow');
+            }
+        });
+
+        const statusEl = document.getElementById('scannerParityStatus');
+        if (statusEl) {
+            statusEl.classList.remove('valid', 'warning');
+            if (totalCount === 54 && isAllNine) {
+                statusEl.textContent = '✓ 54/54 Válido!';
+                statusEl.classList.add('valid');
+            } else if (totalCount === 54 && !isAllNine) {
+                statusEl.textContent = '⚠️ Desbalanceado';
+                statusEl.classList.add('warning');
+            } else {
+                statusEl.textContent = `${totalCount}/54 lidas`;
+            }
+        }
+    }
+
     async open() {
         if (!this.modal) return;
         this.currentStep = 0;
         this.scannedFaces = {};
+        this.calibratedCenters = {};
         this.modal.classList.add('active');
         this.updateStepUI();
+        this.updateParityTracker();
         await this.startCamera();
     }
 
@@ -395,7 +465,7 @@ class CuboCameraScanner {
         };
     }
 
-    classifyColorHSV(r, g, b) {
+    rgbToHsv(r, g, b) {
         const rNorm = r / 255, gNorm = g / 255, bNorm = b / 255;
         const max = Math.max(rNorm, gNorm, bNorm);
         const min = Math.min(rNorm, gNorm, bNorm);
@@ -416,22 +486,68 @@ class CuboCameraScanner {
 
         const s = max === 0 ? 0 : delta / max;
         const v = max;
+        return { h, s, v };
+    }
 
-        // Branco
-        if (s < 0.22 && v > 0.40) {
+    calcColorDistance(rgb1, hsv1, rgb2, hsv2) {
+        let dh = Math.abs(hsv1.h - hsv2.h);
+        if (dh > 180) dh = 360 - dh;
+        const normDh = dh / 180;
+        const normDs = Math.abs(hsv1.s - hsv2.s);
+        const normDv = Math.abs(hsv1.v - hsv2.v);
+
+        const dr = (rgb1.r - rgb2.r) / 255;
+        const dg = (rgb1.g - rgb2.g) / 255;
+        const db = (rgb1.b - rgb2.b) / 255;
+        const rgbDist = Math.sqrt(dr * dr + dg * dg + db * db) / Math.sqrt(3);
+
+        if (hsv1.s < 0.20 && hsv2.s < 0.20) {
+            return rgbDist;
+        }
+
+        return (normDh * 0.55) + (normDs * 0.20) + (normDv * 0.10) + (rgbDist * 0.15);
+    }
+
+    classifyColorHSV(r, g, b) {
+        const hsv = this.rgbToHsv(r, g, b);
+        const { h, s, v } = hsv;
+
+        // Se houver centros calibrados de faces já capturadas, avalia proximidade adaptativa
+        const calKeys = Object.keys(this.calibratedCenters);
+        if (calKeys.length >= 2) {
+            let bestMatch = null;
+            let minDistance = Infinity;
+
+            for (const colorKey of calKeys) {
+                const center = this.calibratedCenters[colorKey];
+                let dist = this.calcColorDistance({ r, g, b }, hsv, center.rgb, center.hsv);
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    bestMatch = center.hex;
+                }
+            }
+
+            if (minDistance < 0.28 && bestMatch) {
+                return bestMatch;
+            }
+        }
+
+        // Fallback robusto por faixas HSV
+        // Branco (baixa saturação e brilho)
+        if (s < 0.22 && v > 0.38) {
             return this.CUBE_COLORS.WHITE.hex;
         }
 
         // Amarelo
-        if (h >= 45 && h <= 72) {
+        if (h >= 45 && h <= 72 && s >= 0.25) {
             return this.CUBE_COLORS.YELLOW.hex;
         }
 
         // Laranja vs Vermelho
-        if (h >= 14 && h < 45) {
+        if (h >= 13 && h < 45) {
             return this.CUBE_COLORS.ORANGE.hex;
         }
-        if (h >= 340 || h < 14) {
+        if (h >= 340 || h < 13) {
             return this.CUBE_COLORS.RED.hex;
         }
 
@@ -452,7 +568,29 @@ class CuboCameraScanner {
         const step = this.FACE_STEPS[this.currentStep];
         this.scannedFaces[step.faceIndex] = [...this.currentFacePreviewColors];
 
+        // Calibração Adaptativa do centro sob a luz real da câmera
+        if (this.ctx && this.canvasOverlay) {
+            const w = this.canvasOverlay.width;
+            const h = this.canvasOverlay.height;
+            const boxSize = Math.min(w, h) * 0.62;
+            const startX = (w - boxSize) / 2;
+            const startY = (h - boxSize) / 2;
+            const cellSize = boxSize / 3;
+            const sampleCenterX = Math.floor(startX + 1.5 * cellSize);
+            const sampleCenterY = Math.floor(startY + 1.5 * cellSize);
+            const sampleRadius = Math.max(4, Math.floor(cellSize * 0.12));
+            const centerRgb = this.getAverageRGB(sampleCenterX, sampleCenterY, sampleRadius);
+            const centerHsv = this.rgbToHsv(centerRgb.r, centerRgb.g, centerRgb.b);
+
+            this.calibratedCenters[step.centerColor] = {
+                rgb: centerRgb,
+                hsv: centerHsv,
+                hex: this.CUBE_COLORS[step.centerColor].hex
+            };
+        }
+
         this.playBeep();
+        this.updateParityTracker();
 
         if (this.currentStep < this.FACE_STEPS.length - 1) {
             this.currentStep++;

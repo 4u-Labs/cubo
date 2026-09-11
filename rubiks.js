@@ -549,18 +549,34 @@ function RubiksCube(canvas, width) {
 
 RubiksCube.prototype.solve = function (progress) {
 	var me = this;
-	if (this.isSolvable()) {
-		this.solver.solveAsync(this.getState(), function (solution) {
-			me.makeMoves(solution);
-		}, progress);
+	function trySolve() {
+		if (me.rotating) {
+			setTimeout(trySolve, 80);
+			return;
+		}
+		if (me.isSolvable()) {
+			me.solver.solveAsync(me.getState(), function (solution) {
+				me.makeMoves(solution);
+			}, progress);
+		}
 	}
+	trySolve();
 }
 
 RubiksCube.prototype.getSolutionAsync = function (callback, progress) {
-	if (this.isSolvable()) {
-		this.solver.solveAsync(this.getState(), callback, progress);
+	var me = this;
+	function trySolve() {
+		if (me.rotating) {
+			setTimeout(trySolve, 80);
+			return;
+		}
+		if (me.isSolvable()) {
+			me.solver.solveAsync(me.getState(), callback, progress);
+		} else {
+			callback('');
+		}
 	}
-	callback('');
+	trySolve();
 }
 
 RubiksCube.prototype.getSolution = function () {
