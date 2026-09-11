@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>CuboFácil 4U | Solucionador 3D de Cubo Mágico & Timer WCA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <meta name="description" content="Solucionador 3D inteligente de Cubo Mágico com escaneamento de cores por câmera, visualizador interativo e cronômetro oficial de Speedcubing (WCA).">
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5"/>
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CuboFácil 4U">
+
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Motores do Cubo & Algoritmos -->
+    <script type="text/javascript" src='rubiks.js'></script>
+    <script type="text/javascript" src='solver.js'></script>
+    <script type="text/javascript" src='flat.js'></script>
+    <script type="text/javascript" src='camera_scanner.js'></script>
+    <script type="text/javascript" src='speed_timer.js'></script>
+    
+    <style type="text/css">
+        :root {
+            --brand-primary: #10b981;
+            --brand-indigo: #6366f1;
+            --brand-purple: #8b5cf6;
+            --bg-gradient: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #0f172a 100%);
+            --glass-bg: rgba(255, 255, 255, 0.12);
+            --glass-card: rgba(15, 23, 42, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --text-main: #f8fafc;
+            --text-muted: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ==================== HEADER 4U ==================== */
+        #header {
+            width: 100%;
+            padding: 16px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(15, 23, 42, 0.82);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .header-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .header-title-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-logo-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.45);
+        }
+
+        .header-title-group h1 {
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #fff;
+        }
+
+        .header-badge {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--brand-primary);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .header-title-group p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .header-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 16px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.16);
+            transform: translateY(-1px);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .header-btn.btn-scanner {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-color: rgba(16, 185, 129, 0.4);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+        }
+
+        .header-btn.btn-scanner:hover {
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.55);
+        }
+
+        .header-btn.btn-timer {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+        }
+
+        .header-btn.btn-timer:hover {
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.55);
+        }
+
+        /* ==================== CONTAINER & CARDS ==================== */
+        #app-container {
+            position: relative;
+            max-width: 900px;
+            width: 100%;
+            margin: 15px auto 40px auto;
+            padding: 20px 15px;
+            flex: 1;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #cube,
+        #controls,
+        #flat-cube {
+            background: var(--glass-card);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 22px;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            transition: all 0.25s ease;
+        }
+
+        #cube:hover,
+        #controls:hover,
+        #flat-cube:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        #cube {
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #cube-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            background: transparent !important;
+        }
+
+        #help-icon {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            background: rgba(0, 0, 0, 0.45);
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 5;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        #help-icon:hover {
+            background: var(--brand-indigo);
+            transform: scale(1.1);
+        }
+
+        /* ==================== BOTÕES DE CONTROLE ==================== */
+        .rc-button {
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 700;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .rc-button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .rc-button:active {
+            transform: translateY(0);
+        }
+
+        .rc-move-button {
+            background-color: rgba(30, 41, 59, 0.85);
+            border-radius: 50% !important;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+        }
+
+        .rc-solve-button {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+            color: white !important;
+        }
+
+        .rc-solve-slow-button {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+            color: white !important;
+        }
+
+        .rc-scramble-button {
+            background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%) !important;
+            color: white !important;
+        }
+
+        .rc-reset-button {
+            background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
+            color: white !important;
+        }
+
+        .rc-step-button {
+            border-radius: 16px;
+            font-size: 18px;
+            color: white;
+            position: relative;
+            background-color: rgba(30, 41, 59, 0.9);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .rc-step-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.8em;
+            color: white;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .rc-step-button.clockwise::before { content: '↻'; }
+        .rc-step-button.counter-clockwise::before { content: '↺'; }
+        .rc-step-button.degree-180::before { content: '180°'; font-size: 1.5em; font-weight: 700; }
+
+        .rc-step-button .step-count,
+        .rc-step-button .step-move {
+            position: relative;
+            z-index: 2;
+        }
+
+        .rc-step-button .step-count {
+            position: absolute;
+            bottom: 0.33em;
+            right: 0.5em;
+            font-size: 1.0em;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .rc-step-button .step-move {
+            position: absolute;
+            top: 0.33em;
+            left: 0.5em;
+            font-size: 1.2em; 
+            font-weight: 700;
+            font-family: 'JetBrains Mono', Courier, monospace;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .rc-step-button.light-bg { color: #111 !important; }
+        .rc-step-button.light-bg .step-count,
+        .rc-step-button.light-bg .step-move { color: #111 !important; }
+        .rc-step-button.light-bg::before { color: #111 !important; filter: none !important; }
+
+        /* ==================== CUBO 2D STICKERS ==================== */
+        .rc-sticker {
+            border: 1.5px solid rgba(0, 0, 0, 0.6) !important;
+            border-radius: 6px !important; 
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.3);
+            transition: all 0.15s ease;
+        }
+
+        .rc-sticker:hover {
+            transform: scale(1.12);
+            border-color: rgba(255, 255, 255, 0.9) !important;
+            z-index: 10;
+        }
+
+        .rc-color-picker {
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid var(--glass-border) !important;
+            border-radius: 16px !important;
+            padding: 6px;
+            backdrop-filter: blur(10px);
+        }
+
+        .rc-picker-choice {
+            transition: all 0.2s ease;
+        }
+        .rc-picker-choice:hover { transform: scale(1.18); }
+
+        .rc-picker-choice.selected {
+            transform: scale(1.15);
+            border-width: 3px !important;
+            border-color: #fff !important;
+            box-shadow: 0 0 14px rgba(255, 255, 255, 0.7);
+        }
+
+        .rc-message {
+            color: #f87171 !important;
+            font-weight: 700;
+            text-align: center;
+            width: 100%;
+            left: 0 !important;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+        }
+
+        .rc-overlay {
+            border-radius: 16px; 
+            background: rgba(0, 0, 0, 0.25) !important;
+            backdrop-filter: blur(8px);
+        }
+
+        .rc-progress {
+            background: linear-gradient(90deg, #10b981, #06b6d4) !important;
+            opacity: 0.85;
+            border-radius: 16px 0 0 16px;
+        }
+
+        /* ==================== MODAL BASE ==================== */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .modal-backdrop.active,
+        .modal-backdrop.modal-open {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-window {
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 24px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+            color: #fff;
+            max-width: 680px;
+            width: 100%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: modalScale 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes modalScale {
+            from { transform: scale(0.92); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-close-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #cbd5e1;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close-btn:hover {
+            background: rgba(239, 68, 68, 0.25);
+            color: #ef4444;
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* ==================== CAMERA SCANNER UI ==================== */
+        .scanner-camera-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 320px;
+            height: 250px;
+            margin: 0 auto 14px auto;
+            border-radius: 18px;
+            overflow: hidden;
+            background: #000;
+            border: 2px solid rgba(16, 185, 129, 0.4);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        #scannerVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        #scannerCanvasOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .scanner-stepper {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .step-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.25s ease;
+        }
+
+        .step-dot.active {
+            transform: scale(1.35);
+            box-shadow: 0 0 10px #60a5fa;
+        }
+
+        .scanner-info-card {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .scanner-info-card h3 {
+            font-size: 1.15rem;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .scanner-info-card p {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+        }
+
+        .scanner-preview-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .scanner-preview-title {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .scanner-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 36px);
+            grid-gap: 5px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+
+        .scanner-preview-cell {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            border: 1.5px solid rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+            transition: transform 0.15s ease;
+        }
+
+        .scanner-preview-cell:hover {
+            transform: scale(1.15);
+            border-color: #fff;
+        }
+
+        .scanner-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .scanner-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            color: #fff;
+            transition: all 0.2s ease;
+        }
+
+        .scanner-btn.capture {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+            flex: 1;
+            justify-content: center;
+            max-width: 220px;
+        }
+
+        .scanner-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .scanner-btn.upload {
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            color: #a5b4fc;
+        }
+
+        /* ==================== SPEED TIMER UI ==================== */
+        .modal-window-timer {
+            max-width: 780px;
+            background: #090d16;
+        }
+
+        .timer-scramble-box {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 14px 18px;
+            margin-bottom: 18px;
+            text-align: center;
+        }
+
+        .scramble-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: #60a5fa;
+            line-height: 1.5;
+            user-select: all;
+        }
+
+        .scramble-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .timer-sm-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .timer-sm-btn:hover {
+            background: rgba(255, 255, 255, 0.16);
+            color: #fff;
+        }
+
+        .timer-touch-surface {
+            background: rgba(15, 23, 42, 0.8);
+            border: 2px dashed rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+            margin-bottom: 20px;
+        }
+
+        .timer-touch-surface:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(15, 23, 42, 0.95);
+        }
+
+        .timer-big-digits {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 4.8rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            color: #f8fafc;
+            line-height: 1;
+            transition: color 0.15s ease;
+        }
+
+        .timer-big-digits.holding { color: #f59e0b !important; }
+        .timer-big-digits.ready { color: #10b981 !important; text-shadow: 0 0 30px rgba(16, 185, 129, 0.6); }
+        .timer-big-digits.inspecting { color: #ef4444 !important; }
+        .timer-big-digits.running { color: #38bdf8 !important; }
+
+        .timer-status-badge {
+            display: inline-block;
+            margin-top: 14px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 5px 14px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-muted);
+        }
+
+        .timer-status-badge.status-ready { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .timer-status-badge.status-holding { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .timer-status-badge.status-inspecting { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+        .timer-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .stat-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #fff;
+            margin-top: 3px;
+        }
+
+        .timer-history-container {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 12px;
+            max-height: 160px;
+            overflow-y: auto;
+        }
+
+        .history-item-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.85rem;
+        }
+
+        .solve-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: #38bdf8;
+        }
+
+        .solve-del-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+        .solve-del-btn:hover { color: #ef4444; }
+
+        /* ==================== FOOTER 4U ==================== */
+        .app-footer {
+            width: 100%;
+            text-align: center;
+            padding: 24px 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(15, 23, 42, 0.6);
+            margin-top: auto;
+        }
+
+        .footer-links {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+
+        .footer-link-item {
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer-link-item:hover { color: var(--brand-primary); }
+
+        .footer-copy {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        @media (max-width: 768px) {
+            .header-inner { justify-content: center; text-align: center; }
+            .header-title-box { flex-direction: column; }
+            .header-actions { justify-content: center; width: 100%; }
+            .timer-big-digits { font-size: 3.4rem; }
+            .timer-stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ==================== HEADER ==================== -->
+    <header id="header">
+        <div class="header-inner">
+            <div class="header-title-box">
+                <div class="header-logo-icon">
+                    <i class="fas fa-cube"></i>
+                </div>
+                <div class="header-title-group">
+                    <h1>
+                        CuboFácil 4U
+                        <span class="header-badge">Speedcubing Suite</span>
+                    </h1>
+                    <p>Solucionador 3D Inteligente, Scanner por Câmera & Timer WCA</p>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <button id="btnOpenScanner" class="header-btn btn-scanner" title="Escanear as faces com a Câmera">
+                    <i class="fas fa-camera"></i> Escanear Câmera
+                </button>
+                <button id="btnOpenTimer" class="header-btn btn-timer" title="Cronômetro de Speedcubing">
+                    <i class="fas fa-stopwatch"></i> Timer WCA
+                </button>
+                <button id="btnOpenHelp" class="header-btn" title="Instruções de Uso">
+                    <i class="fas fa-circle-question"></i> Ajuda
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== ÁREA PRINCIPAL DO CUBO ==================== -->
+    <div id="app-container">
+        <div id="cube"> 
+            <canvas id="cube-canvas">HTML5 CANVAS</canvas>
+            <div id="help-icon" title="Ajuda">?</div>
+        </div>
+        
+        <div id='controls'></div>
+        <div id='flat-cube'></div>
+    </div>
+
+    <!-- ==================== MODAL 1: SCANNER POR CÂMERA ==================== -->
+    <div id="cameraScannerModal" class="modal-backdrop">
+        <div class="modal-window">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-camera" style="color:var(--brand-primary);"></i>
+                    <span>Scanner Óptico de Cores</span>
+                </div>
+                <button class="modal-close-btn" id="scannerBtnClose" title="Fechar">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="scannerCameraStatus" style="display:none; padding:10px 14px; background:rgba(239, 68, 68, 0.2); border:1px solid rgba(239, 68, 68, 0.4); border-radius:12px; font-size:0.85rem; margin-bottom:12px; color:#fca5a5;"></div>
+
+                <div class="scanner-stepper" id="scannerStepperDots"></div>
+
+                <div class="scanner-info-card">
+                    <h3 id="scannerStepTitle">Passo 1/6: Face Branca (Topo / U)</h3>
+                    <p id="scannerStepTip">Aponte para a face com centro Branco e enquadre na mira</p>
+                </div>
+
+                <div class="scanner-camera-wrapper">
+                    <video id="scannerVideo" playsinline autoplay muted></video>
+                    <canvas id="scannerCanvasOverlay"></canvas>
+                </div>
+
+                <div class="scanner-preview-box">
+                    <span class="scanner-preview-title">Cores Detectadas (Clique para Ajustar):</span>
+                    <div id="scannerPreviewGrid" class="scanner-preview-grid"></div>
+                </div>
+
+                <div class="scanner-controls">
+                    <button id="scannerBtnPrev" class="scanner-btn secondary"><i class="fas fa-arrow-left"></i> Anterior</button>
+                    <button id="scannerBtnCapture" class="scanner-btn capture"><i class="fas fa-camera"></i> Capturar Face</button>
+                    <button id="scannerBtnNext" class="scanner-btn secondary"><i class="fas fa-arrow-right"></i> Avançar</button>
+                    <button id="scannerBtnUpload" class="scanner-btn upload"><i class="fas fa-image"></i> Carregar Foto</button>
+                    <input type="file" id="scannerFileInput" accept="image/*" style="display:none;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 2: CRONÔMETRO WCA ==================== -->
+    <div id="speedTimerModal" class="modal-backdrop">
+        <div class="modal-window modal-window-timer">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-stopwatch" style="color:#60a5fa;"></i>
+                    <span>Speedcubing Timer WCA</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:16px;">
+                    <label style="display:flex; align-items:center; gap:6px; font-size:0.85rem; cursor:pointer; color:var(--text-muted);">
+                        <input type="checkbox" id="timerInspectionToggle"> Inspeção (15s)
+                    </label>
+                    <button class="modal-close-btn" id="timerBtnClose" title="Fechar">&times;</button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <!-- Scramble Box -->
+                <div class="timer-scramble-box">
+                    <div id="timerScrambleText" class="scramble-text">R' U2 F L2 B...</div>
+                    <div class="scramble-actions">
+                        <button id="timerBtnNewScramble" class="timer-sm-btn"><i class="fas fa-rotate"></i> Novo Scramble</button>
+                        <button id="timerBtnApplyScramble" class="timer-sm-btn"><i class="fas fa-cube"></i> Aplicar no Cubo 3D</button>
+                    </div>
+                </div>
+
+                <!-- Touch & Display Area -->
+                <div id="timerTouchArea" class="timer-touch-surface">
+                    <div id="timerDisplay" class="timer-big-digits">0.000</div>
+                    <div id="timerStatusBadge" class="timer-status-badge status-idle">Pressione e segure ESPAÇO (ou toque) para armar</div>
+                </div>
+
+                <!-- Stats Bar -->
+                <div class="timer-stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Melhor (Single)</div>
+                        <div class="stat-val" id="timerStatBest">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Média de 5 (Ao5)</div>
+                        <div class="stat-val" id="timerStatAo5">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Média de 12 (Ao12)</div>
+                        <div class="stat-val" id="timerStatAo12">--</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Soluções</div>
+                        <div class="stat-val" id="timerStatCount">0</div>
+                    </div>
+                </div>
+
+                <!-- History -->
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <span style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Histórico Recente</span>
+                    <button id="timerBtnClearHistory" class="timer-sm-btn" style="color:#ef4444;"><i class="fas fa-trash"></i> Limpar</button>
+                </div>
+                <div class="timer-history-container" id="timerHistoryList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 3: COMO USAR ==================== -->
+    <div id="help-modal-overlay" class="modal-backdrop">
+        <div class="modal-window">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-circle-question" style="color:var(--brand-indigo);"></i>
+                    <span>Como Usar o CuboFácil 4U</span>
+                </div>
+                <button class="modal-close-btn" id="help-modal-close" title="Fechar">&times;</button>
+            </div>
+            <div class="modal-body" style="line-height:1.6;">
+                <ol style="padding-left: 20px; margin-bottom: 16px;">
+                    <li style="margin-bottom:10px;"><strong>Escanear com Câmera:</strong> Clique em "Escanear Câmera" para ler as 6 faces do seu cubo real automaticamente sem precisar pintar na tela!</li>
+                    <li style="margin-bottom:10px;"><strong>Mapeamento 2D Manual:</strong> Use a cruz planificada à direita para ajustar qualquer adesivo manualmente com a paleta de cores.</li>
+                    <li style="margin-bottom:10px;"><strong>Resolver e Passo a Passo:</strong> Clique em "Resolver" para ver a solução instantânea ou "Passo a Passo" para acompanhar cada movimento no cubo 3D.</li>
+                    <li style="margin-bottom:10px;"><strong>Timer WCA:</strong> Clique em "Timer WCA" para cronometrar seus tempos de speedcubing com regras da World Cube Association e Scramble oficial.</li>
+                    <li style="margin-bottom:10px;"><strong>Giro Interativo:</strong> Você pode rotacionar a visão do cubo 3D clicando e arrastando com o mouse ou dedo.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== RODAPÉ 4U ==================== -->
+    <footer class="app-footer">
+        <div class="footer-links">
+            <a href="privacidade.html" class="footer-link-item">Privacidade</a>
+            <span>•</span>
+            <a href="termos.php" class="footer-link-item">Termos de Uso</a>
+            <span>•</span>
+            <a href="suporte.html" class="footer-link-item">Suporte</a>
+            <span>•</span>
+            <a href="https://github.com/4u-Labs/cubo" target="_blank" rel="noopener noreferrer" class="footer-link-item">
+                <i class="fab fa-github"></i> GitHub
+            </a>
+        </div>
+        <p class="footer-copy">&copy; 2026 4U.IA.BR Labs &bull; Desenvolvido por Fabiano Braga &bull; Todos os direitos reservados</p>
+    </footer>
+
+    <!-- ==================== LOGICA PRINCIPAL ==================== -->
+    <script type="text/javascript">
+        var cube, flatCube, controls;
+        var modalOverlay = null;
+
+        function openModal() {
+            if (modalOverlay) modalOverlay.classList.add('active');
+        }
+        
+        function closeModal() {
+            if (modalOverlay) modalOverlay.classList.remove('active');
+        }
+
+        var run = function () {
+            if (cube) {
+                cube.tick();
+                cube.render();
+            }
+            requestAnimationFrame(run);
+        };
+
+        var oldWidth = null;
+
+        var reset = function () {
+            var down = false;
+            var parent = document.getElementById('app-container');
+            var parentWidth = parent.offsetWidth - 30;
+            var headerHeight = document.getElementById('header').offsetHeight;
+            var availableHeight = window.innerHeight - headerHeight - 100;
+
+            var width = Math.min(parentWidth / 2 - 15, availableHeight / 5 * 3);
+            
+            if (parentWidth < 700 || (width < 250 && parentWidth < availableHeight)) {
+                width = parentWidth;
+                down = true;
+            } else if (width < 250) {
+                width = Math.min(parentWidth / 2 - 15, availableHeight / 5 * 3);
+            }
+
+            if(width < 250) width = 250; 
+            oldWidth = width;
+            
+            var appHeight = 0;
+            var flatCubeHeight = (width / 3) * 4.75;
+            var flatCubeTop; 
+            var controlsTop;
+
+            if (down) {
+                controlsTop = 20 + width + 15;
+                var controlsHeight = (width * 15 / 28);
+                flatCubeTop = controlsTop + controlsHeight + 15;
+                appHeight = flatCubeTop + flatCubeHeight + 20;
+            } else {
+                controlsTop = 20 + width + 15;
+                var controlsHeight = (width * 15 / 28);
+                var leftColHeight = controlsTop + controlsHeight;
+                flatCubeTop = 20;
+                var rightColHeight = flatCubeTop + flatCubeHeight;
+                appHeight = Math.max(leftColHeight, rightColHeight) + 20;
+            }
+
+            parent.style.height = appHeight + 'px';
+
+            var cubeContainer = document.getElementById('cube');
+            cubeContainer.style.position = 'absolute';
+            cubeContainer.style.top = '20px';
+            cubeContainer.style.left = '15px';
+            cubeContainer.style.width = width + 'px';
+            cubeContainer.style.height = width + 'px';
+
+            cube = new RubiksCube('cube-canvas', width);
+            
+            flatCube = new FlatCube(
+                'flat-cube', 
+                width, 
+                down,
+                flatCubeTop
+            );
+            controls = new RubiksCubeControls('controls', cube, width, controlsTop);
+
+            cube.flatCube = flatCube;
+            flatCube.cube = cube;
+        };
+
+        var init = function () {
+            reset();
+            run();
+
+            // Modal de Ajuda
+            modalOverlay = document.getElementById('help-modal-overlay');
+            var helpIcon = document.getElementById('help-icon');
+            var closeModalBtn = document.getElementById('help-modal-close');
+            var btnOpenHelp = document.getElementById('btnOpenHelp');
+
+            if (helpIcon) helpIcon.addEventListener('click', openModal);
+            if (btnOpenHelp) btnOpenHelp.addEventListener('click', openModal);
+            if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+            if (modalOverlay) {
+                modalOverlay.addEventListener('click', function(e) {
+                    if (e.target === modalOverlay) closeModal();
+                });
+            }
+
+            // Inicializar Camera Scanner
+            window.cameraScanner = new CuboCameraScanner(flatCube, function() {
+                if (controls) controls.setSolution('');
+            });
+
+            var btnOpenScanner = document.getElementById('btnOpenScanner');
+            if (btnOpenScanner) {
+                btnOpenScanner.addEventListener('click', function() {
+                    window.cameraScanner.open();
+                });
+            }
+
+            // Inicializar Speedcubing Timer
+            window.speedTimer = new CuboSpeedTimer(cube);
+
+            var btnOpenTimer = document.getElementById('btnOpenTimer');
+            if (btnOpenTimer) {
+                btnOpenTimer.addEventListener('click', function() {
+                    window.speedTimer.open();
+                });
+            }
+        };
+
+        window.addEventListener('load', init, false);
+
+        window.addEventListener('resize', function () {
+            var down = false;
+            var parent = document.getElementById('app-container');
+            var parentWidth = parent.offsetWidth - 30;
+            var headerHeight = document.getElementById('header').offsetHeight;
+            var availableHeight = window.innerHeight - headerHeight - 100;
+
+            var width = Math.min(parentWidth / 2 - 15, availableHeight / 5 * 3);
+            
+            if (parentWidth < 700 || (width < 250 && parentWidth < availableHeight)) {
+                width = parentWidth;
+                down = true;
+            } else if (width < 250) {
+                width = Math.min(parentWidth / 2 - 15, availableHeight / 5 * 3);
+            }
+
+            if(width < 250) width = 250;
+            if (width == oldWidth) return;
+            oldWidth = width;
+
+            var appHeight = 0;
+            var flatCubeHeight = (width / 3) * 4.75;
+            var flatCubeTop; 
+            var controlsTop;
+
+            if (down) {
+                controlsTop = 20 + width + 15;
+                var controlsHeight = (width * 15 / 28);
+                flatCubeTop = controlsTop + controlsHeight + 15;
+                appHeight = flatCubeTop + flatCubeHeight + 20;
+            } else {
+                controlsTop = 20 + width + 15;
+                var controlsHeight = (width * 15 / 28);
+                var leftColHeight = controlsTop + controlsHeight;
+                flatCubeTop = 20;
+                var rightColHeight = flatCubeTop + flatCubeHeight;
+                appHeight = Math.max(leftColHeight, rightColHeight) + 20;
+            }
+
+            parent.style.height = appHeight + 'px';
+
+            var cubeContainer = document.getElementById('cube');
+            cubeContainer.style.position = 'absolute';
+            cubeContainer.style.top = '20px';
+            cubeContainer.style.left = '15px';
+            cubeContainer.style.width = width + 'px';
+            cubeContainer.style.height = width + 'px';
+
+            cube.updateSize(width);
+            controls.setWidth(width, controlsTop);
+            flatCube = new FlatCube(
+                'flat-cube', 
+                width, 
+                down,
+                flatCubeTop
+            );
+            cube.flatCube = flatCube;
+            flatCube.cube = cube;
+            cube.update();
+            flatCube.update();
+
+            // Atualiza referência no scanner
+            if (window.cameraScanner) {
+                window.cameraScanner.flatCube = flatCube;
+            }
+        });
+
+        // Registro correto do Service Worker com caminho relativo
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(function(reg) {
+                        console.log('CuboFácil Service Worker registrado com sucesso:', reg.scope);
+                    })
+                    .catch(function(err) {
+                        console.log('Falha ao registrar Service Worker:', err);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
