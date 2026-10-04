@@ -986,20 +986,29 @@ $antiCache = time();
 
         @media (max-width: 600px) {
             .modal-backdrop {
-                padding: 6px 4px !important;
+                padding: 4px 4px !important;
             }
             .modal-window {
                 width: 98% !important;
                 max-width: 100% !important;
-                max-height: 96vh !important;
-                border-radius: 16px !important;
+                max-height: 98vh !important;
+                border-radius: 14px !important;
             }
             .modal-body {
-                padding: 8px 6px !important;
+                padding: 6px 6px !important;
                 overflow-x: hidden !important;
+                overflow-y: auto !important;
             }
             .modal-header {
-                padding: 8px 12px !important;
+                padding: 6px 10px !important;
+            }
+            .modal-title {
+                font-size: 0.90rem !important;
+            }
+            .modal-close-btn {
+                width: 28px !important;
+                height: 28px !important;
+                font-size: 1.1rem !important;
             }
         }
 
@@ -1087,33 +1096,29 @@ $antiCache = time();
             box-shadow: 0 0 8px #60a5fa;
         }
 
-        .orient-dual-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 8px;
-        }
-
-        .orient-box {
-            position: relative;
+        .orient-box-front {
+            width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 7px 8px;
+            padding: 5px 8px;
             border-radius: 12px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1.5px solid rgba(255, 255, 255, 0.12);
-            min-height: 70px;
+            border: 2px solid #10b981 !important;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.22) 0%, rgba(15, 23, 42, 0.8) 100%) !important;
+            box-shadow: 0 0 14px rgba(16, 185, 129, 0.4), inset 0 0 8px rgba(16, 185, 129, 0.15) !important;
+            min-height: 48px;
+            margin-bottom: 5px;
             box-sizing: border-box;
             transition: all 0.25s ease;
         }
 
-        /* DESTAQUE PRINCIPAL: BOTÃO DA CÂMERA (FACE VOLTADA PARA O USUÁRIO) */
-        .orient-box-front {
-            border: 2px solid #10b981 !important;
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.22) 0%, rgba(15, 23, 42, 0.8) 100%) !important;
-            box-shadow: 0 0 16px rgba(16, 185, 129, 0.4), inset 0 0 10px rgba(16, 185, 129, 0.15) !important;
+        .orient-front-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 2px;
         }
 
         .orient-front-badge {
@@ -1122,68 +1127,41 @@ $antiCache = time();
             gap: 4px;
             background: #10b981;
             color: #064e3b;
-            font-size: 0.60rem;
+            font-size: 0.58rem;
             font-weight: 900;
             letter-spacing: 0.05em;
             text-transform: uppercase;
             padding: 1px 6px;
-            border-radius: 8px;
-            margin-bottom: 3px;
+            border-radius: 6px;
         }
 
         .orient-box-front .orient-sub {
             color: #6ee7b7 !important;
-            font-size: 0.72rem;
+            font-size: 0.70rem;
             font-weight: 800;
             display: flex;
             align-items: center;
             gap: 4px;
-        }
-
-        .orient-box-top {
-            border-color: rgba(99, 102, 241, 0.35);
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.10) 0%, rgba(15, 23, 42, 0.6) 100%);
-        }
-
-        .orient-top-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: rgba(99, 102, 241, 0.3);
-            color: #c7d2fe;
-            font-size: 0.60rem;
-            font-weight: 800;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            padding: 1px 6px;
-            border-radius: 8px;
-            margin-bottom: 3px;
-        }
-
-        .orient-sub {
-            font-size: 0.68rem;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-            color: #94a3b8;
-            margin-bottom: 2px;
+            margin-bottom: 0;
         }
 
         .orient-val {
-            font-size: 1.10rem;
+            font-size: 1.05rem;
             font-weight: 900;
             letter-spacing: 0.05em;
             color: #ffffff;
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+            line-height: 1.1;
         }
 
         /* 4 VIZINHAS: TODOS OS BOTÕES RIGOROSAMENTE DO MESMO TAMANHO */
         .orient-neighbors-strip {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
+            gap: 5px;
             width: 100%;
             box-sizing: border-box;
-            padding-top: 2px;
+            margin-top: 1px;
         }
 
         .orient-pill {
@@ -1192,10 +1170,10 @@ $antiCache = time();
             justify-content: center;
             text-align: center;
             width: 100%;
-            min-height: 30px;
-            padding: 4px 2px;
-            border-radius: 10px;
-            font-size: 0.72rem;
+            min-height: 28px;
+            padding: 2px 2px;
+            border-radius: 8px;
+            font-size: 0.70rem;
             font-weight: 700;
             background: rgba(255, 255, 255, 0.06);
             border: 1.5px solid rgba(255, 255, 255, 0.15);
@@ -1215,14 +1193,14 @@ $antiCache = time();
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            padding: 7px 16px;
-            margin: 0 auto 8px auto;
-            border-radius: 12px;
-            font-size: 0.82rem;
+            gap: 6px;
+            padding: 5px 14px;
+            margin: 0 auto 5px auto;
+            border-radius: 10px;
+            font-size: 0.78rem;
             font-weight: 700;
             text-align: center;
-            line-height: 1.35;
+            line-height: 1.25;
             width: fit-content;
             max-width: 95%;
             box-sizing: border-box;
@@ -1230,7 +1208,7 @@ $antiCache = time();
         }
 
         .scanner-center-badge i {
-            font-size: 0.95rem;
+            font-size: 0.90rem;
             flex-shrink: 0;
         }
 
@@ -1267,14 +1245,14 @@ $antiCache = time();
         .scanner-camera-wrapper {
             position: relative;
             width: 100%;
-            max-width: 290px;
-            height: 205px;
-            margin: 0 auto 6px auto;
-            border-radius: 16px;
+            max-width: 270px;
+            height: 180px;
+            margin: 0 auto 5px auto;
+            border-radius: 14px;
             overflow: hidden;
             background: #000;
             border: 2px solid rgba(16, 185, 129, 0.4);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
         }
 
         #scannerVideo {
@@ -1293,64 +1271,23 @@ $antiCache = time();
             pointer-events: none;
         }
 
-        .scanner-preview-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            margin-bottom: 10px;
-        }
-
-        .scanner-preview-title {
-            font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            color: var(--text-muted);
-            font-weight: 700;
-        }
-
-        .scanner-preview-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 26px);
-            grid-gap: 4px;
-            padding: 5px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-        }
-
-        .scanner-preview-cell {
-            width: 26px;
-            height: 26px;
-            border-radius: 4px;
-            border: 1px solid rgba(0, 0, 0, 0.5);
-            cursor: pointer;
-            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
-            transition: transform 0.15s ease;
-        }
-
-        .scanner-preview-cell:hover {
-            transform: scale(1.15);
-            border-color: #fff;
-        }
-
         .scanner-controls {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 6px;
+            gap: 5px;
             width: 100%;
             box-sizing: border-box;
-            margin-top: 4px;
+            margin-top: 2px;
         }
 
         .scanner-btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
-            padding: 9px 8px;
-            border-radius: 10px;
-            font-size: 0.82rem;
+            gap: 5px;
+            padding: 8px 6px;
+            border-radius: 8px;
+            font-size: 0.80rem;
             font-weight: 700;
             cursor: pointer;
             border: none;
@@ -1362,7 +1299,7 @@ $antiCache = time();
 
         .scanner-btn.capture {
             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 3px 12px rgba(16, 185, 129, 0.4);
         }
 
         .scanner-btn.secondary {
@@ -1377,14 +1314,14 @@ $antiCache = time();
         }
 
         .scanner-action-tip {
-            font-size: 0.72rem;
+            font-size: 0.69rem;
             color: #94a3b8;
             text-align: center;
-            line-height: 1.35;
-            margin-top: 6px;
-            padding: 6px 8px;
+            line-height: 1.25;
+            margin-top: 4px;
+            padding: 3px 6px;
             background: rgba(255, 255, 255, 0.03);
-            border-radius: 8px;
+            border-radius: 6px;
             border: 1px solid rgba(255, 255, 255, 0.06);
             width: 100%;
             box-sizing: border-box;
@@ -1662,21 +1599,16 @@ $antiCache = time();
                         <div class="scanner-stepper" id="scannerStepperDots"></div>
                     </div>
 
-                    <!-- Foco Principal: Frente + Cima -->
-                    <div class="orient-dual-grid">
-                        <div class="orient-box orient-box-front">
+                    <!-- Foco Principal: CÂMERA (SUA FRENTE) -->
+                    <div class="orient-box orient-box-front">
+                        <div class="orient-front-header">
                             <span class="orient-front-badge"><i class="fas fa-bullseye"></i> FACE PRINCIPAL</span>
-                            <div class="orient-sub"><i class="fas fa-camera"></i> CÂMERA (SUA FRENTE)</div>
-                            <div id="guideFrontText" class="orient-val">BRANCO</div>
+                            <span class="orient-sub"><i class="fas fa-camera"></i> CÂMERA (SUA FRENTE)</span>
                         </div>
-                        <div class="orient-box orient-box-top">
-                            <span class="orient-top-badge"><i class="fas fa-compass"></i> REFERÊNCIA</span>
-                            <div class="orient-sub"><i class="fas fa-arrow-up"></i> TETO (CIMA)</div>
-                            <div id="guideTopText" class="orient-val">VERDE</div>
-                        </div>
+                        <div id="guideFrontText" class="orient-val">BRANCO</div>
                     </div>
 
-                    <!-- 4 Vizinhas em Linha Compacta -->
+                    <!-- 4 Vizinhas: Cima, Dir, Baixo, Esq -->
                     <div class="orient-neighbors-strip">
                         <span id="compassTop" class="orient-pill">▲ Cima: Verde</span>
                         <span id="compassRight" class="orient-pill">▶ Dir: Laranja</span>
@@ -1704,7 +1636,7 @@ $antiCache = time();
                 </div>
 
                 <div class="scanner-action-tip">
-                    <i class="fas fa-info-circle"></i> Enquadrou a face? Clique em <strong>Capturar Face</strong> para salvar e ir para a próxima. Ao concluir os 6 passos, o cubo 3D será preenchido para você resolver!
+                    <i class="fas fa-info-circle"></i> Aponte a face e clique em <strong>Capturar Face</strong> para avançar.
                 </div>
             </div>
         </div>
