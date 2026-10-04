@@ -164,6 +164,14 @@
             help_li_4_text: "Clique em \"Timer WCA\" para cronometrar seus tempos de speedcubing com regras da World Cube Association e Scramble oficial.",
             help_li_5_strong: "Giro Interativo:",
             help_li_5_text: "Você pode rotacionar a visão do cubo 3D clicando e arrastando com o mouse ou dedo.",
+            help_official_title: "Nossas Páginas Oficiais",
+            help_link_portal_sub: "Ecossistema & Aplicativos",
+            help_link_support_sub: "Central de Atendimento",
+            help_link_privacy_sub: "Segurança & LGPD",
+            help_link_terms_sub: "Diretrizes Legais",
+            help_link_github_sub: "Código Aberto & Versões",
+            help_link_donate: "Apoie o Projeto",
+            help_link_donate_sub: "Contribuição Voluntária",
 
             // Modais de Alerta e Validação
             alert_title_default: "Aviso",
@@ -355,6 +363,14 @@
             help_li_4_text: "Click \"WCA Timer\" to time your speedcubing solves with official World Cube Association rules and scramble.",
             help_li_5_strong: "Interactive Rotation:",
             help_li_5_text: "You can rotate the 3D view of the cube by dragging with your mouse or finger.",
+            help_official_title: "Our Official Pages",
+            help_link_portal_sub: "Ecosystem & Applications",
+            help_link_support_sub: "Help Center & Contact",
+            help_link_privacy_sub: "Security & Privacy Policy",
+            help_link_terms_sub: "Legal Guidelines",
+            help_link_github_sub: "Open Source & Releases",
+            help_link_donate: "Support the Project",
+            help_link_donate_sub: "Voluntary Contribution",
 
             // Alert & Validation Modals
             alert_title_default: "Notice",

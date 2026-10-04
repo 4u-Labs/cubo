@@ -1079,6 +1079,147 @@ $antiCache = time();
             }
         }
 
+        /* ==================== PÁGINAS OFICIAIS NO MODAL DE INSTRUÇÕES ==================== */
+        .help-official-section {
+            margin-top: 18px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .help-official-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: #f1f5f9;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .help-official-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .help-official-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            border-radius: 12px;
+            text-decoration: none;
+            color: #f8fafc;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .help-official-card:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(99, 102, 241, 0.45);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+        }
+
+        .help-official-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+
+        .help-official-icon.portal-icon {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .help-official-icon.support-icon {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .help-official-icon.privacy-icon {
+            background: rgba(168, 85, 247, 0.2);
+            color: #c084fc;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+        }
+
+        .help-official-icon.terms-icon {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .help-official-icon.github-icon {
+            background: rgba(255, 255, 255, 0.12);
+            color: #f1f5f9;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .help-official-icon.donate-icon {
+            background: rgba(0, 112, 186, 0.25);
+            color: #38bdf8;
+            border: 1px solid rgba(0, 112, 186, 0.4);
+        }
+
+        .help-official-card.donate-card:hover {
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+
+        .help-official-info {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .help-official-name {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .help-official-sub {
+            font-size: 0.68rem;
+            color: #94a3b8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .help-official-arrow {
+            font-size: 0.7rem;
+            color: #64748b;
+            margin-left: auto;
+            flex-shrink: 0;
+            transition: color 0.2s, transform 0.2s;
+        }
+
+        .help-official-card:hover .help-official-arrow {
+            color: #fff;
+            transform: translate(2px, -2px);
+        }
+
+        @media (max-width: 480px) {
+            .help-official-grid {
+                grid-template-columns: 1fr;
+                gap: 6px;
+            }
+        }
+
         /* ==================== TOAST & ALERT NOTIFICATIONS ==================== */
         .cube-toast {
             position: fixed;
@@ -1779,7 +1920,7 @@ $antiCache = time();
 
     <!-- ==================== MODAL 3: COMO USAR ==================== -->
     <div id="help-modal-overlay" class="modal-backdrop">
-        <div class="modal-window">
+        <div class="modal-window" style="max-width: 500px;">
             <div class="modal-header">
                 <div class="modal-title">
                     <i class="fas fa-circle-question" style="color:var(--brand-indigo);"></i>
@@ -1795,6 +1936,64 @@ $antiCache = time();
                     <li style="margin-bottom:10px;"><strong data-i18n="help_li_4_strong">Timer WCA:</strong> <span data-i18n="help_li_4_text">Clique em "Timer WCA" para cronometrar seus tempos de speedcubing com regras da World Cube Association e Scramble oficial.</span></li>
                     <li style="margin-bottom:10px;"><strong data-i18n="help_li_5_strong">Giro Interativo:</strong> <span data-i18n="help_li_5_text">Você pode rotacionar a visão do cubo 3D clicando e arrastando com o mouse ou dedo.</span></li>
                 </ol>
+
+                <!-- Seção de Páginas Oficiais do Ecossistema 4U -->
+                <div class="help-official-section">
+                    <div class="help-official-header">
+                        <i class="fas fa-compass" style="color:var(--brand-primary);"></i>
+                        <span data-i18n="help_official_title">Nossas Páginas Oficiais</span>
+                    </div>
+                    <div class="help-official-grid">
+                        <a href="https://4u.ia.br" target="_blank" rel="noopener noreferrer" class="help-official-card">
+                            <div class="help-official-icon portal-icon"><i class="fas fa-globe"></i></div>
+                            <div class="help-official-info">
+                                <span class="help-official-name">Portal 4U.IA.BR</span>
+                                <span class="help-official-sub" data-i18n="help_link_portal_sub">Ecossistema & Aplicativos</span>
+                            </div>
+                            <i class="fas fa-arrow-up-right-from-square help-official-arrow"></i>
+                        </a>
+                        <a href="suporte.html" target="_blank" rel="noopener noreferrer" class="help-official-card">
+                            <div class="help-official-icon support-icon"><i class="fas fa-headset"></i></div>
+                            <div class="help-official-info">
+                                <span class="help-official-name" data-i18n="footer_support">Suporte</span>
+                                <span class="help-official-sub" data-i18n="help_link_support_sub">Central de Atendimento</span>
+                            </div>
+                            <i class="fas fa-arrow-up-right-from-square help-official-arrow"></i>
+                        </a>
+                        <a href="privacidade.html" target="_blank" rel="noopener noreferrer" class="help-official-card">
+                            <div class="help-official-icon privacy-icon"><i class="fas fa-shield-halved"></i></div>
+                            <div class="help-official-info">
+                                <span class="help-official-name" data-i18n="footer_privacy">Privacidade</span>
+                                <span class="help-official-sub" data-i18n="help_link_privacy_sub">Segurança & LGPD</span>
+                            </div>
+                            <i class="fas fa-arrow-up-right-from-square help-official-arrow"></i>
+                        </a>
+                        <a href="termos.php" target="_blank" rel="noopener noreferrer" class="help-official-card">
+                            <div class="help-official-icon terms-icon"><i class="fas fa-file-contract"></i></div>
+                            <div class="help-official-info">
+                                <span class="help-official-name" data-i18n="footer_terms">Termos de Uso</span>
+                                <span class="help-official-sub" data-i18n="help_link_terms_sub">Diretrizes Legais</span>
+                            </div>
+                            <i class="fas fa-arrow-up-right-from-square help-official-arrow"></i>
+                        </a>
+                        <a href="https://github.com/4u-Labs/cubo" target="_blank" rel="noopener noreferrer" class="help-official-card">
+                            <div class="help-official-icon github-icon"><i class="fab fa-github"></i></div>
+                            <div class="help-official-info">
+                                <span class="help-official-name">GitHub 4u-Labs</span>
+                                <span class="help-official-sub" data-i18n="help_link_github_sub">Código Aberto & Versões</span>
+                            </div>
+                            <i class="fas fa-arrow-up-right-from-square help-official-arrow"></i>
+                        </a>
+                        <a href="https://www.paypal.com/ncp/payment/L7YRCS984T33N" target="_blank" rel="noopener noreferrer" class="help-official-card donate-card">
+                            <div class="help-official-icon donate-icon"><i class="fab fa-paypal"></i></div>
+                            <div class="help-official-info">
+                                <span class="help-official-name" data-i18n="help_link_donate">Apoie o Projeto</span>
+                                <span class="help-official-sub" data-i18n="help_link_donate_sub">Contribuição Voluntária</span>
+                            </div>
+                            <i class="fas fa-heart help-official-arrow" style="color:#ef4444;"></i>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
