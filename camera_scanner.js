@@ -287,6 +287,7 @@ class CuboCameraScanner {
     }
 
     updateParityTracker() {
+        if (!document.getElementById('scannerParityStatus') && !document.getElementById('scannerParityBar')) return;
         const counts = this.getParityCounts();
         let totalCount = 0;
         let isAllNine = true;
@@ -858,7 +859,7 @@ class CuboCameraScanner {
             return '#ffffff';
         };
 
-        const dotStyle = (hex) => `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${hex};border:1px solid rgba(255,255,255,0.7);margin-right:4px;vertical-align:middle;"></span>`;
+        const dotStyle = (hex) => `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${hex};border:1px solid rgba(255,255,255,0.7);margin-right:3px;vertical-align:middle;flex-shrink:0;"></span>`;
         const formatCompassName = (name) => {
             if (name === 'Amarelo') return 'Aml';
             if (name === 'Branco') return 'Bco';
@@ -870,7 +871,7 @@ class CuboCameraScanner {
         };
 
         if (this.compassTop) {
-            this.compassTop.innerHTML = `▲ Cima: ${dotStyle(step.top.hex)}<span style="color:${getTextColor(step.top.hex)}">${step.top.name}</span>`;
+            this.compassTop.innerHTML = `▲ Cima: ${dotStyle(step.top.hex)}<span style="color:${getTextColor(step.top.hex)}">${formatCompassName(step.top.name)}</span>`;
             this.compassTop.style.borderColor = step.top.hex;
         }
         if (this.compassRight) {
@@ -878,7 +879,7 @@ class CuboCameraScanner {
             this.compassRight.style.borderColor = step.right.hex;
         }
         if (this.compassBottom) {
-            this.compassBottom.innerHTML = `▼ Baixo: ${dotStyle(step.bottom.hex)}<span style="color:${getTextColor(step.bottom.hex)}">${step.bottom.name}</span>`;
+            this.compassBottom.innerHTML = `▼ Baixo: ${dotStyle(step.bottom.hex)}<span style="color:${getTextColor(step.bottom.hex)}">${formatCompassName(step.bottom.name)}</span>`;
             this.compassBottom.style.borderColor = step.bottom.hex;
         }
         if (this.compassLeft) {

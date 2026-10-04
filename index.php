@@ -1090,29 +1090,74 @@ $antiCache = time();
         .orient-dual-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 8px;
+            gap: 10px;
             margin-bottom: 8px;
         }
 
         .orient-box {
+            position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 6px 8px;
-            border-radius: 10px;
+            padding: 7px 8px;
+            border-radius: 12px;
             background: rgba(255, 255, 255, 0.04);
             border: 1.5px solid rgba(255, 255, 255, 0.12);
+            min-height: 70px;
+            box-sizing: border-box;
+            transition: all 0.25s ease;
         }
 
+        /* DESTAQUE PRINCIPAL: BOTÃO DA CÂMERA (FACE VOLTADA PARA O USUÁRIO) */
         .orient-box-front {
-            border-color: rgba(16, 185, 129, 0.4);
-            background: linear-gradient(180deg, rgba(16, 185, 129, 0.12) 0%, rgba(15, 23, 42, 0.5) 100%);
+            border: 2px solid #10b981 !important;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.22) 0%, rgba(15, 23, 42, 0.8) 100%) !important;
+            box-shadow: 0 0 16px rgba(16, 185, 129, 0.4), inset 0 0 10px rgba(16, 185, 129, 0.15) !important;
+        }
+
+        .orient-front-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #10b981;
+            color: #064e3b;
+            font-size: 0.60rem;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 1px 6px;
+            border-radius: 8px;
+            margin-bottom: 3px;
+        }
+
+        .orient-box-front .orient-sub {
+            color: #6ee7b7 !important;
+            font-size: 0.72rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .orient-box-top {
-            border-color: rgba(99, 102, 241, 0.4);
-            background: linear-gradient(180deg, rgba(99, 102, 241, 0.12) 0%, rgba(15, 23, 42, 0.5) 100%);
+            border-color: rgba(99, 102, 241, 0.35);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.10) 0%, rgba(15, 23, 42, 0.6) 100%);
+        }
+
+        .orient-top-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(99, 102, 241, 0.3);
+            color: #c7d2fe;
+            font-size: 0.60rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 1px 6px;
+            border-radius: 8px;
+            margin-bottom: 3px;
         }
 
         .orient-sub {
@@ -1124,32 +1169,46 @@ $antiCache = time();
         }
 
         .orient-val {
-            font-size: 1.05rem;
+            font-size: 1.10rem;
             font-weight: 900;
             letter-spacing: 0.05em;
             color: #ffffff;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
         }
 
+        /* 4 VIZINHAS: TODOS OS BOTÕES RIGOROSAMENTE DO MESMO TAMANHO */
         .orient-neighbors-strip {
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
             gap: 6px;
-            flex-wrap: wrap;
+            width: 100%;
+            box-sizing: border-box;
             padding-top: 2px;
         }
 
         .orient-pill {
-            display: inline-flex;
+            display: flex;
             align-items: center;
-            padding: 3px 8px;
-            border-radius: 12px;
+            justify-content: center;
+            text-align: center;
+            width: 100%;
+            min-height: 30px;
+            padding: 4px 2px;
+            border-radius: 10px;
             font-size: 0.72rem;
-            font-weight: 600;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
             color: #e2e8f0;
             white-space: nowrap;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        @media (max-width: 380px) {
+            .orient-neighbors-strip {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         .scanner-center-badge {
@@ -1590,11 +1649,13 @@ $antiCache = time();
                     <!-- Foco Principal: Frente + Cima -->
                     <div class="orient-dual-grid">
                         <div class="orient-box orient-box-front">
-                            <div class="orient-sub">📷 CÂMERA (FRENTE)</div>
+                            <span class="orient-front-badge"><i class="fas fa-bullseye"></i> FACE PRINCIPAL</span>
+                            <div class="orient-sub"><i class="fas fa-camera"></i> CÂMERA (SUA FRENTE)</div>
                             <div id="guideFrontText" class="orient-val">BRANCO</div>
                         </div>
                         <div class="orient-box orient-box-top">
-                            <div class="orient-sub">⬆️ TETO (CIMA)</div>
+                            <span class="orient-top-badge"><i class="fas fa-compass"></i> REFERÊNCIA</span>
+                            <div class="orient-sub"><i class="fas fa-arrow-up"></i> TETO (CIMA)</div>
                             <div id="guideTopText" class="orient-val">VERDE</div>
                         </div>
                     </div>
@@ -1616,51 +1677,6 @@ $antiCache = time();
                 <div class="scanner-camera-wrapper">
                     <video id="scannerVideo" playsinline autoplay muted></video>
                     <canvas id="scannerCanvasOverlay"></canvas>
-                </div>
-
-                <div class="scanner-preview-box">
-                    <span class="scanner-preview-title">Cores Detectadas (Clique para Ajustar):</span>
-                    <div id="scannerPreviewGrid" class="scanner-preview-grid"></div>
-                </div>
-
-                <!-- Contador de Paridade 54 Peças (9 de cada cor) -->
-                <div class="scanner-parity-container">
-                    <div class="scanner-parity-header">
-                        <span><i class="fas fa-balance-scale"></i> Verificação (54 Peças):</span>
-                        <span id="scannerParityStatus" class="parity-status-tag">0/54 lidas</span>
-                    </div>
-                    <div class="scanner-parity-bar" id="scannerParityBar">
-                        <div class="parity-pill" id="parityPill-WHITE" style="border-color:#ffffff;" title="Branco">
-                            <span class="parity-color-dot" style="background:#ffffff;"></span>
-                            <span>Bra:</span>
-                            <strong id="parityCount-WHITE">0/9</strong>
-                        </div>
-                        <div class="parity-pill" id="parityPill-YELLOW" style="border-color:#ffff00;" title="Amarelo">
-                            <span class="parity-color-dot" style="background:#ffff00;"></span>
-                            <span>Ama:</span>
-                            <strong id="parityCount-YELLOW">0/9</strong>
-                        </div>
-                        <div class="parity-pill" id="parityPill-GREEN" style="border-color:#009900;" title="Verde">
-                            <span class="parity-color-dot" style="background:#009900;"></span>
-                            <span>Vde:</span>
-                            <strong id="parityCount-GREEN">0/9</strong>
-                        </div>
-                        <div class="parity-pill" id="parityPill-BLUE" style="border-color:#000099;" title="Azul">
-                            <span class="parity-color-dot" style="background:#000099;"></span>
-                            <span>Azu:</span>
-                            <strong id="parityCount-BLUE">0/9</strong>
-                        </div>
-                        <div class="parity-pill" id="parityPill-RED" style="border-color:#cc0000;" title="Vermelho">
-                            <span class="parity-color-dot" style="background:#cc0000;"></span>
-                            <span>Ver:</span>
-                            <strong id="parityCount-RED">0/9</strong>
-                        </div>
-                        <div class="parity-pill" id="parityPill-ORANGE" style="border-color:#ff8000;" title="Laranja">
-                            <span class="parity-color-dot" style="background:#ff8000;"></span>
-                            <span>Lar:</span>
-                            <strong id="parityCount-ORANGE">0/9</strong>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="scanner-controls">
