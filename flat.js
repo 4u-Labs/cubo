@@ -344,21 +344,34 @@ FlatColorPicker.prototype.getColor = function(){
 }
 
 // ======================================================
-//   DICIONÁRIO DE MOVIMENTOS EM PORTUGUÊS PARA LEIGOS
+//   DICIONÁRIO DE MOVIMENTOS EM PORTUGUÊS / INGLÊS
 // ======================================================
-var HUMAN_FACE_MAP = {
-	'U': { name: 'CIMA / TOPO', color: '#ffffff', textColor: '#111', ptColor: 'Branca' },
-	'D': { name: 'BASE / BAIXO', color: '#ffff00', textColor: '#111', ptColor: 'Amarela' },
-	'F': { name: 'FRENTE', color: '#000099', textColor: '#fff', ptColor: 'Azul' },
-	'B': { name: 'ATRÁS', color: '#009900', textColor: '#fff', ptColor: 'Verde' },
-	'L': { name: 'ESQUERDA', color: '#cc0000', textColor: '#fff', ptColor: 'Vermelha' },
-	'R': { name: 'DIREITA', color: '#ff8000', textColor: '#111', ptColor: 'Laranja' }
-};
+function getFaceHumanInfo(faceLetter) {
+	var letter = (faceLetter || '').toUpperCase();
+	var defaultInfo = {
+		'U': { color: '#ffffff', textColor: '#111' },
+		'D': { color: '#ffff00', textColor: '#111' },
+		'F': { color: '#000099', textColor: '#fff' },
+		'B': { color: '#009900', textColor: '#fff' },
+		'L': { color: '#cc0000', textColor: '#fff' },
+		'R': { color: '#ff8000', textColor: '#111' }
+	}[letter] || { color: '#334155', textColor: '#fff' };
+
+	var name = window.t ? window.t('face_' + letter + '_name') : letter;
+	var ptColor = window.t ? window.t('face_' + letter + '_color') : '';
+
+	return {
+		name: name,
+		color: defaultInfo.color,
+		textColor: defaultInfo.textColor,
+		ptColor: ptColor
+	};
+}
 
 function parseMoveDetails(move, cube) {
 	if (!move) return null;
 	var faceLetter = move.charAt(0).toUpperCase();
-	var faceInfo = HUMAN_FACE_MAP[faceLetter] || { name: faceLetter, color: '#334155', textColor: '#fff', ptColor: '' };
+	var faceInfo = getFaceHumanInfo(faceLetter);
 	
 	var color = faceInfo.color;
 	if (cube && typeof cube.getFaceColor === 'function') {
@@ -376,16 +389,16 @@ function parseMoveDetails(move, cube) {
 	var icon = '';
 
 	if (move.endsWith('2')) {
-		rotationTitle = 'Giro 180° (Meia Volta)';
-		instruction = 'Olhe para a face <strong>' + faceInfo.name + '</strong> e dê <strong>meia volta 🔄 (180°)</strong> em qualquer direção.';
+		rotationTitle = window.t ? window.t('rot_180_title') : 'Giro 180° (Meia Volta)';
+		instruction = window.t ? window.t('rot_180_inst', { face: faceInfo.name }) : ('Olhe para a face <strong>' + faceInfo.name + '</strong> e dê <strong>meia volta 🔄 (180°)</strong> em qualquer direção.');
 		icon = '🔄';
 	} else if (move.endsWith("'")) {
-		rotationTitle = 'Anti-Horário ↺ (90°)';
-		instruction = 'Olhe para a face <strong>' + faceInfo.name + '</strong> e gire <strong>ANTI-HORÁRIO ↺</strong> (para a esquerda).';
+		rotationTitle = window.t ? window.t('rot_ccw_title') : 'Anti-Horário ↺ (90°)';
+		instruction = window.t ? window.t('rot_ccw_inst', { face: faceInfo.name }) : ('Olhe para a face <strong>' + faceInfo.name + '</strong> e gire <strong>ANTI-HORÁRIO ↺</strong> (para a esquerda).');
 		icon = '↺';
 	} else {
-		rotationTitle = 'Horário ↻ (90°)';
-		instruction = 'Olhe para a face <strong>' + faceInfo.name + '</strong> e gire <strong>HORÁRIO ↻</strong> (para a direita, como o relógio).';
+		rotationTitle = window.t ? window.t('rot_cw_title') : 'Horário ↻ (90°)';
+		instruction = window.t ? window.t('rot_cw_inst', { face: faceInfo.name }) : ('Olhe para a face <strong>' + faceInfo.name + '</strong> e gire <strong>HORÁRIO ↻</strong> (para a direita, como o relógio).');
 		icon = '↻';
 	}
 
@@ -462,13 +475,13 @@ var RubiksCubeControls = function(id, cube, width, controlsTop){
 
 	this.solveButton = document.createElement('div');
 	this.solveButton.className = 'rc-button rc-solve-button';
-	this.solveButton.appendChild(document.createTextNode('Resolver'));
+	this.solveButton.appendChild(document.createTextNode(window.t ? window.t('btn_solve') : 'Resolver'));
 	this.solveButton.addEventListener('click', function(){
 		var val = me.cube.validateState ? me.cube.validateState() : { valid: me.cube.isSolvable() };
 		if (!val.valid) {
 			if (window.showCubeAlert) {
 				window.showCubeAlert({
-					title: 'Não foi possível resolver o cubo',
+					title: window.t ? window.t('val_cant_solve_title') : 'Não foi possível resolver o cubo',
 					message: val.reason,
 					details: val.details || '',
 					type: 'warning',
@@ -486,12 +499,12 @@ var RubiksCubeControls = function(id, cube, width, controlsTop){
 		if (!sol || sol.trim().length === 0) {
 			if (window.showCubeAlert) {
 				window.showCubeAlert({
-					title: 'Cubo Já Resolvido!',
-					message: 'Todas as faces do cubo já estão 100% montadas com as cores certas.',
+					title: window.t ? window.t('alert_already_solved_title') : 'Cubo Já Resolvido!',
+					message: window.t ? window.t('alert_already_solved_msg') : 'Todas as faces do cubo já estão 100% montadas com as cores certas.',
 					type: 'success'
 				});
 			} else {
-				alert('🎉 O cubo já está 100% resolvido!');
+				alert('🎉 ' + (window.t ? window.t('alert_already_solved_title') : 'O cubo já está 100% resolvido!'));
 			}
 			return;
 		}
@@ -505,13 +518,13 @@ var RubiksCubeControls = function(id, cube, width, controlsTop){
 	
 	this.solveSlowButton = document.createElement('div');
 	this.solveSlowButton.className = 'rc-button rc-solve-slow-button';
-	this.solveSlowButton.appendChild(document.createTextNode('Passo a Passo'));
+	this.solveSlowButton.appendChild(document.createTextNode(window.t ? window.t('btn_step_by_step') : 'Passo a Passo'));
 	this.solveSlowButton.addEventListener('click', function(){
 		var val = me.cube.validateState ? me.cube.validateState() : { valid: me.cube.isSolvable() };
 		if (!val.valid) {
 			if (window.showCubeAlert) {
 				window.showCubeAlert({
-					title: 'Não foi possível iniciar o Passo a Passo',
+					title: window.t ? window.t('val_cant_step_title') : 'Não foi possível iniciar o Passo a Passo',
 					message: val.reason,
 					details: val.details || '',
 					type: 'warning',
@@ -528,12 +541,12 @@ var RubiksCubeControls = function(id, cube, width, controlsTop){
 			if (!solution || solution.trim().length === 0) {
 				if (window.showCubeAlert) {
 					window.showCubeAlert({
-						title: 'Cubo Já Resolvido!',
-						message: 'O cubo já está completamente montado. Embaralhe o cubo para ver os passos da solução!',
+						title: window.t ? window.t('alert_already_solved_title') : 'Cubo Já Resolvido!',
+						message: window.t ? window.t('alert_already_solved_step_msg') : 'O cubo já está completamente montado. Embaralhe o cubo para ver os passos da solução!',
 						type: 'success'
 					});
 				} else {
-					alert('🎉 O cubo já está 100% resolvido!');
+					alert('🎉 ' + (window.t ? window.t('alert_already_solved_title') : 'O cubo já está 100% resolvido!'));
 				}
 				me.setSolution('');
 			} else {
@@ -571,11 +584,11 @@ var RubiksCubeControls = function(id, cube, width, controlsTop){
 	header.innerHTML = 
 		'<div class="step-player-title-wrap">' +
 			'<i class="fas fa-puzzle-piece"></i>' +
-			'<span>Passo a Passo</span>' +
+			'<span>' + (window.t ? window.t('player_title') : 'Passo a Passo') + '</span>' +
 		'</div>' +
 		'<div class="step-player-counter" id="stepCounterBadge">Passo 1 de 1</div>' +
-		'<button class="step-player-close" id="stepBtnClose" title="Fechar passo a passo">' +
-			'<i class="fas fa-times"></i> Fechar' +
+		'<button class="step-player-close" id="stepBtnClose" title="' + (window.t ? window.t('player_close_title') : 'Fechar passo a passo') + '">' +
+			'<i class="fas fa-times"></i> ' + (window.t ? window.t('player_close') : 'Fechar') +
 		'</button>';
 	playerWrap.appendChild(header);
 
@@ -615,10 +628,10 @@ var RubiksCubeControls = function(id, cube, width, controlsTop){
 	completedCard.style.display = 'none';
 	completedCard.innerHTML = 
 		'<div class="step-completed-icon">🏆</div>' +
-		'<div class="step-completed-title">Cubo Resolvido!</div>' +
-		'<div class="step-completed-desc">Parabéns! Todos os passos da solução foram concluídos com sucesso.</div>' +
+		'<div class="step-completed-title">' + (window.t ? window.t('player_completed_title') : 'Cubo Resolvido!') + '</div>' +
+		'<div class="step-completed-desc">' + (window.t ? window.t('player_completed_desc') : 'Parabéns! Todos os passos da solução foram concluídos com sucesso.') + '</div>' +
 		'<button class="step-act-btn btn-next" id="stepBtnFinish" style="margin-top:6px;max-width:180px;">' +
-			'<i class="fas fa-check"></i> Concluir' +
+			'<i class="fas fa-check"></i> ' + (window.t ? window.t('player_btn_finish') : 'Concluir') +
 		'</button>';
 	playerWrap.appendChild(completedCard);
 
@@ -630,17 +643,17 @@ var RubiksCubeControls = function(id, cube, width, controlsTop){
 	var btnPrev = document.createElement('button');
 	btnPrev.className = 'step-act-btn btn-prev';
 	btnPrev.id = 'stepBtnPrev';
-	btnPrev.innerHTML = '<i class="fas fa-chevron-left"></i> Voltar';
+	btnPrev.innerHTML = '<i class="fas fa-chevron-left"></i> ' + (window.t ? window.t('player_btn_prev') : 'Voltar');
 
 	var btnAuto = document.createElement('button');
 	btnAuto.className = 'step-act-btn btn-auto';
 	btnAuto.id = 'stepBtnAuto';
-	btnAuto.innerHTML = '<i class="fas fa-play"></i> Auto (1.5s)';
+	btnAuto.innerHTML = '<i class="fas fa-play"></i> ' + (window.t ? window.t('player_btn_auto', { speed: '1.5' }) : 'Auto (1.5s)');
 
 	var btnNext = document.createElement('button');
 	btnNext.className = 'step-act-btn btn-next';
 	btnNext.id = 'stepBtnNext';
-	btnNext.innerHTML = 'Avançar <i class="fas fa-chevron-right"></i>';
+	btnNext.innerHTML = (window.t ? window.t('player_btn_next') : 'Avançar') + ' <i class="fas fa-chevron-right"></i>';
 
 	actions.appendChild(btnPrev);
 	actions.appendChild(btnAuto);
@@ -672,7 +685,7 @@ var RubiksCubeControls = function(id, cube, width, controlsTop){
 
 	this.scrambleButton = document.createElement('div');
 	this.scrambleButton.className = 'rc-button rc-scramble-button';
-	this.scrambleButton.appendChild(document.createTextNode('Embaralhar'));
+	this.scrambleButton.appendChild(document.createTextNode(window.t ? window.t('btn_scramble') : 'Embaralhar'));
 	this.scrambleButton.addEventListener('click', function(){
 		me.setSolution(''); 
 		me.cube.scramble();
@@ -681,7 +694,7 @@ var RubiksCubeControls = function(id, cube, width, controlsTop){
 	// Botão Reiniciar
 	this.resetButton = document.createElement('div');
 	this.resetButton.className = 'rc-button rc-reset-button';
-	this.resetButton.appendChild(document.createTextNode('Reiniciar'));
+	this.resetButton.appendChild(document.createTextNode(window.t ? window.t('btn_reset') : 'Reiniciar'));
 	this.resetButton.addEventListener('click', function(){
 		window.location.reload();
 	});
@@ -703,6 +716,10 @@ var RubiksCubeControls = function(id, cube, width, controlsTop){
 	if(width){
 		this.setWidth(width, controlsTop);
 	}
+
+	window.addEventListener('cubeLanguageChanged', function() {
+		me.updateLanguage();
+	});
 }
 
 RubiksCubeControls.prototype.getInverseMove = function(move) {
@@ -744,7 +761,7 @@ RubiksCubeControls.prototype.updateStepPlayer = function() {
 		mainCard.style.display = 'none';
 		actionsBar.style.display = 'none';
 		completedCard.style.display = 'flex';
-		if (counterBadge) counterBadge.textContent = '100% Concluído';
+		if (counterBadge) counterBadge.textContent = window.t ? window.t('player_completed_badge') : '100% Concluído';
 		if (progressBar) progressBar.style.width = '100%';
 		this.stopAutoPlay();
 		return;
@@ -756,7 +773,9 @@ RubiksCubeControls.prototype.updateStepPlayer = function() {
 
 	var percent = Math.round((idx / total) * 100);
 	if (counterBadge) {
-		counterBadge.textContent = 'Passo ' + (idx + 1) + ' de ' + total + ' (' + percent + '%)';
+		counterBadge.textContent = window.t 
+			? window.t('player_step_counter', { step: idx + 1, total: total, pct: percent }) 
+			: ('Passo ' + (idx + 1) + ' de ' + total + ' (' + percent + '%)');
 	}
 	if (progressBar) {
 		progressBar.style.width = ((idx / total) * 100) + '%';
@@ -781,7 +800,8 @@ RubiksCubeControls.prototype.updateStepPlayer = function() {
 
 	if (faceNameEl && info) {
 		var ptLabel = info.ptColor ? ' (' + info.ptColor + ')' : '';
-		faceNameEl.innerHTML = '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + info.color + ';margin-right:6px;border:1px solid rgba(255,255,255,0.6);vertical-align:middle;"></span>Face ' + info.faceName + ptLabel;
+		var prefix = window.t ? window.t('face_prefix') : 'Face ';
+		faceNameEl.innerHTML = '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + info.color + ';margin-right:6px;border:1px solid rgba(255,255,255,0.6);vertical-align:middle;"></span>' + prefix + info.faceName + ptLabel;
 	}
 
 	if (rotTitleEl && info) {
@@ -799,8 +819,8 @@ RubiksCubeControls.prototype.updateStepPlayer = function() {
 	}
 	if (btnNext) {
 		btnNext.innerHTML = (idx === total - 1) 
-			? 'Finalizar <i class="fas fa-check"></i>' 
-			: 'Avançar <i class="fas fa-chevron-right"></i>';
+			? ((window.t ? window.t('player_btn_last') : 'Finalizar') + ' <i class="fas fa-check"></i>') 
+			: ((window.t ? window.t('player_btn_next') : 'Avançar') + ' <i class="fas fa-chevron-right"></i>');
 	}
 };
 
@@ -840,7 +860,7 @@ RubiksCubeControls.prototype.startAutoPlay = function() {
 	this.isAutoPlaying = true;
 	var btnAuto = this.overlay.querySelector('#stepBtnAuto');
 	if (btnAuto) {
-		btnAuto.innerHTML = '<i class="fas fa-pause"></i> Pausar';
+		btnAuto.innerHTML = '<i class="fas fa-pause"></i> ' + (window.t ? window.t('player_btn_pause') : 'Pausar');
 		btnAuto.classList.add('active-playing');
 	}
 	this.autoPlayInterval = setInterval(function(){
@@ -860,8 +880,40 @@ RubiksCubeControls.prototype.stopAutoPlay = function() {
 	}
 	var btnAuto = this.overlay.querySelector('#stepBtnAuto');
 	if (btnAuto) {
-		btnAuto.innerHTML = '<i class="fas fa-play"></i> Auto (1.5s)';
+		btnAuto.innerHTML = '<i class="fas fa-play"></i> ' + (window.t ? window.t('player_btn_auto', { speed: '1.5' }) : 'Auto (1.5s)');
 		btnAuto.classList.remove('active-playing');
+	}
+};
+
+RubiksCubeControls.prototype.updateLanguage = function() {
+	if (this.solveButton) this.solveButton.textContent = window.t ? window.t('btn_solve') : 'Resolver';
+	if (this.solveSlowButton) this.solveSlowButton.textContent = window.t ? window.t('btn_step_by_step') : 'Passo a Passo';
+	if (this.scrambleButton) this.scrambleButton.textContent = window.t ? window.t('btn_scramble') : 'Embaralhar';
+	if (this.resetButton) this.resetButton.textContent = window.t ? window.t('btn_reset') : 'Reiniciar';
+	
+	if (this.overlay) {
+		var stepTitle = this.overlay.querySelector('.step-player-title-wrap span');
+		if (stepTitle) stepTitle.textContent = window.t ? window.t('player_title') : 'Passo a Passo';
+		var stepClose = this.overlay.querySelector('#stepBtnClose');
+		if (stepClose) {
+			stepClose.title = window.t ? window.t('player_close_title') : 'Fechar passo a passo';
+			stepClose.innerHTML = '<i class="fas fa-times"></i> ' + (window.t ? window.t('player_close') : 'Fechar');
+		}
+		var compTitle = this.overlay.querySelector('.step-completed-title');
+		if (compTitle) compTitle.textContent = window.t ? window.t('player_completed_title') : 'Cubo Resolvido!';
+		var compDesc = this.overlay.querySelector('.step-completed-desc');
+		if (compDesc) compDesc.textContent = window.t ? window.t('player_completed_desc') : 'Parabéns! Todos os passos da solução foram concluídos com sucesso.';
+		var compFinish = this.overlay.querySelector('#stepBtnFinish');
+		if (compFinish) compFinish.innerHTML = '<i class="fas fa-check"></i> ' + (window.t ? window.t('player_btn_finish') : 'Concluir');
+
+		var btnPrev = this.overlay.querySelector('#stepBtnPrev');
+		if (btnPrev) btnPrev.innerHTML = '<i class="fas fa-chevron-left"></i> ' + (window.t ? window.t('player_btn_prev') : 'Voltar');
+		var btnAuto = this.overlay.querySelector('#stepBtnAuto');
+		if (btnAuto && !this.isAutoPlaying) btnAuto.innerHTML = '<i class="fas fa-play"></i> ' + (window.t ? window.t('player_btn_auto', { speed: '1.5' }) : 'Auto (1.5s)');
+
+		if (this.overlay.style.display !== 'none') {
+			this.updateStepPlayer();
+		}
 	}
 };
 

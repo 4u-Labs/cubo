@@ -22,7 +22,18 @@ class CuboSpeedTimer {
 
         this.currentScramble = this.generateScramble();
 
+        window.addEventListener('cubeLanguageChanged', () => this.updateLanguage());
+
         this.initDOM();
+    }
+
+    updateLanguage() {
+        if (this.state === 'idle') {
+            this.setStatus(window.t ? window.t('timer_status_idle') : 'Pressione e segure ESPAÇO (ou toque) para armar', 'idle');
+        } else if (this.state === 'stopped') {
+            this.setStatus(window.t ? window.t('timer_status_completed') : 'Solução Concluída!', 'stopped');
+        }
+        this.updateStatsUI();
     }
 
     loadSolves() {
@@ -77,7 +88,8 @@ class CuboSpeedTimer {
 
         if (this.btnClearHistory) {
             this.btnClearHistory.addEventListener('click', () => {
-                if (confirm('Deseja realmente limpar todo o histórico de tempos?')) {
+                const confirmMsg = window.t ? window.t('timer_confirm_clear') : 'Deseja realmente limpar todo o histórico de tempos?';
+                if (confirm(confirmMsg)) {
                     this.solves = [];
                     this.saveSolves();
                     this.updateStatsUI();
@@ -102,7 +114,7 @@ class CuboSpeedTimer {
         this.modal.classList.add('active');
         this.state = 'idle';
         this.display.textContent = '0.000';
-        this.setStatus('Pressione e segure ESPAÇO (ou toque) para armar', 'idle');
+        this.setStatus(window.t ? window.t('timer_status_idle') : 'Pressione e segure ESPAÇO (ou toque) para armar', 'idle');
         this.currentScramble = this.generateScramble();
         this.renderScramble();
         this.updateStatsUI();
@@ -186,7 +198,7 @@ class CuboSpeedTimer {
         this.state = 'holding';
         this.display.classList.add('holding');
         this.display.classList.remove('ready');
-        this.setStatus('Aguarde... Armando cronômetro', 'holding');
+        this.setStatus(window.t ? window.t('timer_status_holding') : 'Aguarde... Armando cronômetro', 'holding');
 
         this.holdTimeout = setTimeout(() => {
             if (this.state === 'holding') {
@@ -194,7 +206,7 @@ class CuboSpeedTimer {
                 this.display.classList.remove('holding');
                 this.display.classList.add('ready');
                 this.display.textContent = '0.000';
-                this.setStatus('PRONTO! Solte para iniciar!', 'ready');
+                this.setStatus(window.t ? window.t('timer_status_ready') : 'PRONTO! Solte para iniciar!', 'ready');
                 this.playTone(880, 0.08); // Lá (A5)
             }
         }, 320);
@@ -212,7 +224,7 @@ class CuboSpeedTimer {
             // Soltou antes de ficar verde
             this.state = 'idle';
             this.display.classList.remove('holding', 'ready');
-            this.setStatus('Pressione e segure por 0.3s até ficar verde', 'idle');
+            this.setStatus(window.t ? window.t('timer_status_hold_hint') : 'Pressione e segure por 0.3s até ficar verde', 'idle');
         }
     }
 
@@ -221,7 +233,7 @@ class CuboSpeedTimer {
         this.inspectionRemaining = 15;
         this.display.textContent = '15';
         this.display.classList.add('inspecting');
-        this.setStatus('INSPEÇÃO: Planeje sua solução (15s)', 'inspecting');
+        this.setStatus(window.t ? window.t('timer_status_inspecting') : 'INSPEÇÃO: Planeje sua solução (15s)', 'inspecting');
 
         if (this.inspectionTimer) clearInterval(this.inspectionTimer);
         this.inspectionTimer = setInterval(() => {
@@ -237,7 +249,7 @@ class CuboSpeedTimer {
                 clearInterval(this.inspectionTimer);
                 this.inspectionTimer = null;
                 this.display.textContent = '+2';
-                this.setStatus('Tempo de inspeção esgotado! (+2s de penalidade)', 'warning');
+                this.setStatus(window.t ? window.t('timer_status_penalty') : 'Tempo de inspeção esgotado! (+2s de penalidade)', 'warning');
             }
         }, 1000);
     }
@@ -252,7 +264,7 @@ class CuboSpeedTimer {
         this.startTime = performance.now();
         this.display.classList.remove('holding', 'ready', 'inspecting');
         this.display.classList.add('running');
-        this.setStatus('CRONOMETRANDO... Toque ou tecle para parar', 'running');
+        this.setStatus(window.t ? window.t('timer_status_running') : 'CRONOMETRANDO... Toque ou tecle para parar', 'running');
 
         const updateLoop = () => {
             if (this.state !== 'running') return;
@@ -275,7 +287,7 @@ class CuboSpeedTimer {
         this.elapsedTime = performance.now() - this.startTime;
         this.display.textContent = this.formatTime(this.elapsedTime);
         this.display.classList.remove('running');
-        this.setStatus('Solução Concluída!', 'stopped');
+        this.setStatus(window.t ? window.t('timer_status_completed') : 'Solução Concluída!', 'stopped');
         this.playTone(1046.5, 0.15); // C6 - som de finalização
 
         // Registrar no histórico
@@ -394,9 +406,12 @@ class CuboSpeedTimer {
         if (this.historyList) {
             this.historyList.innerHTML = '';
             if (this.solves.length === 0) {
-                this.historyList.innerHTML = '<div style="color:var(--text-muted); font-size:0.85rem; padding:10px 0; text-align:center;">Nenhum tempo gravado ainda.</div>';
+                const emptyMsg = window.t ? window.t('timer_history_empty') : 'Nenhum tempo gravado ainda.';
+                this.historyList.innerHTML = `<div style="color:var(--text-muted); font-size:0.85rem; padding:10px 0; text-align:center;">${emptyMsg}</div>`;
                 return;
             }
+
+            const delTitle = window.t ? window.t('timer_delete_time_title') : 'Excluir tempo';
 
             this.solves.slice(0, 20).forEach((item, index) => {
                 const row = document.createElement('div');
@@ -405,7 +420,7 @@ class CuboSpeedTimer {
                     <span class="solve-index">#${this.solves.length - index}</span>
                     <strong class="solve-time">${item.timeStr}</strong>
                     <span class="solve-date">${item.date}</span>
-                    <button class="solve-del-btn" title="Excluir tempo">&times;</button>
+                    <button class="solve-del-btn" title="${delTitle}">&times;</button>
                 `;
                 row.querySelector('.solve-del-btn').addEventListener('click', (e) => {
                     e.stopPropagation();

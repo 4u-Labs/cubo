@@ -58,6 +58,7 @@ $antiCache = time();
     </script>
 
     <!-- Motores do Cubo & Algoritmos com Anti-Cache Dinâmico -->
+    <script type="text/javascript" src='i18n.js?v=<?= $antiCache ?>'></script>
     <script type="text/javascript" src='rubiks.js?v=<?= $antiCache ?>'></script>
     <script type="text/javascript" src='solver.js?v=<?= $antiCache ?>'></script>
     <script type="text/javascript" src='flat.js?v=<?= $antiCache ?>'></script>
@@ -213,6 +214,46 @@ $antiCache = time();
             box-shadow: 0 6px 20px rgba(99, 102, 241, 0.55);
         }
 
+        /* Language Switcher Buttons [ PT ] [ EN ] */
+        .lang-switch-box {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.78);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 12px;
+            padding: 3px;
+            gap: 2px;
+            backdrop-filter: blur(8px);
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 0.76rem;
+            font-weight: 800;
+            font-family: inherit;
+            padding: 5px 10px;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            line-height: 1;
+            letter-spacing: 0.5px;
+            user-select: none;
+        }
+
+        .lang-btn:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .lang-btn.active {
+            background: linear-gradient(135deg, #6366f1 0%, #3b82f6 100%);
+            color: #ffffff;
+            font-weight: 900;
+            box-shadow: 0 2px 10px rgba(99, 102, 241, 0.45);
+        }
+
         /* ==================== CONTROLES DE RECOLHER/EXPANDIR O CABEÇALHO ==================== */
         #header {
             transition: padding 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s ease, box-shadow 0.25s ease;
@@ -332,6 +373,17 @@ $antiCache = time();
             background: rgba(99, 102, 241, 0.25);
             border-color: rgba(99, 102, 241, 0.45);
             color: #c7d2fe;
+        }
+
+        #header.collapsed .lang-switch-box {
+            padding: 2px;
+            border-radius: 8px;
+        }
+
+        #header.collapsed .lang-btn {
+            padding: 3px 6px;
+            font-size: 0.72rem;
+            border-radius: 6px;
         }
 
         @media (max-width: 650px) {
@@ -1541,29 +1593,33 @@ $antiCache = time();
                 </div>
                 <div class="header-title-group">
                     <h1>
-                        CuboFácil 4U
-                        <span class="header-badge">Speedcubing Suite</span>
+                        <span data-i18n="app_title">CuboFácil 4U</span>
+                        <span class="header-badge" data-i18n="app_badge">Speedcubing Suite</span>
                     </h1>
-                    <p>Solucionador 3D Inteligente, Scanner por Câmera & Timer WCA</p>
+                    <p data-i18n="app_subtitle">Solucionador 3D Inteligente, Scanner por Câmera & Timer WCA</p>
                 </div>
             </div>
 
             <div class="header-actions">
-                <button id="btnOpenScanner" class="header-btn btn-scanner" title="Escanear as faces com a Câmera">
-                    <i class="fas fa-camera"></i> <span class="btn-label">Escanear Câmera</span>
+                <button id="btnOpenScanner" class="header-btn btn-scanner" data-i18n-title="btn_scan_camera_title" title="Escanear as faces com a Câmera">
+                    <i class="fas fa-camera"></i> <span class="btn-label" data-i18n="btn_scan_camera">Escanear Câmera</span>
                 </button>
-                <button id="btnOpenTimer" class="header-btn btn-timer" title="Cronômetro de Speedcubing">
-                    <i class="fas fa-stopwatch"></i> <span class="btn-label">Timer WCA</span>
+                <button id="btnOpenTimer" class="header-btn btn-timer" data-i18n-title="btn_timer_wca_title" title="Cronômetro de Speedcubing">
+                    <i class="fas fa-stopwatch"></i> <span class="btn-label" data-i18n="btn_timer_wca">Timer WCA</span>
                 </button>
-                <button id="btnOpenHelp" class="header-btn" title="Instruções de Uso">
-                    <i class="fas fa-circle-question"></i> <span class="btn-label">Ajuda</span>
+                <button id="btnOpenHelp" class="header-btn" data-i18n-title="btn_help_title" title="Instruções de Uso">
+                    <i class="fas fa-circle-question"></i> <span class="btn-label" data-i18n="btn_help">Ajuda</span>
                 </button>
-                <button id="btnToggleHeader" class="header-toggle-btn" title="Recolher Cabeçalho">
-                    <i class="fas fa-chevron-up"></i> <span class="toggle-btn-text">Recolher</span>
+                <div class="lang-switch-box" id="langSwitchBox" data-i18n-title="lang_switch_title" title="Mudar Idioma / Switch Language">
+                    <button type="button" class="lang-btn" id="btnLangPT" data-lang="pt" onclick="if(window.setCubeLang) window.setCubeLang('pt')">PT</button>
+                    <button type="button" class="lang-btn" id="btnLangEN" data-lang="en" onclick="if(window.setCubeLang) window.setCubeLang('en')">EN</button>
+                </div>
+                <button id="btnToggleHeader" class="header-toggle-btn" data-i18n-title="btn_collapse_title" title="Recolher Cabeçalho">
+                    <i class="fas fa-chevron-up"></i> <span class="toggle-btn-text" data-i18n="btn_collapse">Recolher</span>
                 </button>
             </div>
         </div>
-        <div class="header-collapse-handle" id="headerCollapseHandle" title="Toque para recolher ou expandir">
+        <div class="header-collapse-handle" id="headerCollapseHandle" data-i18n-title="collapse_handle_title" title="Toque para recolher ou expandir">
             <i class="fas fa-chevron-up"></i>
         </div>
     </header>
@@ -1572,7 +1628,7 @@ $antiCache = time();
     <div id="app-container">
         <div id="cube"> 
             <canvas id="cube-canvas">HTML5 CANVAS</canvas>
-            <div id="help-icon" title="Ajuda">?</div>
+            <div id="help-icon" data-i18n-title="canvas_help_title" title="Ajuda">?</div>
         </div>
         
         <div id='controls'></div>
@@ -1585,9 +1641,9 @@ $antiCache = time();
             <div class="modal-header">
                 <div class="modal-title">
                     <i class="fas fa-camera" style="color:var(--brand-primary);"></i>
-                    <span>Scanner Óptico de Cores</span>
+                    <span data-i18n="scanner_title">Scanner Óptico de Cores</span>
                 </div>
-                <button class="modal-close-btn" id="scannerBtnClose" title="Fechar">&times;</button>
+                <button class="modal-close-btn" id="scannerBtnClose" data-i18n-title="scanner_close_title" title="Fechar">&times;</button>
             </div>
             <div class="modal-body">
                 <div id="scannerCameraStatus" style="display:none; padding:10px 14px; background:rgba(239, 68, 68, 0.2); border:1px solid rgba(239, 68, 68, 0.4); border-radius:12px; font-size:0.85rem; margin-bottom:12px; color:#fca5a5;"></div>
@@ -1602,8 +1658,8 @@ $antiCache = time();
                     <!-- Foco Principal: CÂMERA (SUA FRENTE) -->
                     <div class="orient-box orient-box-front">
                         <div class="orient-front-header">
-                            <span class="orient-front-badge"><i class="fas fa-bullseye"></i> FACE PRINCIPAL</span>
-                            <span class="orient-sub"><i class="fas fa-camera"></i> CÂMERA (SUA FRENTE)</span>
+                            <span class="orient-front-badge"><i class="fas fa-bullseye"></i> <span data-i18n="scanner_badge_main_face">FACE PRINCIPAL</span></span>
+                            <span class="orient-sub"><i class="fas fa-camera"></i> <span data-i18n="scanner_badge_camera_front">CÂMERA (SUA FRENTE)</span></span>
                         </div>
                         <div id="guideFrontText" class="orient-val">BRANCO</div>
                     </div>
@@ -1628,14 +1684,14 @@ $antiCache = time();
                 </div>
 
                 <div class="scanner-controls">
-                    <button id="scannerBtnPrev" class="scanner-btn secondary"><i class="fas fa-arrow-left"></i> Anterior</button>
-                    <button id="scannerBtnCapture" class="scanner-btn capture"><i class="fas fa-camera"></i> Capturar Face</button>
-                    <button id="scannerBtnNext" class="scanner-btn secondary"><i class="fas fa-arrow-right"></i> Avançar</button>
-                    <button id="scannerBtnUpload" class="scanner-btn upload"><i class="fas fa-image"></i> Carregar Foto</button>
+                    <button id="scannerBtnPrev" class="scanner-btn secondary"><i class="fas fa-arrow-left"></i> <span data-i18n="scanner_btn_prev">Anterior</span></button>
+                    <button id="scannerBtnCapture" class="scanner-btn capture"><i class="fas fa-camera"></i> <span data-i18n="scanner_btn_capture">Capturar Face</span></button>
+                    <button id="scannerBtnNext" class="scanner-btn secondary"><i class="fas fa-arrow-right"></i> <span data-i18n="scanner_btn_next">Avançar</span></button>
+                    <button id="scannerBtnUpload" class="scanner-btn upload"><i class="fas fa-image"></i> <span data-i18n="scanner_btn_upload">Carregar Foto</span></button>
                     <input type="file" id="scannerFileInput" accept="image/*" style="display:none;">
                 </div>
 
-                <div class="scanner-action-tip">
+                <div class="scanner-action-tip" data-i18n="scanner_action_tip">
                     <i class="fas fa-info-circle"></i> Aponte a face e clique em <strong>Capturar Face</strong> para avançar.
                 </div>
             </div>
@@ -1648,13 +1704,13 @@ $antiCache = time();
             <div class="modal-header">
                 <div class="modal-title">
                     <i class="fas fa-stopwatch" style="color:#60a5fa;"></i>
-                    <span>Speedcubing Timer WCA</span>
+                    <span data-i18n="timer_title">Speedcubing Timer WCA</span>
                 </div>
                 <div style="display:flex; align-items:center; gap:16px;">
                     <label style="display:flex; align-items:center; gap:6px; font-size:0.85rem; cursor:pointer; color:var(--text-muted);">
-                        <input type="checkbox" id="timerInspectionToggle"> Inspeção (15s)
+                        <input type="checkbox" id="timerInspectionToggle"> <span data-i18n="timer_inspection">Inspeção (15s)</span>
                     </label>
-                    <button class="modal-close-btn" id="timerBtnClose" title="Fechar">&times;</button>
+                    <button class="modal-close-btn" id="timerBtnClose" data-i18n-title="scanner_close_title" title="Fechar">&times;</button>
                 </div>
             </div>
             <div class="modal-body">
@@ -1662,41 +1718,41 @@ $antiCache = time();
                 <div class="timer-scramble-box">
                     <div id="timerScrambleText" class="scramble-text">R' U2 F L2 B...</div>
                     <div class="scramble-actions">
-                        <button id="timerBtnNewScramble" class="timer-sm-btn"><i class="fas fa-rotate"></i> Novo Scramble</button>
-                        <button id="timerBtnApplyScramble" class="timer-sm-btn"><i class="fas fa-cube"></i> Aplicar no Cubo 3D</button>
+                        <button id="timerBtnNewScramble" class="timer-sm-btn"><i class="fas fa-rotate"></i> <span data-i18n="timer_btn_new_scramble">Novo Scramble</span></button>
+                        <button id="timerBtnApplyScramble" class="timer-sm-btn"><i class="fas fa-cube"></i> <span data-i18n="timer_btn_apply_3d">Aplicar no Cubo 3D</span></button>
                     </div>
                 </div>
 
                 <!-- Touch & Display Area -->
                 <div id="timerTouchArea" class="timer-touch-surface">
                     <div id="timerDisplay" class="timer-big-digits">0.000</div>
-                    <div id="timerStatusBadge" class="timer-status-badge status-idle">Pressione e segure ESPAÇO (ou toque) para armar</div>
+                    <div id="timerStatusBadge" class="timer-status-badge status-idle" data-i18n="timer_status_idle">Pressione e segure ESPAÇO (ou toque) para armar</div>
                 </div>
 
                 <!-- Stats Bar -->
                 <div class="timer-stats-grid">
                     <div class="stat-card">
-                        <div class="stat-label">Melhor (Single)</div>
+                        <div class="stat-label" data-i18n="timer_stat_best">Melhor (Single)</div>
                         <div class="stat-val" id="timerStatBest">--</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-label">Média de 5 (Ao5)</div>
+                        <div class="stat-label" data-i18n="timer_stat_ao5">Média de 5 (Ao5)</div>
                         <div class="stat-val" id="timerStatAo5">--</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-label">Média de 12 (Ao12)</div>
+                        <div class="stat-label" data-i18n="timer_stat_ao12">Média de 12 (Ao12)</div>
                         <div class="stat-val" id="timerStatAo12">--</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-label">Soluções</div>
+                        <div class="stat-label" data-i18n="timer_stat_solves">Soluções</div>
                         <div class="stat-val" id="timerStatCount">0</div>
                     </div>
                 </div>
 
                 <!-- History -->
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <span style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Histórico Recente</span>
-                    <button id="timerBtnClearHistory" class="timer-sm-btn" style="color:#ef4444;"><i class="fas fa-trash"></i> Limpar</button>
+                    <span style="font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;" data-i18n="timer_history_title">Histórico Recente</span>
+                    <button id="timerBtnClearHistory" class="timer-sm-btn" style="color:#ef4444;"><i class="fas fa-trash"></i> <span data-i18n="timer_history_clear">Limpar</span></button>
                 </div>
                 <div class="timer-history-container" id="timerHistoryList"></div>
             </div>
@@ -1709,17 +1765,17 @@ $antiCache = time();
             <div class="modal-header">
                 <div class="modal-title">
                     <i class="fas fa-circle-question" style="color:var(--brand-indigo);"></i>
-                    <span>Como Usar o CuboFácil 4U</span>
+                    <span data-i18n="help_title">Como Usar o CuboFácil 4U</span>
                 </div>
-                <button class="modal-close-btn" id="help-modal-close" title="Fechar">&times;</button>
+                <button class="modal-close-btn" id="help-modal-close" data-i18n-title="scanner_close_title" title="Fechar">&times;</button>
             </div>
             <div class="modal-body" style="line-height:1.6;">
                 <ol style="padding-left: 20px; margin-bottom: 16px;">
-                    <li style="margin-bottom:10px;"><strong>Escanear com Câmera:</strong> Clique em "Escanear Câmera" para ler as 6 faces do seu cubo real automaticamente sem precisar pintar na tela!</li>
-                    <li style="margin-bottom:10px;"><strong>Mapeamento 2D Manual:</strong> Use a cruz planificada à direita para ajustar qualquer adesivo manualmente com a paleta de cores.</li>
-                    <li style="margin-bottom:10px;"><strong>Resolver e Passo a Passo:</strong> Clique em "Resolver" para ver a solução instantânea ou "Passo a Passo" para acompanhar cada movimento no cubo 3D.</li>
-                    <li style="margin-bottom:10px;"><strong>Timer WCA:</strong> Clique em "Timer WCA" para cronometrar seus tempos de speedcubing com regras da World Cube Association e Scramble oficial.</li>
-                    <li style="margin-bottom:10px;"><strong>Giro Interativo:</strong> Você pode rotacionar a visão do cubo 3D clicando e arrastando com o mouse ou dedo.</li>
+                    <li style="margin-bottom:10px;"><strong data-i18n="help_li_1_strong">Escanear com Câmera:</strong> <span data-i18n="help_li_1_text">Clique em "Escanear Câmera" para ler as 6 faces do seu cubo real automaticamente sem precisar pintar na tela!</span></li>
+                    <li style="margin-bottom:10px;"><strong data-i18n="help_li_2_strong">Mapeamento 2D Manual:</strong> <span data-i18n="help_li_2_text">Use a cruz planificada à direita para ajustar qualquer adesivo manualmente com a paleta de cores.</span></li>
+                    <li style="margin-bottom:10px;"><strong data-i18n="help_li_3_strong">Resolver e Passo a Passo:</strong> <span data-i18n="help_li_3_text">Clique em "Resolver" para ver a solução instantânea ou "Passo a Passo" para acompanhar cada movimento no cubo 3D.</span></li>
+                    <li style="margin-bottom:10px;"><strong data-i18n="help_li_4_strong">Timer WCA:</strong> <span data-i18n="help_li_4_text">Clique em "Timer WCA" para cronometrar seus tempos de speedcubing com regras da World Cube Association e Scramble oficial.</span></li>
+                    <li style="margin-bottom:10px;"><strong data-i18n="help_li_5_strong">Giro Interativo:</strong> <span data-i18n="help_li_5_text">Você pode rotacionar a visão do cubo 3D clicando e arrastando com o mouse ou dedo.</span></li>
                 </ol>
             </div>
         </div>
@@ -1731,21 +1787,21 @@ $antiCache = time();
             <div class="modal-header">
                 <div class="modal-title">
                     <i id="alertModalIcon" class="fas fa-exclamation-triangle" style="color:#f59e0b;"></i>
-                    <span id="alertModalTitle">Aviso</span>
+                    <span id="alertModalTitle" data-i18n="alert_title_default">Aviso</span>
                 </div>
-                <button class="modal-close-btn" id="alertModalBtnClose" title="Fechar">&times;</button>
+                <button class="modal-close-btn" id="alertModalBtnClose" data-i18n-title="scanner_close_title" title="Fechar">&times;</button>
             </div>
             <div class="modal-body" style="line-height:1.5;">
                 <p id="alertModalMessage" style="font-size:0.95rem; margin-bottom:12px; color:var(--text-main); font-weight:500;"></p>
                 <div id="alertModalDetailsBox" style="display:none; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:10px 14px; font-size:0.84rem; color:var(--text-muted); margin-bottom:16px; font-family:'JetBrains Mono', monospace; white-space:pre-wrap;"></div>
                 <div id="alertModalActions" style="display:flex; flex-direction:column; gap:8px;">
                     <button id="alertBtnFixFlat" class="scanner-btn capture" style="display:none; width:100%; justify-content:center;">
-                        <i class="fas fa-th"></i> Ajustar no Modelo Planificado
+                        <i class="fas fa-th"></i> <span data-i18n="alert_btn_fix_flat">Ajustar no Modelo Planificado</span>
                     </button>
                     <button id="alertBtnRescan" class="scanner-btn secondary" style="display:none; width:100%; justify-content:center;">
-                        <i class="fas fa-camera"></i> Escanear com a Câmera
+                        <i class="fas fa-camera"></i> <span data-i18n="alert_btn_rescan">Escanear com a Câmera</span>
                     </button>
-                    <button id="alertBtnOk" class="scanner-btn secondary" style="width:100%; justify-content:center;">
+                    <button id="alertBtnOk" class="scanner-btn secondary" style="width:100%; justify-content:center;" data-i18n="alert_btn_ok">
                         Entendido
                     </button>
                 </div>
@@ -1756,17 +1812,17 @@ $antiCache = time();
     <!-- ==================== RODAPÉ 4U ==================== -->
     <footer class="app-footer">
         <div class="footer-links">
-            <a href="privacidade.html" class="footer-link-item">Privacidade</a>
+            <a href="privacidade.html" class="footer-link-item" data-i18n="footer_privacy">Privacidade</a>
             <span>•</span>
-            <a href="termos.php" class="footer-link-item">Termos de Uso</a>
+            <a href="termos.php" class="footer-link-item" data-i18n="footer_terms">Termos de Uso</a>
             <span>•</span>
-            <a href="suporte.html" class="footer-link-item">Suporte</a>
+            <a href="suporte.html" class="footer-link-item" data-i18n="footer_support">Suporte</a>
             <span>•</span>
             <a href="https://github.com/4u-Labs/cubo" target="_blank" rel="noopener noreferrer" class="footer-link-item">
                 <i class="fab fa-github"></i> GitHub
             </a>
         </div>
-        <p class="footer-copy">&copy; 2026 4U.IA.BR Labs &bull; Desenvolvido por Fabiano Braga &bull; Todos os direitos reservados</p>
+        <p class="footer-copy" data-i18n="footer_copy">&copy; 2026 4U.IA.BR Labs &bull; Desenvolvido por Fabiano Braga &bull; Todos os direitos reservados</p>
     </footer>
 
     <!-- ==================== LOGICA PRINCIPAL ==================== -->
@@ -1805,7 +1861,7 @@ $antiCache = time();
             var btnOk = document.getElementById('alertBtnOk');
             var closeBtn = document.getElementById('alertModalBtnClose');
 
-            if (titleEl) titleEl.textContent = opts.title || 'Aviso';
+            if (titleEl) titleEl.textContent = opts.title || (window.t ? window.t('alert_title_default') : 'Aviso');
             if (msgEl) msgEl.innerHTML = opts.message || '';
 
             if (iconEl) {
@@ -1835,6 +1891,8 @@ $antiCache = time();
             if (btnFixFlat) {
                 if (opts.showFixFlat) {
                     btnFixFlat.style.display = 'flex';
+                    var fixLabel = window.t ? window.t('alert_btn_fix_flat') : 'Ajustar no Modelo Planificado';
+                    btnFixFlat.innerHTML = '<i class="fas fa-th"></i> <span>' + fixLabel + '</span>';
                     btnFixFlat.onclick = function() {
                         closeModal();
                         var flatEl = document.getElementById('flat-cube');
@@ -1856,6 +1914,8 @@ $antiCache = time();
             if (btnRescan) {
                 if (opts.showRescan) {
                     btnRescan.style.display = 'flex';
+                    var rescanLabel = window.t ? window.t('alert_btn_rescan') : 'Escanear com a Câmera';
+                    btnRescan.innerHTML = '<i class="fas fa-camera"></i> <span>' + rescanLabel + '</span>';
                     btnRescan.onclick = function() {
                         closeModal();
                         if (window.cameraScanner) window.cameraScanner.open();
@@ -1865,7 +1925,10 @@ $antiCache = time();
                 }
             }
 
-            if (btnOk) btnOk.onclick = closeModal;
+            if (btnOk) {
+                btnOk.textContent = window.t ? window.t('alert_btn_ok') : 'Entendido';
+                btnOk.onclick = closeModal;
+            }
             if (closeBtn) closeBtn.onclick = closeModal;
             modal.onclick = function(e) { if (e.target === modal) closeModal(); };
 
@@ -2022,13 +2085,13 @@ $antiCache = time();
                     var icon = btnToggleHeader.querySelector('i');
                     var text = btnToggleHeader.querySelector('.toggle-btn-text');
                     if (icon) icon.className = isCollapsed ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
-                    if (text) text.textContent = isCollapsed ? 'Expandir' : 'Recolher';
-                    btnToggleHeader.title = isCollapsed ? 'Expandir Cabeçalho' : 'Recolher Cabeçalho';
+                    if (text) text.textContent = isCollapsed ? (window.t ? window.t('btn_expand') : 'Expandir') : (window.t ? window.t('btn_collapse') : 'Recolher');
+                    btnToggleHeader.title = isCollapsed ? (window.t ? window.t('btn_expand_title') : 'Expandir Cabeçalho') : (window.t ? window.t('btn_collapse_title') : 'Recolher Cabeçalho');
                 }
                 if (headerHandle) {
                     var hIcon = headerHandle.querySelector('i');
                     if (hIcon) hIcon.className = isCollapsed ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
-                    headerHandle.title = isCollapsed ? 'Toque para expandir o cabeçalho' : 'Toque para recolher o cabeçalho';
+                    headerHandle.title = window.t ? window.t('collapse_handle_title') : 'Toque para recolher ou expandir';
                 }
             }
 

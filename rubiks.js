@@ -592,7 +592,12 @@ RubiksCube.prototype.isSolvable = function () {
 
 RubiksCube.prototype.validateState = function () {
 	if (this.rotating) {
-		return { valid: false, code: 'ROTATING', reason: 'O cubo ainda está girando.', details: 'Aguarde a animação terminar para validar ou resolver.' };
+		return { 
+			valid: false, 
+			code: 'ROTATING', 
+			reason: window.t ? window.t('val_rotating_reason') : 'O cubo ainda está girando.', 
+			details: window.t ? window.t('val_rotating_details') : 'Aguarde a animação terminar para validar ou resolver.' 
+		};
 	}
 
 	// 1. Verificar contagem de cores no flatCube (se disponível)
@@ -608,12 +613,12 @@ RubiksCube.prototype.validateState = function () {
 			}
 		}
 		var colorNames = {
-			'#ffffff': 'Branco',
-			'#ffff00': 'Amarelo',
-			'#009900': 'Verde',
-			'#000099': 'Azul',
-			'#cc0000': 'Vermelho',
-			'#ff8000': 'Laranja'
+			'#ffffff': window.t ? window.t('color_white') : 'Branco',
+			'#ffff00': window.t ? window.t('color_yellow') : 'Amarelo',
+			'#009900': window.t ? window.t('color_green') : 'Verde',
+			'#000099': window.t ? window.t('color_blue') : 'Azul',
+			'#cc0000': window.t ? window.t('color_red') : 'Vermelho',
+			'#ff8000': window.t ? window.t('color_orange') : 'Laranja'
 		};
 		var colorErrors = [];
 		var totalStickers = 0;
@@ -628,8 +633,8 @@ RubiksCube.prototype.validateState = function () {
 			return {
 				valid: false,
 				code: 'UNBALANCED_COLORS',
-				reason: 'A contagem de cores está desbalanceada.',
-				details: 'Cada uma das 6 cores precisa ter exatamente 9 adesivos:\n' + colorErrors.join(' • ')
+				reason: window.t ? window.t('val_unbalanced_reason') : 'A contagem de cores está desbalanceada.',
+				details: window.t ? window.t('val_unbalanced_details', { errors: colorErrors.join(' • ') }) : ('Cada uma das 6 cores precisa ter exatamente 9 adesivos:\n' + colorErrors.join(' • '))
 			};
 		}
 	}
@@ -638,21 +643,21 @@ RubiksCube.prototype.validateState = function () {
 	var state = this.getState();
 	var solvable = this.solver.setState(state);
 	if (!solvable) {
-		var err = this.solver.currentState || 'Estado inválido';
+		var err = this.solver.currentState || (window.t ? window.t('val_invalid_state') : 'Estado inválido');
 		var friendly = err;
 		var details = '';
 		if (err === 'Cores inválidas') {
-			friendly = 'Peças ou cores incompatíveis';
-			details = 'Uma ou mais peças têm combinação fisicamente impossível de cores (ex: adesivos de lados opostos na mesma peça ou cubos repetidos). Verifique se algum adesivo foi lido errado no modelo planificado.';
+			friendly = window.t ? window.t('val_incompatible_pieces') : 'Peças ou cores incompatíveis';
+			details = window.t ? window.t('val_incompatible_details') : 'Uma ou mais peças têm combinação fisicamente impossível de cores (ex: adesivos de lados opostos na mesma peça ou cubos repetidos). Verifique se algum adesivo foi lido errado no modelo planificado.';
 		} else if (err === 'Arestas invertidas') {
-			friendly = 'Orientação invertida em aresta (meio)';
-			details = 'Uma das peças de meio do cubo está virada ao contrário (orientação invertida).';
+			friendly = window.t ? window.t('val_flipped_edges') : 'Orientação invertida em aresta (meio)';
+			details = window.t ? window.t('val_flipped_edges_details') : 'Uma das peças de meio do cubo está virada ao contrário (orientação invertida).';
 		} else if (err === 'Cantos invertidos') {
-			friendly = 'Orientação invertida em canto (quina)';
-			details = 'Um dos cantos do cubo está girado em seu próprio eixo (torção de canto).';
+			friendly = window.t ? window.t('val_twisted_corners') : 'Orientação invertida em canto (quina)';
+			details = window.t ? window.t('val_twisted_corners_details') : 'Um dos cantos do cubo está girado em seu próprio eixo (torção de canto).';
 		} else if (err === 'Erro de paridade') {
-			friendly = 'Erro de paridade de posição';
-			details = 'Duas peças estão trocadas de lugar (situação impossível em cubo 3x3x3 sem desmontar).';
+			friendly = window.t ? window.t('val_parity_error') : 'Erro de paridade de posição';
+			details = window.t ? window.t('val_parity_error_details') : 'Duas peças estão trocadas de lugar (situação impossível em cubo 3x3x3 sem desmontar).';
 		}
 		return {
 			valid: false,

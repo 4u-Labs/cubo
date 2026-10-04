@@ -31,10 +31,10 @@ class CuboCameraScanner {
                 name: 'Topo (U)',
                 centerColor: 'WHITE',
                 title: '1. Face Branca (Topo / U)',
-                top:    { name: 'Verde',    hex: '#009900', label: 'Verde' },
-                bottom: { name: 'Azul',     hex: '#000099', label: 'Azul' },
-                left:   { name: 'Vermelho', hex: '#cc0000', label: 'Vermelho' },
-                right:  { name: 'Laranja',  hex: '#ff8000', label: 'Laranja' },
+                top:    { colorKey: 'GREEN', name: 'Verde',    hex: '#009900', label: 'Verde' },
+                bottom: { colorKey: 'BLUE', name: 'Azul',     hex: '#000099', label: 'Azul' },
+                left:   { colorKey: 'RED', name: 'Vermelho', hex: '#cc0000', label: 'Vermelho' },
+                right:  { colorKey: 'ORANGE', name: 'Laranja',  hex: '#ff8000', label: 'Laranja' },
                 instruction: 'Aponte o centro BRANCO de frente • TETO: Verde • DIREITA: Laranja',
                 transform: [0, 1, 2, 3, 4, 5, 6, 7, 8]
             },
@@ -43,10 +43,10 @@ class CuboCameraScanner {
                 name: 'Frente (F)',
                 centerColor: 'BLUE',
                 title: '2. Face Azul (Frente / F)',
-                top:    { name: 'Branco',   hex: '#ffffff', label: 'Branco' },
-                bottom: { name: 'Amarelo',  hex: '#ffff00', label: 'Amarelo' },
-                left:   { name: 'Vermelho', hex: '#cc0000', label: 'Vermelho' },
-                right:  { name: 'Laranja',  hex: '#ff8000', label: 'Laranja' },
+                top:    { colorKey: 'WHITE', name: 'Branco',   hex: '#ffffff', label: 'Branco' },
+                bottom: { colorKey: 'YELLOW', name: 'Amarelo',  hex: '#ffff00', label: 'Amarelo' },
+                left:   { colorKey: 'RED', name: 'Vermelho', hex: '#cc0000', label: 'Vermelho' },
+                right:  { colorKey: 'ORANGE', name: 'Laranja',  hex: '#ff8000', label: 'Laranja' },
                 instruction: 'Aponte o centro AZUL de frente • TETO: Branco • DIREITA: Laranja',
                 transform: [0, 1, 2, 3, 4, 5, 6, 7, 8]
             },
@@ -55,10 +55,10 @@ class CuboCameraScanner {
                 name: 'Direita (R)',
                 centerColor: 'ORANGE',
                 title: '3. Face Laranja (Direita / R)',
-                top:    { name: 'Branco',   hex: '#ffffff', label: 'Branco' },
-                bottom: { name: 'Amarelo',  hex: '#ffff00', label: 'Amarelo' },
-                left:   { name: 'Azul',     hex: '#000099', label: 'Azul' },
-                right:  { name: 'Verde',    hex: '#009900', label: 'Verde' },
+                top:    { colorKey: 'WHITE', name: 'Branco',   hex: '#ffffff', label: 'Branco' },
+                bottom: { colorKey: 'YELLOW', name: 'Amarelo',  hex: '#ffff00', label: 'Amarelo' },
+                left:   { colorKey: 'BLUE', name: 'Azul',     hex: '#000099', label: 'Azul' },
+                right:  { colorKey: 'GREEN', name: 'Verde',    hex: '#009900', label: 'Verde' },
                 instruction: 'Gire à direita: centro LARANJA • TETO: Branco • DIREITA: Verde',
                 transform: [2, 5, 8, 1, 4, 7, 0, 3, 6]
             },
@@ -67,10 +67,10 @@ class CuboCameraScanner {
                 name: 'Atrás (B)',
                 centerColor: 'GREEN',
                 title: '4. Face Verde (Atrás / B)',
-                top:    { name: 'Branco',   hex: '#ffffff', label: 'Branco' },
-                bottom: { name: 'Amarelo',  hex: '#ffff00', label: 'Amarelo' },
-                left:   { name: 'Laranja',  hex: '#ff8000', label: 'Laranja' },
-                right:  { name: 'Vermelho', hex: '#cc0000', label: 'Vermelho' },
+                top:    { colorKey: 'WHITE', name: 'Branco',   hex: '#ffffff', label: 'Branco' },
+                bottom: { colorKey: 'YELLOW', name: 'Amarelo',  hex: '#ffff00', label: 'Amarelo' },
+                left:   { colorKey: 'ORANGE', name: 'Laranja',  hex: '#ff8000', label: 'Laranja' },
+                right:  { colorKey: 'RED', name: 'Vermelho', hex: '#cc0000', label: 'Vermelho' },
                 instruction: 'Gire à direita: centro VERDE • TETO: Branco • DIREITA: Vermelho',
                 transform: [8, 7, 6, 5, 4, 3, 2, 1, 0]
             },
@@ -79,10 +79,10 @@ class CuboCameraScanner {
                 name: 'Esquerda (L)',
                 centerColor: 'RED',
                 title: '5. Face Vermelha (Esquerda / L)',
-                top:    { name: 'Branco',   hex: '#ffffff', label: 'Branco' },
-                bottom: { name: 'Amarelo',  hex: '#ffff00', label: 'Amarelo' },
-                left:   { name: 'Verde',    hex: '#009900', label: 'Verde' },
-                right:  { name: 'Azul',     hex: '#000099', label: 'Azul' },
+                top:    { colorKey: 'WHITE', name: 'Branco',   hex: '#ffffff', label: 'Branco' },
+                bottom: { colorKey: 'YELLOW', name: 'Amarelo',  hex: '#ffff00', label: 'Amarelo' },
+                left:   { colorKey: 'GREEN', name: 'Verde',    hex: '#009900', label: 'Verde' },
+                right:  { colorKey: 'BLUE', name: 'Azul',     hex: '#000099', label: 'Azul' },
                 instruction: 'Gire à direita: centro VERMELHO • TETO: Branco • DIREITA: Azul',
                 transform: [6, 3, 0, 7, 4, 1, 8, 5, 2]
             },
@@ -91,10 +91,10 @@ class CuboCameraScanner {
                 name: 'Base (D)',
                 centerColor: 'YELLOW',
                 title: '6. Face Amarela (Base / D)',
-                top:    { name: 'Azul',     hex: '#000099', label: 'Azul' },
-                bottom: { name: 'Verde',    hex: '#009900', label: 'Verde' },
-                left:   { name: 'Vermelho', hex: '#cc0000', label: 'Vermelho' },
-                right:  { name: 'Laranja',  hex: '#ff8000', label: 'Laranja' },
+                top:    { colorKey: 'BLUE', name: 'Azul',     hex: '#000099', label: 'Azul' },
+                bottom: { colorKey: 'GREEN', name: 'Verde',    hex: '#009900', label: 'Verde' },
+                left:   { colorKey: 'RED', name: 'Vermelho', hex: '#cc0000', label: 'Vermelho' },
+                right:  { colorKey: 'ORANGE', name: 'Laranja',  hex: '#ff8000', label: 'Laranja' },
                 instruction: 'Gire à direita de volta para a face AZUL e incline para cima: AMARELO de frente • TETO: Azul • DIREITA: Laranja',
                 transform: [0, 1, 2, 3, 4, 5, 6, 7, 8]
             }
@@ -109,7 +109,46 @@ class CuboCameraScanner {
 
         this.currentFacePreviewColors = Array(9).fill(this.CUBE_COLORS.WHITE.hex);
 
+        window.addEventListener('cubeLanguageChanged', () => this.updateLanguage());
+
         this.initDOM();
+    }
+
+    getColorName(colorKey) {
+        if (window.t) return window.t('color_' + colorKey.toLowerCase());
+        return this.CUBE_COLORS[colorKey] ? this.CUBE_COLORS[colorKey].name : colorKey;
+    }
+
+    getColorNameByHex(hex) {
+        if (!hex) return 'Desconhecido';
+        const cleanHex = hex.toLowerCase();
+        for (const [key, val] of Object.entries(this.CUBE_COLORS)) {
+            if (val.hex.toLowerCase() === cleanHex) {
+                return this.getColorName(key);
+            }
+        }
+        return hex;
+    }
+
+    getCompassAbbr(colorKey) {
+        if (!colorKey) return '';
+        if (window.t) return window.t('color_' + colorKey.toLowerCase() + '_abbr');
+        const name = this.getColorName(colorKey);
+        return name ? name.substring(0, 3) : '';
+    }
+
+    getStepTitle(stepIndex) {
+        if (window.t) return window.t(`scanner_step_${stepIndex + 1}_title`);
+        return this.FACE_STEPS[stepIndex].title;
+    }
+
+    getStepInstruction(stepIndex) {
+        if (window.t) return window.t(`scanner_step_${stepIndex + 1}_inst`);
+        return this.FACE_STEPS[stepIndex].instruction;
+    }
+
+    updateLanguage() {
+        this.updateStepUI();
     }
 
     initDOM() {
@@ -533,16 +572,18 @@ class CuboCameraScanner {
 
     updateCenterStatusBadge(isMatch, detectedHex, step) {
         if (!this.centerStatusEl) return;
-        const expectedName = this.CUBE_COLORS[step.centerColor].name;
+        const expectedName = this.getColorName(step.centerColor);
         const detectedName = this.getColorNameByHex(detectedHex);
 
         this.centerStatusEl.style.display = 'flex';
         if (isMatch) {
             this.centerStatusEl.className = 'scanner-center-badge match';
-            this.centerStatusEl.innerHTML = `<i class="fas fa-check-circle"></i><span>Centro Correto: <strong>${expectedName.toUpperCase()}</strong></span>`;
+            const text = window.t ? window.t('scanner_center_correct', { color: expectedName.toUpperCase() }) : `Centro Correto: <strong>${expectedName.toUpperCase()}</strong>`;
+            this.centerStatusEl.innerHTML = `<i class="fas fa-check-circle"></i><span>${text}</span>`;
         } else {
             this.centerStatusEl.className = 'scanner-center-badge mismatch';
-            this.centerStatusEl.innerHTML = `<i class="fas fa-exclamation-triangle"></i><span>Atenção: Centro é <strong>${detectedName.toUpperCase()}</strong>! Aponte <strong>${expectedName.toUpperCase()}</strong></span>`;
+            const text = window.t ? window.t('scanner_center_mismatch', { detected: detectedName.toUpperCase(), expected: expectedName.toUpperCase() }) : `Atenção: Centro é <strong>${detectedName.toUpperCase()}</strong>! Aponte <strong>${expectedName.toUpperCase()}</strong>`;
+            this.centerStatusEl.innerHTML = `<i class="fas fa-exclamation-triangle"></i><span>${text}</span>`;
         }
     }
 
@@ -771,12 +812,13 @@ class CuboCameraScanner {
         // Se o centro detectado não coincidir com a face esperada, avisa o usuário!
         if (centerDetectedHex.toLowerCase() !== centerExpectedHex.toLowerCase()) {
             const detectedName = this.getColorNameByHex(centerDetectedHex);
-            const expectedName = this.CUBE_COLORS[step.centerColor].name;
-            const confirmCapture = confirm(
-                `⚠️ ATENÇÃO: Centro Detectado Incorreto!\n\n` +
-                `O centro apontado para a câmera parece ser ${detectedName.toUpperCase()}, mas esta etapa pede a Face ${expectedName.toUpperCase()}!\n\n` +
-                `Deseja capturar esta face mesmo assim? (Clique em 'Cancelar' para apontar a face correta)`
-            );
+            const expectedName = this.getColorName(step.centerColor);
+            const msg = window.t
+                ? window.t('scanner_warn_wrong_center', { detected: detectedName.toUpperCase(), expected: expectedName.toUpperCase() })
+                : `⚠️ ATENÇÃO: Centro Detectado Incorreto!\n\n` +
+                  `O centro apontado para a câmera parece ser ${detectedName.toUpperCase()}, mas esta etapa pede a Face ${expectedName.toUpperCase()}!\n\n` +
+                  `Deseja capturar esta face mesmo assim? (Clique em 'Cancelar' para apontar a face correta)`;
+            const confirmCapture = confirm(msg);
             if (!confirmCapture) {
                 return;
             }
@@ -841,10 +883,10 @@ class CuboCameraScanner {
     updateStepUI() {
         const step = this.FACE_STEPS[this.currentStep];
         if (this.stepTitle) {
-            this.stepTitle.textContent = step.title;
+            this.stepTitle.textContent = this.getStepTitle(this.currentStep);
         }
         if (this.stepTip) {
-            this.stepTip.innerHTML = `<strong>Orientação Obrigatória:</strong><br>${step.instruction}`;
+            this.stepTip.innerHTML = `<strong>Orientação Obrigatória:</strong><br>${this.getStepInstruction(this.currentStep)}`;
         }
 
         // Indicador de progresso (pontos)
@@ -860,70 +902,87 @@ class CuboCameraScanner {
         };
 
         const dotStyle = (hex) => `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${hex};border:1px solid rgba(255,255,255,0.7);margin-right:3px;vertical-align:middle;flex-shrink:0;"></span>`;
-        const formatCompassName = (name) => {
-            if (name === 'Amarelo') return 'Aml';
-            if (name === 'Branco') return 'Bco';
-            if (name === 'Laranja') return 'Lar';
-            if (name === 'Vermelho') return 'Ver';
-            if (name === 'Verde') return 'Vde';
-            if (name === 'Azul') return 'Azu';
-            return name;
-        };
+
+        const topPrefix = window.t ? window.t('scanner_compass_top') : '▲ Cima:';
+        const rightPrefix = window.t ? window.t('scanner_compass_right') : '▶ Dir:';
+        const bottomPrefix = window.t ? window.t('scanner_compass_bottom') : '▼ Baixo:';
+        const leftPrefix = window.t ? window.t('scanner_compass_left') : '◀ Esq:';
+        const centerPrefix = window.t ? window.t('scanner_compass_center') : '🎯 Centro:';
 
         if (this.compassTop) {
-            this.compassTop.innerHTML = `▲ Cima: ${dotStyle(step.top.hex)}<span style="color:${getTextColor(step.top.hex)}">${formatCompassName(step.top.name)}</span>`;
+            const name = this.getCompassAbbr(step.top.colorKey);
+            this.compassTop.innerHTML = `${topPrefix} ${dotStyle(step.top.hex)}<span style="color:${getTextColor(step.top.hex)}">${name}</span>`;
             this.compassTop.style.borderColor = step.top.hex;
         }
         if (this.compassRight) {
-            this.compassRight.innerHTML = `▶ Dir: ${dotStyle(step.right.hex)}<span style="color:${getTextColor(step.right.hex)}">${formatCompassName(step.right.name)}</span>`;
+            const name = this.getCompassAbbr(step.right.colorKey);
+            this.compassRight.innerHTML = `${rightPrefix} ${dotStyle(step.right.hex)}<span style="color:${getTextColor(step.right.hex)}">${name}</span>`;
             this.compassRight.style.borderColor = step.right.hex;
         }
         if (this.compassBottom) {
-            this.compassBottom.innerHTML = `▼ Baixo: ${dotStyle(step.bottom.hex)}<span style="color:${getTextColor(step.bottom.hex)}">${formatCompassName(step.bottom.name)}</span>`;
+            const name = this.getCompassAbbr(step.bottom.colorKey);
+            this.compassBottom.innerHTML = `${bottomPrefix} ${dotStyle(step.bottom.hex)}<span style="color:${getTextColor(step.bottom.hex)}">${name}</span>`;
             this.compassBottom.style.borderColor = step.bottom.hex;
         }
         if (this.compassLeft) {
-            this.compassLeft.innerHTML = `◀ Esq: ${dotStyle(step.left.hex)}<span style="color:${getTextColor(step.left.hex)}">${formatCompassName(step.left.name)}</span>`;
+            const name = this.getCompassAbbr(step.left.colorKey);
+            this.compassLeft.innerHTML = `${leftPrefix} ${dotStyle(step.left.hex)}<span style="color:${getTextColor(step.left.hex)}">${name}</span>`;
             this.compassLeft.style.borderColor = step.left.hex;
         }
         if (this.compassCenter) {
-            const centerInfo = this.CUBE_COLORS[step.centerColor];
-            this.compassCenter.innerHTML = `🎯 Centro: ${dotStyle(centerInfo.hex)}<span style="color:${getTextColor(centerInfo.hex)}">${centerInfo.name}</span>`;
-            this.compassCenter.style.borderColor = centerInfo.hex;
+            const centerName = this.getColorName(step.centerColor);
+            this.compassCenter.innerHTML = `${centerPrefix} ${dotStyle(this.CUBE_COLORS[step.centerColor].hex)}<span style="color:${getTextColor(this.CUBE_COLORS[step.centerColor].hex)}">${centerName}</span>`;
+            this.compassCenter.style.borderColor = this.CUBE_COLORS[step.centerColor].hex;
         }
 
         if (this.guideFrontText) {
-            const centerInfo = this.CUBE_COLORS[step.centerColor];
-            this.guideFrontText.textContent = centerInfo.name.toUpperCase();
-            this.guideFrontText.style.color = getTextColor(centerInfo.hex);
+            const centerName = this.getColorName(step.centerColor);
+            this.guideFrontText.textContent = centerName.toUpperCase();
+            this.guideFrontText.style.color = getTextColor(this.CUBE_COLORS[step.centerColor].hex);
         }
         if (this.guideTopText) {
-            this.guideTopText.textContent = step.top.name.toUpperCase();
+            const topName = this.getColorName(step.top.colorKey);
+            this.guideTopText.textContent = topName.toUpperCase();
             this.guideTopText.style.color = getTextColor(step.top.hex);
         }
 
         if (this.btnPrev) {
             this.btnPrev.disabled = (this.currentStep === 0);
+            this.btnPrev.innerHTML = `<i class="fas fa-arrow-left"></i> ${window.t ? window.t('scanner_btn_prev') : 'Anterior'}`;
+        }
+
+        if (this.btnUploadFallback) {
+            this.btnUploadFallback.innerHTML = `<i class="fas fa-image"></i> ${window.t ? window.t('scanner_btn_upload') : 'Carregar Foto'}`;
         }
 
         // Ajuste dos botões de ação conforme estado (Live vs Revisão)
         const isLastStep = (this.currentStep === this.FACE_STEPS.length - 1);
         if (this.isPausedForReview) {
             if (this.btnCapture) {
-                this.btnCapture.innerHTML = '<i class="fas fa-redo"></i> Refazer Leitura';
+                const label = window.t ? window.t('scanner_btn_recapture') : 'Refazer Leitura';
+                this.btnCapture.innerHTML = `<i class="fas fa-redo"></i> ${label}`;
                 this.btnCapture.className = 'scanner-btn secondary';
             }
             if (this.btnNext) {
-                this.btnNext.innerHTML = isLastStep ? '<i class="fas fa-check"></i> Finalizar Cubo' : '<i class="fas fa-arrow-right"></i> Próxima Face';
+                const label = isLastStep 
+                    ? (window.t ? window.t('scanner_btn_finish_cube') : 'Finalizar Cubo')
+                    : (window.t ? window.t('scanner_btn_next_face') : 'Próxima Face');
+                this.btnNext.innerHTML = isLastStep 
+                    ? `<i class="fas fa-check"></i> ${label}` 
+                    : `<i class="fas fa-arrow-right"></i> ${label}`;
                 this.btnNext.className = 'scanner-btn capture';
             }
         } else {
             if (this.btnCapture) {
-                this.btnCapture.innerHTML = '<i class="fas fa-camera"></i> Capturar Face';
+                const label = window.t ? window.t('scanner_btn_capture') : 'Capturar Face';
+                this.btnCapture.innerHTML = `<i class="fas fa-camera"></i> ${label}`;
                 this.btnCapture.className = 'scanner-btn capture';
             }
             if (this.btnNext) {
-                this.btnNext.innerHTML = isLastStep ? 'Finalizar' : 'Avançar';
+                const label = isLastStep 
+                    ? (window.t ? window.t('scanner_btn_finish') : 'Finalizar') 
+                    : (window.t ? window.t('scanner_btn_next') : 'Avançar');
+                this.btnNext.innerHTML = label;
                 this.btnNext.className = 'scanner-btn secondary';
             }
         }
@@ -1031,19 +1090,21 @@ class CuboCameraScanner {
         const validation = (cubeInstance && cubeInstance.validateState) ? cubeInstance.validateState() : { valid: true };
 
         if (!validation.valid) {
-            const confirmLeave = confirm(
-                `⚠️ Atenção: Detectamos inconsistências nas cores lidas:\n\n` +
-                `${validation.reason}\n${validation.details ? validation.details + '\n\n' : '\n'}` +
-                `Deseja finalizar assim mesmo para corrigir no modelo planificado?\n\n` +
-                `• Clique em 'OK' para ir ao modelo planificado e ajustar os adesivos com cliques.\n` +
-                `• Clique em 'Cancelar' para revisar e ajustar as faces aqui no scanner.`
-            );
+            const msg = window.t
+                ? window.t('scanner_warn_inconsistency', { reason: validation.reason, details: validation.details ? validation.details + '\n\n' : '\n' })
+                : `⚠️ Atenção: Detectamos inconsistências nas cores lidas:\n\n` +
+                  `${validation.reason}\n${validation.details ? validation.details + '\n\n' : '\n'}` +
+                  `Deseja finalizar assim mesmo para corrigir no modelo planificado?\n\n` +
+                  `• Clique em 'OK' para ir ao modelo planificado e ajustar os adesivos com cliques.\n` +
+                  `• Clique em 'Cancelar' para revisar e ajustar as faces aqui no scanner.`;
+            const confirmLeave = confirm(msg);
             if (!confirmLeave) {
                 return;
             }
         } else {
             if (window.showCubeToast) {
-                window.showCubeToast('Cubo lido com sucesso! Abrindo Passo a Passo...', 'success');
+                const toastMsg = window.t ? window.t('scanner_toast_success') : 'Cubo lido com sucesso! Abrindo Passo a Passo...';
+                window.showCubeToast(toastMsg, 'success');
             }
         }
 
