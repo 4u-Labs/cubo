@@ -1113,6 +1113,43 @@ $antiCache = time();
             white-space: nowrap;
         }
 
+        .scanner-center-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 8px 14px;
+            margin: 0 auto 8px auto;
+            border-radius: 12px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-align: center;
+            width: 100%;
+            max-width: 290px;
+            box-sizing: border-box;
+            transition: all 0.25s ease;
+        }
+
+        .scanner-center-badge.match {
+            background: rgba(16, 185, 129, 0.18);
+            border: 1.5px solid rgba(16, 185, 129, 0.7);
+            color: #34d399;
+            box-shadow: 0 2px 10px rgba(16, 185, 129, 0.2);
+        }
+
+        .scanner-center-badge.mismatch {
+            background: rgba(239, 68, 68, 0.22);
+            border: 1.5px solid rgba(239, 68, 68, 0.85);
+            color: #fca5a5;
+            box-shadow: 0 2px 12px rgba(239, 68, 68, 0.3);
+            animation: pulse-mismatch 1.5s infinite;
+        }
+
+        @keyframes pulse-mismatch {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
         .scanner-camera-wrapper {
             position: relative;
             width: 100%;
@@ -1533,6 +1570,9 @@ $antiCache = time();
                         <span id="scannerStepTip" style="display:none;"></span>
                     </div>
                 </div>
+
+                <!-- Status de Validação do Centro em Tempo Real -->
+                <div id="scannerCenterStatus" class="scanner-center-badge" style="display:none;"></div>
 
                 <div class="scanner-camera-wrapper">
                     <video id="scannerVideo" playsinline autoplay muted></video>

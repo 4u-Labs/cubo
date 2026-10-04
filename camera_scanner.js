@@ -1,7 +1,9 @@
 /**
- * CuboFácil Vision — Scanner de Cores por Câmera & Foto com Bússola de Orientação Espacial
- * Informa com precisão a cor central e as 4 referências laterais (Cima, Baixo, Esquerda, Direita)
- * para garantir que o cubo nunca seja lido com rotação invertida.
+ * CuboFácil Vision — Scanner de Cores por Câmera & Foto
+ * Sistema Inteligente com Detecção Espectral Robusta de Cores,
+ * Validação de Centro em Tempo Real e Orientação Natural
+ * 
+ * 4U-Labs • https://4u.ia.br/app/cubo/
  */
 
 class CuboCameraScanner {
@@ -19,7 +21,10 @@ class CuboCameraScanner {
             ORANGE: { name: 'Laranja',  hex: '#ff8000', textColor: '#111' }
         };
 
-        // Ordem e orientações exatas das 6 faces no FlatCube:
+        // Ordem e orientações das 6 faces:
+        // Regra Intuitiva Natural: O usuário mantém a face BRANCA virada para CIMA (Teto)
+        // nas 4 faces laterais (Frente, Direita, Atrás, Esquerda), apenas girando o cubo horizontalmente!
+        // A matriz 'transform' converte o grid 3x3 da câmera para as coordenadas do FlatCube.
         this.FACE_STEPS = [
             {
                 faceIndex: 2,
@@ -30,7 +35,8 @@ class CuboCameraScanner {
                 bottom: { name: 'Azul',     hex: '#000099', label: 'Azul' },
                 left:   { name: 'Vermelho', hex: '#cc0000', label: 'Vermelho' },
                 right:  { name: 'Laranja',  hex: '#ff8000', label: 'Laranja' },
-                instruction: 'Centro BRANCO de frente • CIMA: Verde • DIREITA: Laranja'
+                instruction: 'Aponte o centro BRANCO de frente • TETO: Verde • DIREITA: Laranja',
+                transform: [0, 1, 2, 3, 4, 5, 6, 7, 8]
             },
             {
                 faceIndex: 4,
@@ -41,40 +47,44 @@ class CuboCameraScanner {
                 bottom: { name: 'Amarelo',  hex: '#ffff00', label: 'Amarelo' },
                 left:   { name: 'Vermelho', hex: '#cc0000', label: 'Vermelho' },
                 right:  { name: 'Laranja',  hex: '#ff8000', label: 'Laranja' },
-                instruction: 'Centro AZUL de frente • CIMA: Branco • DIREITA: Laranja'
+                instruction: 'Aponte o centro AZUL de frente • TETO: Branco • DIREITA: Laranja',
+                transform: [0, 1, 2, 3, 4, 5, 6, 7, 8]
             },
             {
                 faceIndex: 3,
                 name: 'Direita (R)',
                 centerColor: 'ORANGE',
                 title: '3. Face Laranja (Direita / R)',
-                top:    { name: 'Verde',    hex: '#009900', label: 'Verde' },
-                bottom: { name: 'Azul',     hex: '#000099', label: 'Azul' },
-                left:   { name: 'Branco',   hex: '#ffffff', label: 'Branco' },
-                right:  { name: 'Amarelo',  hex: '#ffff00', label: 'Amarelo' },
-                instruction: 'Centro LARANJA de frente • CIMA: Verde • ESQUERDA: Branco'
+                top:    { name: 'Branco',   hex: '#ffffff', label: 'Branco' },
+                bottom: { name: 'Amarelo',  hex: '#ffff00', label: 'Amarelo' },
+                left:   { name: 'Azul',     hex: '#000099', label: 'Azul' },
+                right:  { name: 'Verde',    hex: '#009900', label: 'Verde' },
+                instruction: 'Gire à direita: centro LARANJA • TETO: Branco • DIREITA: Verde',
+                transform: [2, 5, 8, 1, 4, 7, 0, 3, 6]
             },
             {
                 faceIndex: 0,
                 name: 'Atrás (B)',
                 centerColor: 'GREEN',
                 title: '4. Face Verde (Atrás / B)',
-                top:    { name: 'Amarelo',  hex: '#ffff00', label: 'Amarelo' },
-                bottom: { name: 'Branco',   hex: '#ffffff', label: 'Branco' },
-                left:   { name: 'Vermelho', hex: '#cc0000', label: 'Vermelho' },
-                right:  { name: 'Laranja',  hex: '#ff8000', label: 'Laranja' },
-                instruction: 'Centro VERDE de frente • CIMA: Amarelo • DIREITA: Laranja'
+                top:    { name: 'Branco',   hex: '#ffffff', label: 'Branco' },
+                bottom: { name: 'Amarelo',  hex: '#ffff00', label: 'Amarelo' },
+                left:   { name: 'Laranja',  hex: '#ff8000', label: 'Laranja' },
+                right:  { name: 'Vermelho', hex: '#cc0000', label: 'Vermelho' },
+                instruction: 'Gire à direita: centro VERDE • TETO: Branco • DIREITA: Vermelho',
+                transform: [8, 7, 6, 5, 4, 3, 2, 1, 0]
             },
             {
                 faceIndex: 1,
                 name: 'Esquerda (L)',
                 centerColor: 'RED',
                 title: '5. Face Vermelha (Esquerda / L)',
-                top:    { name: 'Verde',    hex: '#009900', label: 'Verde' },
-                bottom: { name: 'Azul',     hex: '#000099', label: 'Azul' },
-                left:   { name: 'Amarelo',  hex: '#ffff00', label: 'Amarelo' },
-                right:  { name: 'Branco',   hex: '#ffffff', label: 'Branco' },
-                instruction: 'Centro VERMELHO de frente • CIMA: Verde • DIREITA: Branco'
+                top:    { name: 'Branco',   hex: '#ffffff', label: 'Branco' },
+                bottom: { name: 'Amarelo',  hex: '#ffff00', label: 'Amarelo' },
+                left:   { name: 'Verde',    hex: '#009900', label: 'Verde' },
+                right:  { name: 'Azul',     hex: '#000099', label: 'Azul' },
+                instruction: 'Gire à direita: centro VERMELHO • TETO: Branco • DIREITA: Azul',
+                transform: [6, 3, 0, 7, 4, 1, 8, 5, 2]
             },
             {
                 faceIndex: 5,
@@ -85,16 +95,17 @@ class CuboCameraScanner {
                 bottom: { name: 'Verde',    hex: '#009900', label: 'Verde' },
                 left:   { name: 'Vermelho', hex: '#cc0000', label: 'Vermelho' },
                 right:  { name: 'Laranja',  hex: '#ff8000', label: 'Laranja' },
-                instruction: 'Centro AMARELO de frente • CIMA: Azul • DIREITA: Laranja'
+                instruction: 'Incline para cima: centro AMARELO • TETO: Azul • DIREITA: Laranja',
+                transform: [0, 1, 2, 3, 4, 5, 6, 7, 8]
             }
         ];
 
         this.currentStep = 0;
         this.scannedFaces = {};
-        this.calibratedCenters = {};
         this.stream = null;
         this.animFrameId = null;
         this.isScanning = false;
+        this.isPausedForReview = false; // Quando capturado, pausa atualização em tempo real para permitir revisão
 
         this.currentFacePreviewColors = Array(9).fill(this.CUBE_COLORS.WHITE.hex);
 
@@ -116,6 +127,7 @@ class CuboCameraScanner {
         this.fileInput = document.getElementById('scannerFileInput');
         this.btnUploadFallback = document.getElementById('scannerBtnUpload');
         this.stepperDots = document.getElementById('scannerStepperDots');
+        this.centerStatusEl = document.getElementById('scannerCenterStatus');
 
         // Bússola de Referências
         this.compassTop = document.getElementById('compassTop');
@@ -130,7 +142,7 @@ class CuboCameraScanner {
             this.btnClose.addEventListener('click', () => this.close());
         }
         if (this.btnCapture) {
-            this.btnCapture.addEventListener('click', () => this.captureCurrentFace());
+            this.btnCapture.addEventListener('click', () => this.handleCaptureButtonClick());
         }
         if (this.btnNext) {
             this.btnNext.addEventListener('click', () => this.nextStep());
@@ -153,9 +165,11 @@ class CuboCameraScanner {
         this.stepperDots.innerHTML = '';
         this.FACE_STEPS.forEach((step, idx) => {
             const dot = document.createElement('div');
-            dot.className = `step-dot ${idx === this.currentStep ? 'active' : ''} ${this.scannedFaces[step.faceIndex] ? 'completed' : ''}`;
+            const isCompleted = !!this.scannedFaces[step.faceIndex];
+            const isActive = (idx === this.currentStep);
+            dot.className = `step-dot ${isActive ? 'active' : ''} ${isCompleted ? 'completed' : ''}`;
             dot.title = step.name;
-            dot.style.background = this.scannedFaces[step.faceIndex] ? 'var(--brand-primary, #10b981)' : (idx === this.currentStep ? '#60a5fa' : 'rgba(255,255,255,0.2)');
+            dot.style.background = isCompleted ? 'var(--brand-primary, #10b981)' : (isActive ? '#60a5fa' : 'rgba(255,255,255,0.2)');
             this.stepperDots.appendChild(dot);
         });
     }
@@ -166,15 +180,20 @@ class CuboCameraScanner {
         for (let i = 0; i < 9; i++) {
             const cell = document.createElement('div');
             cell.className = 'scanner-preview-cell';
-            cell.style.backgroundColor = this.currentFacePreviewColors[i];
+            const colorHex = this.currentFacePreviewColors[i] || this.CUBE_COLORS.WHITE.hex;
+            cell.style.backgroundColor = colorHex;
             
+            const colorName = this.getColorNameByHex(colorHex);
             if (i === 4) {
                 cell.style.border = '2px solid #ffffff';
-                cell.title = 'Centro (fixo de referência)';
+                cell.style.boxShadow = '0 0 6px rgba(255,255,255,0.8)';
+                cell.title = `Centro: ${colorName} (Clique para ajustar)`;
             } else {
-                cell.title = `Clique para alterar a cor (Posição ${i + 1})`;
-                cell.addEventListener('click', () => this.cycleCellColor(i));
+                cell.title = `Posição ${i + 1}: ${colorName} (Clique para alterar)`;
             }
+            
+            // Todas as células, inclusive o centro, podem ser corrigidas manualmente
+            cell.addEventListener('click', () => this.cycleCellColor(i));
             
             this.previewGrid.appendChild(cell);
         }
@@ -182,12 +201,29 @@ class CuboCameraScanner {
     }
 
     cycleCellColor(index) {
-        if (index === 4) return;
         const hexList = Object.values(this.CUBE_COLORS).map(c => c.hex);
-        const currentIdx = hexList.indexOf(this.currentFacePreviewColors[index]);
+        const currentHex = this.currentFacePreviewColors[index];
+        const currentIdx = hexList.indexOf(currentHex);
         const nextIdx = (currentIdx + 1) % hexList.length;
         this.currentFacePreviewColors[index] = hexList[nextIdx];
+        
+        // Pausar atualização live para preservar a edição manual do usuário
+        this.isPausedForReview = true;
+        const step = this.FACE_STEPS[this.currentStep];
+        this.scannedFaces[step.faceIndex] = [...this.currentFacePreviewColors];
+        
         this.renderPreviewGrid();
+        this.updateParityTracker();
+        this.updateStepUI();
+    }
+
+    getColorNameByHex(hex) {
+        for (const key of Object.keys(this.CUBE_COLORS)) {
+            if (this.CUBE_COLORS[key].hex.toLowerCase() === (hex || '').toLowerCase()) {
+                return this.CUBE_COLORS[key].name;
+            }
+        }
+        return 'Indefinido';
     }
 
     getParityCounts() {
@@ -209,7 +245,7 @@ class CuboCameraScanner {
                 : this.scannedFaces[f];
             if (colors && colors.length === 9) {
                 colors.forEach(hex => {
-                    const key = hexMap[hex.toLowerCase()];
+                    const key = hexMap[(hex || '').toLowerCase()];
                     if (key) counts[key]++;
                 });
             }
@@ -259,7 +295,7 @@ class CuboCameraScanner {
         if (!this.modal) return;
         this.currentStep = 0;
         this.scannedFaces = {};
-        this.calibratedCenters = {};
+        this.isPausedForReview = false;
         this.modal.classList.add('active');
         this.updateStepUI();
         this.updateParityTracker();
@@ -316,6 +352,12 @@ class CuboCameraScanner {
     scanLoop() {
         if (!this.isScanning || !this.video || !this.canvasOverlay || !this.ctx) return;
 
+        // Se o usuário capturou a face ou está revisando, mantemos a imagem congelada
+        if (this.isPausedForReview) {
+            this.animFrameId = requestAnimationFrame(() => this.scanLoop());
+            return;
+        }
+
         // Dimensões CSS reais de exibição do elemento no DOM
         const displayW = this.canvasOverlay.clientWidth || 290;
         const displayH = this.canvasOverlay.clientHeight || 205;
@@ -333,7 +375,7 @@ class CuboCameraScanner {
         this.ctx.save();
         this.ctx.scale(dpr, dpr);
 
-        // Desenhar frame do vídeo mantendo a proporção exata (object-fit: cover) sem distorcer
+        // Desenhar frame do vídeo mantendo a proporção exata (object-fit: cover)
         const vW = this.video.videoWidth || 640;
         const vH = this.video.videoHeight || 480;
         const vRatio = vW / vH;
@@ -354,7 +396,7 @@ class CuboCameraScanner {
 
         this.ctx.drawImage(this.video, dx, dy, dw, dh);
 
-        // Geometria da mira 3x3 no centro: QUADRADO PERFEITO COM OS 4 LADOS IGUAIS
+        // Geometria da mira 3x3 no centro: QUADRADO PERFEITO
         const boxSize = Math.round(Math.min(displayW, displayH) * 0.64);
         const startX = Math.round((displayW - boxSize) / 2);
         const startY = Math.round((displayH - boxSize) / 2);
@@ -367,7 +409,7 @@ class CuboCameraScanner {
         this.ctx.fillRect(0, startY, startX, boxSize);
         this.ctx.fillRect(startX + boxSize, startY, displayW - (startX + boxSize), boxSize);
 
-        // Grade 3x3 estilizada: Quadrado com os 4 lados rigorosamente iguais
+        // Grade 3x3 estilizada
         this.ctx.strokeStyle = 'rgba(16, 185, 129, 0.9)';
         this.ctx.lineWidth = 2.5;
         this.ctx.strokeRect(startX, startY, boxSize, boxSize);
@@ -401,34 +443,68 @@ class CuboCameraScanner {
                 const sampleRadius = Math.max(3, Math.floor(cellSize * 0.12));
 
                 const rgb = this.getAverageRGB(sampleCenterX, sampleCenterY, sampleRadius);
-                if (row === 1 && col === 1) {
-                    this.currentCenterRawRgb = { ...rgb };
-                }
-
-                const matchedColor = this.classifyColorHSV(rgb.r, rgb.g, rgb.b);
+                const matchedColor = this.classifyColor(rgb.r, rgb.g, rgb.b);
                 detectedColors.push(matchedColor);
 
-                // Mira central colorida
+                const isCenter = (row === 1 && col === 1);
+
+                // Mira colorida no centro do sticker
                 this.ctx.fillStyle = matchedColor;
                 this.ctx.beginPath();
                 this.ctx.arc(sampleCenterX, sampleCenterY, sampleRadius, 0, Math.PI * 2);
                 this.ctx.fill();
-                this.ctx.strokeStyle = '#ffffff';
-                this.ctx.lineWidth = 1.5;
-                this.ctx.stroke();
+
+                // Destaca o centro com anel de confirmação ou alerta
+                if (isCenter) {
+                    const expectedHex = this.CUBE_COLORS[step.centerColor].hex;
+                    const centerMatches = (matchedColor.toLowerCase() === expectedHex.toLowerCase());
+
+                    this.ctx.strokeStyle = centerMatches ? '#10b981' : '#ef4444';
+                    this.ctx.lineWidth = 2.5;
+                    this.ctx.stroke();
+
+                    // Anel externo pulsante no centro
+                    this.ctx.beginPath();
+                    this.ctx.arc(sampleCenterX, sampleCenterY, sampleRadius + 4, 0, Math.PI * 2);
+                    this.ctx.strokeStyle = centerMatches ? 'rgba(16, 185, 129, 0.7)' : 'rgba(239, 68, 68, 0.85)';
+                    this.ctx.lineWidth = 1.5;
+                    this.ctx.stroke();
+                } else {
+                    this.ctx.strokeStyle = '#ffffff';
+                    this.ctx.lineWidth = 1.5;
+                    this.ctx.stroke();
+                }
             }
         }
 
         this.ctx.restore();
 
-        // Centro é sempre fixo na cor da face atual
-        const currentTargetCenter = this.CUBE_COLORS[step.centerColor].hex;
-        detectedColors[4] = currentTargetCenter;
+        // Validação em Tempo Real do Centro
+        const expectedCenterHex = this.CUBE_COLORS[step.centerColor].hex;
+        const detectedCenterHex = detectedColors[4];
+        const isCenterMatch = (detectedCenterHex.toLowerCase() === expectedCenterHex.toLowerCase());
+        this.updateCenterStatusBadge(isCenterMatch, detectedCenterHex, step);
 
+        // Atualizar preview com as cores detectadas ao vivo
         this.currentFacePreviewColors = detectedColors;
         this.renderPreviewGrid();
 
         this.animFrameId = requestAnimationFrame(() => this.scanLoop());
+    }
+
+    updateCenterStatusBadge(isMatch, detectedHex, step) {
+        if (!this.centerStatusEl) return;
+        const expectedName = this.CUBE_COLORS[step.centerColor].name;
+        const detectedName = this.getColorNameByHex(detectedHex);
+
+        this.centerStatusEl.style.display = 'flex';
+        if (isMatch) {
+            this.centerStatusEl.className = 'scanner-center-badge match';
+            this.centerStatusEl.innerHTML = `<i class="fas fa-check-circle"></i> Centro Correto: <strong>${expectedName.toUpperCase()}</strong>`;
+        } else {
+            this.centerStatusEl.className = 'scanner-center-badge mismatch';
+            this.centerStatusEl.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Atenção: Centro detectado é <strong>${detectedName.toUpperCase()}</strong>! Aponte a Face <strong>${expectedName.toUpperCase()}</strong>`;
+        }
     }
 
     formatSideLabel(label) {
@@ -436,6 +512,8 @@ class CuboCameraScanner {
         if (label === 'Branco') return 'Bco';
         if (label === 'Laranja') return 'Lar';
         if (label === 'Vermelho') return 'Ver';
+        if (label === 'Verde') return 'Vde';
+        if (label === 'Azul') return 'Azu';
         return label;
     }
 
@@ -447,20 +525,20 @@ class CuboCameraScanner {
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
 
-        // Pílula Superior (CIMA) - Cima Verde deixado como está
+        // Pílula Superior (CIMA)
         const topY = startY / 2;
         this.drawBadge(startX + boxSize / 2, topY, `▲ CIMA: ${step.top.label}`, step.top.hex, fontSize);
 
-        // Pílula Inferior (BAIXO) - Baixo Azul deixado como está
+        // Pílula Inferior (BAIXO)
         const botY = (startY + boxSize) + (h - (startY + boxSize)) / 2;
         this.drawBadge(startX + boxSize / 2, botY, `▼ BAIXO: ${step.bottom.label}`, step.bottom.hex, fontSize);
 
-        // Pílula Esquerda (ESQ) - com seta e abreviação ("◀ Aml" / "◀ Bco")
+        // Pílula Esquerda (ESQ)
         const leftX = startX / 2;
         const leftText = `◀ ${this.formatSideLabel(step.left.label)}`;
         this.drawBadge(leftX, startY + boxSize / 2, leftText, step.left.hex, fontSize);
 
-        // Pílula Direita (DIR) - com seta e abreviação ("Bco ▶" / "Aml ▶")
+        // Pílula Direita (DIR)
         const rightX = (startX + boxSize) + (w - (startX + boxSize)) / 2;
         const rightText = `${this.formatSideLabel(step.right.label)} ▶`;
         this.drawBadge(rightX, startY + boxSize / 2, rightText, step.right.hex, fontSize);
@@ -500,14 +578,31 @@ class CuboCameraScanner {
             const dpr = this.dpr || 1;
             const pX = Math.round(cx * dpr);
             const pY = Math.round(cy * dpr);
-            const pR = Math.max(2, Math.round(radius * dpr));
+            const pR = Math.max(3, Math.round(radius * dpr));
             const imgData = this.ctx.getImageData(pX - pR, pY - pR, pR * 2, pR * 2);
             const d = imgData.data;
-            for (let i = 0; i < d.length; i += 4) {
-                r += d[i];
-                g += d[i + 1];
-                b += d[i + 2];
-                count++;
+            const r2 = pR * pR;
+
+            // Amostragem circular com exclusão de reflexos especulares extremos (glare do plástico)
+            for (let dy = -pR; dy < pR; dy++) {
+                for (let dx = -pR; dx < pR; dx++) {
+                    if (dx * dx + dy * dy <= r2) {
+                        const idx = ((dy + pR) * (pR * 2) + (dx + pR)) * 4;
+                        const pr = d[idx];
+                        const pg = d[idx + 1];
+                        const pb = d[idx + 2];
+
+                        // Se for brilho puro de reflexo de lâmpada no plástico lustroso, ignora
+                        if (pr > 248 && pg > 248 && pb > 248) {
+                            continue;
+                        }
+
+                        r += pr;
+                        g += pg;
+                        b += pb;
+                        count++;
+                    }
+                }
             }
         } catch (e) {
             return { r: 255, g: 255, b: 255 };
@@ -543,119 +638,148 @@ class CuboCameraScanner {
         return { h, s, v };
     }
 
-    calcColorDistance(rgb1, hsv1, rgb2, hsv2) {
-        let dh = Math.abs(hsv1.h - hsv2.h);
-        if (dh > 180) dh = 360 - dh;
-        const normDh = dh / 180;
-        const normDs = Math.abs(hsv1.s - hsv2.s);
-        const normDv = Math.abs(hsv1.v - hsv2.v);
+    /**
+     * Classificador Espectral Inteligente de Cores do Cubo
+     * Combina Espaço HSV com Dominância Direta de Canais RGB e Dispersão Cromática.
+     * Imune à iluminação ambiente e reflexos.
+     */
+    classifyColor(r, g, b) {
+        const { h, s, v } = this.rgbToHsv(r, g, b);
 
-        const dr = (rgb1.r - rgb2.r) / 255;
-        const dg = (rgb1.g - rgb2.g) / 255;
-        const db = (rgb1.b - rgb2.b) / 255;
-        const rgbDist = Math.sqrt(dr * dr + dg * dg + db * db) / Math.sqrt(3);
+        const maxCh = Math.max(r, g, b);
+        const minCh = Math.min(r, g, b);
+        const spread = maxCh - minCh;
 
-        if (hsv1.s < 0.20 && hsv2.s < 0.20) {
-            return rgbDist;
-        }
-
-        return (normDh * 0.55) + (normDs * 0.20) + (normDv * 0.10) + (rgbDist * 0.15);
-    }
-
-    classifyColorHSV(r, g, b) {
-        const hsv = this.rgbToHsv(r, g, b);
-        const { h, s, v } = hsv;
-
-        // Se houver centros calibrados de faces já capturadas, avalia proximidade adaptativa
-        const calKeys = Object.keys(this.calibratedCenters);
-        if (calKeys.length >= 2) {
-            let bestMatch = null;
-            let minDistance = Infinity;
-
-            for (const colorKey of calKeys) {
-                const center = this.calibratedCenters[colorKey];
-                let dist = this.calcColorDistance({ r, g, b }, hsv, center.rgb, center.hsv);
-                if (dist < minDistance) {
-                    minDistance = dist;
-                    bestMatch = center.hex;
-                }
-            }
-
-            if (minDistance < 0.28 && bestMatch) {
-                return bestMatch;
-            }
-        }
-
-        // Fallback robusto por faixas HSV
-        // Branco (baixa saturação e brilho)
-        if (s < 0.22 && v > 0.38) {
+        // 1. BRANCO: baixa saturação OU dispersão mínima entre canais com alto brilho
+        if ((s < 0.22 && v > 0.35) || (spread < 48 && v > 0.40)) {
             return this.CUBE_COLORS.WHITE.hex;
         }
 
-        // Amarelo
-        if (h >= 45 && h <= 72 && s >= 0.25) {
-            return this.CUBE_COLORS.YELLOW.hex;
-        }
-
-        // Laranja vs Vermelho
-        if (h >= 13 && h < 45) {
-            return this.CUBE_COLORS.ORANGE.hex;
-        }
-        if (h >= 340 || h < 13) {
-            return this.CUBE_COLORS.RED.hex;
-        }
-
-        // Verde
-        if (h >= 73 && h <= 165) {
+        // 2. VERDE vs AZUL (Diferenciação absoluta por dominância de canais e Matiz)
+        // No cubo verde (inclusive fluorescentes/stickerless), o canal Verde domina expressivamente o Azul:
+        if ((h >= 75 && h <= 168) || (g > b * 1.08 && g > r && h >= 70 && h <= 172)) {
             return this.CUBE_COLORS.GREEN.hex;
         }
 
-        // Azul
-        if (h > 165 && h < 270) {
+        // No cubo azul, o canal Azul domina estritamente o Verde e o Vermelho:
+        if ((h > 168 && h <= 265) || (b > g && b > r && h > 165)) {
             return this.CUBE_COLORS.BLUE.hex;
+        }
+
+        // 3. AMARELO: Ambos os canais R e G são muito altos, canal B é baixo
+        if ((h >= 42 && h <= 75 && s >= 0.25) || (r > 150 && g > 150 && b < 120 && h >= 40 && h <= 78)) {
+            return this.CUBE_COLORS.YELLOW.hex;
+        }
+
+        // 4. LARANJA: Matiz entre 14 e 42, com presença moderada de Verde (g > 60)
+        if (h >= 14 && h < 42) {
+            return this.CUBE_COLORS.ORANGE.hex;
+        }
+
+        // 5. VERMELHO: Matiz próximo aos extremos (338-360 ou 0-14), canal R dominante sobre G e B
+        if (h >= 338 || h < 14) {
+            return this.CUBE_COLORS.RED.hex;
+        }
+
+        // 6. Regras de Fallback baseadas na dominância pura RGB
+        if (g > r && g > b) {
+            return this.CUBE_COLORS.GREEN.hex;
+        }
+        if (b > r && b > g) {
+            return this.CUBE_COLORS.BLUE.hex;
+        }
+        if (r > g && r > b) {
+            if (g > r * 0.55) {
+                return this.CUBE_COLORS.ORANGE.hex;
+            }
+            return this.CUBE_COLORS.RED.hex;
         }
 
         return this.CUBE_COLORS.WHITE.hex;
     }
 
-    captureCurrentFace() {
-        const step = this.FACE_STEPS[this.currentStep];
-        this.scannedFaces[step.faceIndex] = [...this.currentFacePreviewColors];
-
-        // Calibração Adaptativa do centro sob a luz real da câmera
-        if (this.ctx && this.canvasOverlay) {
-            const centerRgb = this.currentCenterRawRgb || { r: 255, g: 255, b: 255 };
-            const centerHsv = this.rgbToHsv(centerRgb.r, centerRgb.g, centerRgb.b);
-
-            this.calibratedCenters[step.centerColor] = {
-                rgb: centerRgb,
-                hsv: centerHsv,
-                hex: this.CUBE_COLORS[step.centerColor].hex
-            };
-        }
-
-        this.playBeep();
-        this.updateParityTracker();
-
-        if (this.currentStep < this.FACE_STEPS.length - 1) {
-            this.currentStep++;
-            this.updateStepUI();
+    handleCaptureButtonClick() {
+        if (this.isPausedForReview) {
+            // Se já estava pausado para revisão, o botão atua como "Refazer Leitura"
+            this.refazerLeitura();
         } else {
-            this.finishScanning();
+            // Caso contrário, captura a face atual
+            this.captureCurrentFace();
         }
     }
 
+    captureCurrentFace() {
+        const step = this.FACE_STEPS[this.currentStep];
+        const centerExpectedHex = this.CUBE_COLORS[step.centerColor].hex;
+        const centerDetectedHex = this.currentFacePreviewColors[4];
+
+        // Se o centro detectado não coincidir com a face esperada, avisa o usuário!
+        if (centerDetectedHex.toLowerCase() !== centerExpectedHex.toLowerCase()) {
+            const detectedName = this.getColorNameByHex(centerDetectedHex);
+            const expectedName = this.CUBE_COLORS[step.centerColor].name;
+            const confirmCapture = confirm(
+                `⚠️ ATENÇÃO: Centro Detectado Incorreto!\n\n` +
+                `O centro apontado para a câmera parece ser ${detectedName.toUpperCase()}, mas esta etapa pede a Face ${expectedName.toUpperCase()}!\n\n` +
+                `Deseja capturar esta face mesmo assim? (Clique em 'Cancelar' para apontar a face correta)`
+            );
+            if (!confirmCapture) {
+                return;
+            }
+        }
+
+        // Salvar a face capturada
+        this.scannedFaces[step.faceIndex] = [...this.currentFacePreviewColors];
+        this.isPausedForReview = true;
+
+        this.playBeep();
+        this.updateStepUI();
+        this.renderPreviewGrid();
+        this.updateParityTracker();
+    }
+
+    refazerLeitura() {
+        const step = this.FACE_STEPS[this.currentStep];
+        delete this.scannedFaces[step.faceIndex];
+        this.isPausedForReview = false;
+        this.updateStepUI();
+        this.renderPreviewGrid();
+        this.updateParityTracker();
+    }
+
     nextStep() {
+        const step = this.FACE_STEPS[this.currentStep];
+        
+        // Garante que a face atual esteja gravada
+        this.scannedFaces[step.faceIndex] = [...this.currentFacePreviewColors];
+
         if (this.currentStep < this.FACE_STEPS.length - 1) {
             this.currentStep++;
+            const nextStep = this.FACE_STEPS[this.currentStep];
+            
+            // Se a próxima face já foi lida anteriormente, exibe em modo revisão; senão, câmera ao vivo
+            this.isPausedForReview = !!this.scannedFaces[nextStep.faceIndex];
+            
             this.updateStepUI();
+            this.renderPreviewGrid();
+            this.updateParityTracker();
+        } else {
+            this.finishScanning();
         }
     }
 
     prevStep() {
         if (this.currentStep > 0) {
             this.currentStep--;
+            const prevStep = this.FACE_STEPS[this.currentStep];
+            
+            this.isPausedForReview = true;
+            if (this.scannedFaces[prevStep.faceIndex]) {
+                this.currentFacePreviewColors = [...this.scannedFaces[prevStep.faceIndex]];
+            }
+            
             this.updateStepUI();
+            this.renderPreviewGrid();
+            this.updateParityTracker();
         }
     }
 
@@ -669,14 +793,7 @@ class CuboCameraScanner {
         }
 
         // Indicador de progresso (pontos)
-        if (this.stepperDots) {
-            this.stepperDots.innerHTML = '';
-            for (let i = 0; i < this.FACE_STEPS.length; i++) {
-                const dot = document.createElement('span');
-                dot.className = 'stepper-dot' + (i === this.currentStep ? ' active' : (i < this.currentStep ? ' done' : ''));
-                this.stepperDots.appendChild(dot);
-            }
-        }
+        this.renderStepperDots();
 
         const getTextColor = (hex) => {
             if (hex === '#000099') return '#60a5fa'; // Azul claro
@@ -687,15 +804,17 @@ class CuboCameraScanner {
             return '#ffffff';
         };
 
-        // Atualizar bússola visual compacta no HTML
         const dotStyle = (hex) => `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${hex};border:1px solid rgba(255,255,255,0.7);margin-right:4px;vertical-align:middle;"></span>`;
         const formatCompassName = (name) => {
             if (name === 'Amarelo') return 'Aml';
             if (name === 'Branco') return 'Bco';
             if (name === 'Laranja') return 'Lar';
             if (name === 'Vermelho') return 'Ver';
+            if (name === 'Verde') return 'Vde';
+            if (name === 'Azul') return 'Azu';
             return name;
         };
+
         if (this.compassTop) {
             this.compassTop.innerHTML = `▲ Cima: ${dotStyle(step.top.hex)}<span style="color:${getTextColor(step.top.hex)}">${step.top.name}</span>`;
             this.compassTop.style.borderColor = step.top.hex;
@@ -732,22 +851,38 @@ class CuboCameraScanner {
             this.btnPrev.disabled = (this.currentStep === 0);
         }
 
-        if (this.btnNext) {
-            this.btnNext.textContent = (this.currentStep === this.FACE_STEPS.length - 1) ? 'Finalizar' : 'Avançar';
+        // Ajuste dos botões de ação conforme estado (Live vs Revisão)
+        const isLastStep = (this.currentStep === this.FACE_STEPS.length - 1);
+        if (this.isPausedForReview) {
+            if (this.btnCapture) {
+                this.btnCapture.innerHTML = '<i class="fas fa-redo"></i> Refazer Leitura';
+                this.btnCapture.className = 'scanner-btn secondary';
+            }
+            if (this.btnNext) {
+                this.btnNext.innerHTML = isLastStep ? '<i class="fas fa-check"></i> Finalizar Cubo' : '<i class="fas fa-arrow-right"></i> Próxima Face';
+                this.btnNext.className = 'scanner-btn capture';
+            }
+        } else {
+            if (this.btnCapture) {
+                this.btnCapture.innerHTML = '<i class="fas fa-camera"></i> Capturar Face';
+                this.btnCapture.className = 'scanner-btn capture';
+            }
+            if (this.btnNext) {
+                this.btnNext.innerHTML = isLastStep ? 'Finalizar' : 'Avançar';
+                this.btnNext.className = 'scanner-btn secondary';
+            }
         }
 
+        // Se a face atual já tiver leitura gravada, carrega suas cores
         if (this.scannedFaces[step.faceIndex]) {
             this.currentFacePreviewColors = [...this.scannedFaces[step.faceIndex]];
-        } else {
+        } else if (!this.isScanning) {
             const targetHex = this.CUBE_COLORS[step.centerColor].hex;
             this.currentFacePreviewColors = Array(9).fill(this.CUBE_COLORS.WHITE.hex);
             this.currentFacePreviewColors[4] = targetHex;
         }
 
-        // Atualizar cor inicial do centro no preview
-        this.currentFacePreviewColors[4] = this.CUBE_COLORS[step.centerColor].hex;
         this.renderPreviewGrid();
-        this.renderStepperDots();
     }
 
     handleImageUpload(event) {
@@ -760,6 +895,7 @@ class CuboCameraScanner {
         reader.onload = (e) => {
             img.onload = () => {
                 if (this.canvasOverlay && this.ctx) {
+                    this.isPausedForReview = true;
                     const displayW = this.canvasOverlay.clientWidth || 290;
                     const displayH = this.canvasOverlay.clientHeight || 205;
                     const dpr = this.dpr || 1;
@@ -794,18 +930,19 @@ class CuboCameraScanner {
                         for (let c = 0; c < 3; c++) {
                             const cx = Math.floor(startX + (c + 0.5) * cellSize);
                             const cy = Math.floor(startY + (r + 0.5) * cellSize);
-                            const rgb = this.getAverageRGB(cx, cy, 6);
-                            colors.push(this.classifyColorHSV(rgb.r, rgb.g, rgb.b));
+                            const rgb = this.getAverageRGB(cx, cy, Math.max(3, Math.floor(cellSize * 0.12)));
+                            colors.push(this.classifyColor(rgb.r, rgb.g, rgb.b));
                         }
                     }
 
                     this.ctx.restore();
 
                     const step = this.FACE_STEPS[this.currentStep];
-                    colors[4] = this.CUBE_COLORS[step.centerColor].hex;
-
-                    this.currentFacePreviewColors = colors;
+                    this.scannedFaces[step.faceIndex] = [...colors];
+                    this.currentFacePreviewColors = [...colors];
                     this.renderPreviewGrid();
+                    this.updateParityTracker();
+                    this.updateStepUI();
                 }
             };
             img.src = e.target.result;
@@ -817,13 +954,18 @@ class CuboCameraScanner {
         this.stopCamera();
         this.close();
 
+        // Mapear todas as 6 faces lidas para o FlatCube e Cubo 3D aplicando as transformações de rotação
         if (this.flatCube && this.flatCube.faces) {
-            for (let f = 0; f < 6; f++) {
-                const faceColors = this.scannedFaces[f];
-                if (faceColors && this.flatCube.faces[f]) {
+            for (let i = 0; i < this.FACE_STEPS.length; i++) {
+                const step = this.FACE_STEPS[i];
+                const camColors = this.scannedFaces[step.faceIndex];
+                if (camColors && this.flatCube.faces[step.faceIndex]) {
+                    const transform = step.transform || [0, 1, 2, 3, 4, 5, 6, 7, 8];
                     for (let s = 0; s < 9; s++) {
-                        if (this.flatCube.faces[f].stickers[s]) {
-                            this.flatCube.faces[f].stickers[s].setColor(faceColors[s]);
+                        const camIdx = transform[s];
+                        const colorHex = camColors[camIdx];
+                        if (this.flatCube.faces[step.faceIndex].stickers[s]) {
+                            this.flatCube.faces[step.faceIndex].stickers[s].setColor(colorHex);
                         }
                     }
                 }
