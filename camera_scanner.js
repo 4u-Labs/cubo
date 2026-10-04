@@ -177,6 +177,15 @@ class CuboCameraScanner {
     renderPreviewGrid() {
         if (!this.previewGrid) return;
         this.previewGrid.innerHTML = '';
+        const abbrevMap = {
+            'Branco': { label: 'B', text: '#111' },
+            'Amarelo': { label: 'A', text: '#111' },
+            'Verde': { label: 'Vd', text: '#fff' },
+            'Azul': { label: 'Az', text: '#fff' },
+            'Vermelho': { label: 'Vm', text: '#fff' },
+            'Laranja': { label: 'Lar', text: '#111' }
+        };
+
         for (let i = 0; i < 9; i++) {
             const cell = document.createElement('div');
             cell.className = 'scanner-preview-cell';
@@ -184,6 +193,9 @@ class CuboCameraScanner {
             cell.style.backgroundColor = colorHex;
             
             const colorName = this.getColorNameByHex(colorHex);
+            const abbr = abbrevMap[colorName] || { label: '', text: '#fff' };
+            cell.innerHTML = `<span style="font-size:10px;font-weight:900;color:${abbr.text};line-height:26px;display:block;text-align:center;user-select:none;">${abbr.label}</span>`;
+
             if (i === 4) {
                 cell.style.border = '2px solid #ffffff';
                 cell.style.boxShadow = '0 0 6px rgba(255,255,255,0.8)';
@@ -538,7 +550,7 @@ class CuboCameraScanner {
         if (label === 'Amarelo') return 'Aml';
         if (label === 'Branco') return 'Bco';
         if (label === 'Laranja') return 'Lar';
-        if (label === 'Vermelho') return 'Ver';
+        if (label === 'Vermelho') return 'Verm';
         if (label === 'Verde') return 'Vde';
         if (label === 'Azul') return 'Azu';
         return label;
@@ -694,35 +706,45 @@ class CuboCameraScanner {
         }
 
         // 3. AMARELO: Ambos os canais R e G são muito altos, canal B é baixo
-        if ((h >= 42 && h <= 75 && s >= 0.25) || (r > 150 && g > 150 && b < 120 && h >= 40 && h <= 78)) {
+        const gRatio = g / Math.max(1, r);
+        if ((h >= 40 && h <= 75 && s >= 0.25) || (r > 140 && g > 130 && b < 125 && gRatio > 0.70)) {
             return this.CUBE_COLORS.YELLOW.hex;
         }
 
-        // 4. LARANJA: Matiz entre 14 e 42, com presença moderada de Verde (g > 60)
-        if (h >= 14 && h < 42) {
+        // 4. DIFERENCIAÇÃO ROBUSTA ENTRE VERMELHO E LARANJA
+        // Ambos possuem canal R dominante (r > g e r > b).
+        // Diferenças físicas e ópticas essenciais:
+        // - No Vermelho: o pigmento absorve o canal verde (gRatio < 0.38). O azul é próximo ou maior que o verde.
+        // - No Laranja: o pigmento reflete bastante verde (gRatio >= 0.38) e quase zero azul (g - b >= 35).
+        const gMinusB = g - b;
+
+        // Regra A: Se o canal Azul for próximo ou superior ao Verde com matiz avermelhado, é 100% VERMELHO
+        // (Plástico laranja NUNCA tem componente azul próximo ou maior que o verde)
+        if ((b >= g - 6 && h < 25) || (b >= g)) {
+            return this.CUBE_COLORS.RED.hex;
+        }
+
+        // Regra B: Laranja evidente (matiz entre 15° e 42°, proporção expressiva de verde e g >> b)
+        if (h >= 15 && h < 42 && gRatio >= 0.38 && gMinusB >= 35) {
             return this.CUBE_COLORS.ORANGE.hex;
         }
 
-        // 5. VERMELHO: Matiz próximo aos extremos (338-360 ou 0-14), canal R dominante sobre G e B
-        if (h >= 338 || h < 14) {
+        // Regra C: Laranja sob luz quente ou alta saturação/brilho
+        if (gRatio >= 0.42 && gMinusB >= 40 && h >= 12) {
+            return this.CUBE_COLORS.ORANGE.hex;
+        }
+
+        // Regra D: Vermelho clássico (matiz nos extremos 335°-360° ou 0°-12°, ou baixa presença de verde)
+        if (h >= 335 || h <= 12 || gRatio < 0.38 || gMinusB < 35) {
             return this.CUBE_COLORS.RED.hex;
         }
 
-        // 6. Regras de Fallback baseadas na dominância pura RGB
-        if (g > r && g > b) {
-            return this.CUBE_COLORS.GREEN.hex;
-        }
-        if (b > r && b > g) {
-            return this.CUBE_COLORS.BLUE.hex;
-        }
-        if (r > g && r > b) {
-            if (g > r * 0.55) {
-                return this.CUBE_COLORS.ORANGE.hex;
-            }
-            return this.CUBE_COLORS.RED.hex;
+        // Regra E: Fronteira sutil (h entre 12° e 18°)
+        if (gRatio >= 0.40 && gMinusB >= 38) {
+            return this.CUBE_COLORS.ORANGE.hex;
         }
 
-        return this.CUBE_COLORS.WHITE.hex;
+        return this.CUBE_COLORS.RED.hex;
     }
 
     handleCaptureButtonClick() {
