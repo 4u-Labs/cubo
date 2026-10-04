@@ -271,129 +271,7 @@ $antiCache = time();
             transition: padding 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.25s ease, box-shadow 0.25s ease;
         }
 
-        .header-toggle-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 14px;
-            border-radius: 12px;
-            font-size: 0.82rem;
-            font-weight: 700;
-            cursor: pointer;
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            background: rgba(255, 255, 255, 0.08);
-            color: #cbd5e1;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-        }
 
-        .header-toggle-btn:hover {
-            background: rgba(255, 255, 255, 0.16);
-            color: #fff;
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-1px);
-        }
-
-        .header-collapse-handle {
-            position: absolute;
-            bottom: -11px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(15, 23, 42, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            border-top: none;
-            border-radius: 0 0 10px 10px;
-            padding: 1px 18px;
-            font-size: 0.65rem;
-            color: #94a3b8;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
-            transition: all 0.2s ease;
-            z-index: 60;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .header-collapse-handle:hover {
-            color: #fff;
-            background: var(--brand-indigo);
-            border-color: rgba(99, 102, 241, 0.5);
-        }
-
-        #header.collapsed .header-collapse-handle i {
-            transform: rotate(180deg);
-        }
-
-        /* Estado Recolhido do Cabeçalho */
-        #header.collapsed {
-            padding: 6px 16px;
-            background: rgba(15, 23, 42, 0.96);
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
-        }
-
-        #header.collapsed .header-inner {
-            flex-direction: row !important;
-            justify-content: space-between !important;
-            align-items: center !important;
-            flex-wrap: nowrap !important;
-            gap: 8px;
-        }
-
-        #header.collapsed .header-title-box {
-            flex-direction: row !important;
-            align-items: center !important;
-            gap: 8px;
-        }
-
-        #header.collapsed .header-logo-icon {
-            width: 28px;
-            height: 28px;
-            font-size: 0.9rem;
-            border-radius: 8px;
-        }
-
-        #header.collapsed .brand-word-cubo {
-            font-size: 0.80rem;
-        }
-
-        #header.collapsed .brand-word-facil {
-            font-size: 0.70rem;
-        }
-
-        #header.collapsed .header-actions {
-            width: auto !important;
-            justify-content: flex-end !important;
-            gap: 5px;
-            flex-wrap: nowrap !important;
-        }
-
-        #header.collapsed .header-btn {
-            padding: 6px 8px;
-            font-size: 0.82rem;
-            border-radius: 8px;
-            gap: 4px;
-        }
-
-        #header.collapsed .header-toggle-btn {
-            padding: 6px 8px;
-            font-size: 0.78rem;
-            border-radius: 8px;
-            background: rgba(99, 102, 241, 0.25);
-            border-color: rgba(99, 102, 241, 0.45);
-            color: #c7d2fe;
-        }
-
-        #header.collapsed .lang-switch-box {
-            padding: 2px;
-            border-radius: 8px;
-        }
-
-        #header.collapsed .lang-btn {
-            padding: 3px 5px;
-            font-size: 0.70rem;
-            border-radius: 6px;
-        }
 
         @media (max-width: 650px) {
             #header {
@@ -451,15 +329,7 @@ $antiCache = time();
                 font-size: 0.68rem !important;
                 border-radius: 6px !important;
             }
-            .header-toggle-btn {
-                padding: 6px 8px !important;
-                min-width: 30px !important;
-                border-radius: 8px !important;
-                justify-content: center !important;
-            }
-            .header-toggle-btn .toggle-btn-text {
-                display: none !important;
-            }
+
         }
 
         /* ==================== CONTAINER & CARDS ==================== */
@@ -1894,13 +1764,7 @@ $antiCache = time();
                     <button type="button" class="lang-btn" id="btnLangPT" data-lang="pt" onclick="if(window.setCubeLang) window.setCubeLang('pt')">PT</button>
                     <button type="button" class="lang-btn" id="btnLangEN" data-lang="en" onclick="if(window.setCubeLang) window.setCubeLang('en')">EN</button>
                 </div>
-                <button id="btnToggleHeader" class="header-toggle-btn" data-i18n-title="btn_collapse_title" title="Recolher Cabeçalho">
-                    <i class="fas fa-chevron-up"></i> <span class="toggle-btn-text" data-i18n="btn_collapse">Recolher</span>
-                </button>
             </div>
-        </div>
-        <div class="header-collapse-handle" id="headerCollapseHandle" data-i18n-title="collapse_handle_title" title="Toque para recolher ou expandir">
-            <i class="fas fa-chevron-up"></i>
         </div>
     </header>
 
@@ -2398,72 +2262,8 @@ $antiCache = time();
                 });
             }
 
-            // ==================== CONTROLE DE RECOLHER / EXPANDIR CABEÇALHO ====================
-            var headerEl = document.getElementById('header');
-            var btnToggleHeader = document.getElementById('btnToggleHeader');
-            var headerHandle = document.getElementById('headerCollapseHandle');
-
-            function updateHeaderUI(isCollapsed) {
-                if (btnToggleHeader) {
-                    var icon = btnToggleHeader.querySelector('i');
-                    var text = btnToggleHeader.querySelector('.toggle-btn-text');
-                    if (icon) icon.className = isCollapsed ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
-                    if (text) text.textContent = isCollapsed ? (window.t ? window.t('btn_expand') : 'Expandir') : (window.t ? window.t('btn_collapse') : 'Recolher');
-                    btnToggleHeader.title = isCollapsed ? (window.t ? window.t('btn_expand_title') : 'Expandir Cabeçalho') : (window.t ? window.t('btn_collapse_title') : 'Recolher Cabeçalho');
-                }
-                if (headerHandle) {
-                    var hIcon = headerHandle.querySelector('i');
-                    if (hIcon) hIcon.className = isCollapsed ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
-                    headerHandle.title = window.t ? window.t('collapse_handle_title') : 'Toque para recolher ou expandir';
-                }
-            }
-
-            function toggleHeaderCollapse(forceState) {
-                if (!headerEl) return;
-                var willCollapse = (typeof forceState === 'boolean') 
-                    ? forceState 
-                    : !headerEl.classList.contains('collapsed');
-                
-                if (willCollapse) {
-                    headerEl.classList.add('collapsed');
-                } else {
-                    headerEl.classList.remove('collapsed');
-                }
-                
-                try {
-                    localStorage.setItem('cubofacil_header_collapsed', willCollapse ? 'true' : 'false');
-                } catch(e) {}
-                
-                updateHeaderUI(willCollapse);
-
-                // Dispara recálculo de altura e posições imediatamente e após a transição CSS
-                window.dispatchEvent(new Event('resize'));
-                setTimeout(function() {
-                    window.dispatchEvent(new Event('resize'));
-                }, 150);
-                setTimeout(function() {
-                    window.dispatchEvent(new Event('resize'));
-                }, 300);
-            }
-
-            if (btnToggleHeader) {
-                btnToggleHeader.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    toggleHeaderCollapse();
-                });
-            }
-            if (headerHandle) {
-                headerHandle.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    toggleHeaderCollapse();
-                });
-            }
-
             try {
-                var savedHeaderState = localStorage.getItem('cubofacil_header_collapsed');
-                if (savedHeaderState === 'true') {
-                    toggleHeaderCollapse(true);
-                }
+                localStorage.removeItem('cubofacil_header_collapsed');
             } catch(e) {}
         };
 

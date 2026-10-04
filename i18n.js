@@ -475,17 +475,7 @@
         if (btnPt) btnPt.classList.toggle('active', currentLang === 'pt');
         if (btnEn) btnEn.classList.toggle('active', currentLang === 'en');
 
-        // 5. Atualizar botão de recolher/expandir se existir
-        const btnToggle = document.getElementById('btnToggleHeader');
-        const header = document.getElementById('header');
-        if (btnToggle && header) {
-            const isCollapsed = header.classList.contains('collapsed');
-            const labelEl = btnToggle.querySelector('.toggle-btn-text');
-            if (labelEl) {
-                labelEl.textContent = isCollapsed ? t('btn_expand') : t('btn_collapse');
-            }
-            btnToggle.title = isCollapsed ? t('btn_expand_title') : t('btn_collapse_title');
-        }
+
 
         // 6. Atualizar controles se já instanciados
         if (window.controls) {
