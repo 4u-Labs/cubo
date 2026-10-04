@@ -129,8 +129,9 @@
             scanner_toast_success: "Cubo lido com sucesso! Abrindo Passo a Passo...",
 
             // Speedcubing Timer WCA
-            timer_title: "Speedcubing Timer WCA",
+            timer_title: "Timer WCA",
             timer_inspection: "Inspeção (15s)",
+            timer_inspection_title: "Regra oficial WCA: 15 segundos de inspeção",
             timer_btn_new_scramble: "Novo Scramble",
             timer_btn_apply_3d: "Aplicar no Cubo 3D",
             timer_status_idle: "Pressione e segure ESPAÇO (ou toque) para armar",
@@ -328,8 +329,9 @@
             scanner_toast_success: "Cube scanned successfully! Opening Step by Step...",
 
             // Speedcubing Timer WCA
-            timer_title: "WCA Speedcubing Timer",
+            timer_title: "WCA Timer",
             timer_inspection: "Inspection (15s)",
+            timer_inspection_title: "Official WCA rule: 15-second inspection",
             timer_btn_new_scramble: "New Scramble",
             timer_btn_apply_3d: "Apply to 3D Cube",
             timer_status_idle: "Press and hold SPACE (or touch) to arm",

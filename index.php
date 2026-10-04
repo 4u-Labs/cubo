@@ -965,14 +965,15 @@ $antiCache = time();
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.75);
+            height: 100dvh;
+            background: rgba(0, 0, 0, 0.78);
             -webkit-backdrop-filter: blur(12px);
             backdrop-filter: blur(12px);
             z-index: 1000;
             display: none;
             align-items: center;
             justify-content: center;
-            padding: 12px 8px;
+            padding: max(16px, env(safe-area-inset-top, 16px)) 12px max(16px, env(safe-area-inset-bottom, 16px)) 12px;
             box-sizing: border-box;
             opacity: 0;
             transition: opacity 0.25s ease;
@@ -992,7 +993,7 @@ $antiCache = time();
             color: #fff;
             max-width: 440px;
             width: 100%;
-            max-height: 94vh;
+            max-height: calc(100dvh - 32px);
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -1011,6 +1012,7 @@ $antiCache = time();
             display: flex;
             align-items: center;
             justify-content: space-between;
+            flex-shrink: 0;
         }
 
         .modal-title {
@@ -1034,6 +1036,7 @@ $antiCache = time();
             cursor: pointer;
             font-size: 1.05rem;
             transition: all 0.2s ease;
+            flex-shrink: 0;
         }
 
         .modal-close-btn:hover {
@@ -1053,29 +1056,30 @@ $antiCache = time();
 
         @media (max-width: 600px) {
             .modal-backdrop {
-                padding: 4px 4px !important;
+                padding: max(16px, env(safe-area-inset-top, 16px)) 8px max(16px, env(safe-area-inset-bottom, 16px)) 8px !important;
+                align-items: center !important;
             }
             .modal-window {
-                width: 98% !important;
+                width: 100% !important;
                 max-width: 100% !important;
-                max-height: 98vh !important;
-                border-radius: 14px !important;
+                max-height: calc(100dvh - 32px) !important;
+                border-radius: 18px !important;
             }
             .modal-body {
-                padding: 6px 6px !important;
+                padding: 10px 10px !important;
                 overflow-x: hidden !important;
                 overflow-y: auto !important;
             }
             .modal-header {
-                padding: 6px 10px !important;
+                padding: 10px 14px !important;
             }
             .modal-title {
-                font-size: 0.90rem !important;
+                font-size: 0.95rem !important;
             }
             .modal-close-btn {
-                width: 28px !important;
-                height: 28px !important;
-                font-size: 1.1rem !important;
+                width: 32px !important;
+                height: 32px !important;
+                font-size: 1.15rem !important;
             }
         }
 
@@ -1541,6 +1545,124 @@ $antiCache = time();
             background: #090d16;
         }
 
+        .timer-modal-header {
+            padding: 12px 18px;
+            background: linear-gradient(180deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.4) 100%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .timer-header-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+            flex-shrink: 1;
+        }
+
+        .timer-header-icon {
+            font-size: 1.25rem;
+            color: #60a5fa;
+            flex-shrink: 0;
+        }
+
+        .timer-title-text {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #fff;
+            white-space: nowrap;
+        }
+
+        .timer-wca-pill {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 6px;
+            background: rgba(96, 165, 250, 0.15);
+            color: #60a5fa;
+            border: 1px solid rgba(96, 165, 250, 0.3);
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .timer-header-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .timer-inspection-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .timer-inspection-pill:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(99, 102, 241, 0.4);
+            color: #fff;
+        }
+
+        .timer-inspection-pill input[type="checkbox"] {
+            accent-color: #6366f1;
+            width: 15px;
+            height: 15px;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        @media (max-width: 600px) {
+            .timer-modal-header {
+                padding: 10px 12px !important;
+                gap: 8px !important;
+            }
+            .timer-header-icon {
+                font-size: 1.1rem !important;
+            }
+            .timer-title-text {
+                font-size: 0.95rem !important;
+            }
+            .timer-wca-pill {
+                font-size: 0.62rem !important;
+                padding: 1px 5px !important;
+            }
+            .timer-header-controls {
+                gap: 8px !important;
+            }
+            .timer-inspection-pill {
+                padding: 4px 8px !important;
+                font-size: 0.74rem !important;
+                gap: 5px !important;
+            }
+            .timer-inspection-pill input[type="checkbox"] {
+                width: 13px !important;
+                height: 13px !important;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .timer-wca-pill {
+                display: none !important;
+            }
+        }
+
         .timer-scramble-box {
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1860,14 +1982,16 @@ $antiCache = time();
     <!-- ==================== MODAL 2: CRONÔMETRO WCA ==================== -->
     <div id="speedTimerModal" class="modal-backdrop">
         <div class="modal-window modal-window-timer">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <i class="fas fa-stopwatch" style="color:#60a5fa;"></i>
-                    <span data-i18n="timer_title">Speedcubing Timer WCA</span>
+            <div class="modal-header timer-modal-header">
+                <div class="modal-title timer-header-title">
+                    <i class="fas fa-stopwatch timer-header-icon"></i>
+                    <span class="timer-title-text" data-i18n="timer_title">Timer WCA</span>
+                    <span class="timer-wca-pill">3x3x3</span>
                 </div>
-                <div style="display:flex; align-items:center; gap:16px;">
-                    <label style="display:flex; align-items:center; gap:6px; font-size:0.85rem; cursor:pointer; color:var(--text-muted);">
-                        <input type="checkbox" id="timerInspectionToggle"> <span data-i18n="timer_inspection">Inspeção (15s)</span>
+                <div class="timer-header-controls">
+                    <label class="timer-inspection-pill" data-i18n-title="timer_inspection_title" title="Regra oficial WCA: 15 segundos de inspeção">
+                        <input type="checkbox" id="timerInspectionToggle">
+                        <span data-i18n="timer_inspection">Inspeção (15s)</span>
                     </label>
                     <button class="modal-close-btn" id="timerBtnClose" data-i18n-title="scanner_close_title" title="Fechar">&times;</button>
                 </div>
