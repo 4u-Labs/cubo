@@ -27,11 +27,14 @@ $antiCache = time();
 
     <link rel="manifest" href="manifest.json?v=<?= $antiCache ?>">
     <meta name="theme-color" content="#4f46e5"/>
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32x32.png">
+    <link rel="shortcut icon" href="favicon.ico">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="CuboFácil 4U">
+    <meta name="apple-mobile-web-app-title" content="CuboFácil">
+    <meta name="mobile-web-app-capable" content="yes">
 
     <!-- Fonts & Icons -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,20 +42,17 @@ $antiCache = time();
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Limpeza proativa de qualquer cache no navegador do usuário -->
+    <!-- Registro do Service Worker para PWA (Offline & Instalação) -->
     <script>
-        if ('caches' in window) {
-            caches.keys().then(function(keys) {
-                keys.forEach(function(key) {
-                    caches.delete(key);
-                });
-            });
-        }
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                for (let registration of registrations) {
-                    registration.unregister();
-                }
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js?v=<?= $antiCache ?>')
+                    .then(function(reg) {
+                        reg.update();
+                    })
+                    .catch(function(err) {
+                        console.warn('[SW] Falha ao registrar Service Worker:', err);
+                    });
             });
         }
     </script>
@@ -212,6 +212,21 @@ $antiCache = time();
 
         .header-btn.btn-timer:hover {
             box-shadow: 0 6px 20px rgba(99, 102, 241, 0.55);
+        }
+
+        .header-btn.btn-install {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            border-color: rgba(245, 158, 11, 0.45);
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.35);
+        }
+
+        .header-btn.btn-install:hover {
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.55);
+            background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+        }
+
+        .header-btn.btn-install.installed {
+            display: none !important;
         }
 
         /* Language Switcher Buttons [ PT ] [ EN ] */
@@ -1589,7 +1604,7 @@ $antiCache = time();
         <div class="header-inner">
             <div class="header-title-box">
                 <div class="header-logo-icon">
-                    <i class="fas fa-cube"></i>
+                    <img src="icons/icon-192x192.png" alt="CuboFácil" style="width:100%;height:100%;border-radius:12px;object-fit:cover;display:block;">
                 </div>
                 <div class="header-title-group">
                     <h1>
@@ -1606,6 +1621,9 @@ $antiCache = time();
                 </button>
                 <button id="btnOpenTimer" class="header-btn btn-timer" data-i18n-title="btn_timer_wca_title" title="Cronômetro de Speedcubing">
                     <i class="fas fa-stopwatch"></i> <span class="btn-label" data-i18n="btn_timer_wca">Timer WCA</span>
+                </button>
+                <button id="btnInstallPwa" class="header-btn btn-install" data-i18n-title="btn_install_title" title="Instalar CuboFácil no seu dispositivo">
+                    <i class="fas fa-download"></i> <span class="btn-label" data-i18n="btn_install_app">Instalar App</span>
                 </button>
                 <button id="btnOpenHelp" class="header-btn" data-i18n-title="btn_help_title" title="Instruções de Uso">
                     <i class="fas fa-circle-question"></i> <span class="btn-label" data-i18n="btn_help">Ajuda</span>
@@ -2212,6 +2230,75 @@ $antiCache = time();
                 window.cameraScanner.flatCube = flatCube;
             }
         });
+    </script>
+
+    <!-- ==================== PWA INSTALL CONTROLLER ==================== -->
+    <script>
+        (function() {
+            let deferredPwaPrompt = null;
+            const btn = document.getElementById('btnInstallPwa');
+            if (!btn) return;
+
+            function isAppStandalone() {
+                return window.matchMedia('(display-mode: standalone)').matches 
+                    || window.navigator.standalone === true 
+                    || document.referrer.includes('android-app://');
+            }
+
+            function updatePwaUi() {
+                if (isAppStandalone()) {
+                    btn.style.display = 'none';
+                    btn.classList.add('installed');
+                } else {
+                    btn.style.display = 'inline-flex';
+                    btn.classList.remove('installed');
+                }
+            }
+
+            // Inicializa visibilidade de acordo com o modo standalone
+            updatePwaUi();
+
+            // Intercepta evento nativo de instalação PWA (Chrome, Edge, Samsung Internet, Android)
+            window.addEventListener('beforeinstallprompt', function(e) {
+                e.preventDefault();
+                deferredPwaPrompt = e;
+                updatePwaUi();
+            });
+
+            // Disparado quando o app é instalado com sucesso
+            window.addEventListener('appinstalled', function() {
+                deferredPwaPrompt = null;
+                btn.style.display = 'none';
+                btn.classList.add('installed');
+                const msg = (window.t) ? window.t('install_success') : 'CuboFácil instalado com sucesso!';
+                console.log('[PWA]', msg);
+            });
+
+            // Clique no botão de instalar
+            btn.addEventListener('click', async function() {
+                if (deferredPwaPrompt) {
+                    deferredPwaPrompt.prompt();
+                    const choiceResult = await deferredPwaPrompt.userChoice;
+                    if (choiceResult && choiceResult.outcome === 'accepted') {
+                        btn.style.display = 'none';
+                        btn.classList.add('installed');
+                    }
+                    deferredPwaPrompt = null;
+                } else {
+                    if (isAppStandalone()) {
+                        const alertMsg = (window.t)
+                            ? window.t('install_already_installed')
+                            : 'O CuboFácil já está instalado e rodando em modo aplicativo!';
+                        alert(alertMsg);
+                    } else {
+                        const guideMsg = (window.t)
+                            ? window.t('install_manual_guide')
+                            : 'Para instalar o CuboFácil no seu dispositivo:\n• No Chrome/Edge: Clique no ícone de instalar na barra de endereços ou no menu do navegador.\n• No iPhone/iPad (Safari): Toque em Compartilhar e selecione "Adicionar à Tela de Início".';
+                        alert(guideMsg);
+                    }
+                }
+            });
+        })();
     </script>
 </body>
 </html>

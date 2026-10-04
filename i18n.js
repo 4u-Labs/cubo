@@ -18,6 +18,8 @@
             btn_timer_wca_title: "Cronômetro de Speedcubing",
             btn_help: "Ajuda",
             btn_help_title: "Instruções de Uso",
+            btn_install_app: "Instalar App",
+            btn_install_title: "Instalar CuboFácil no seu dispositivo (PWA)",
             btn_collapse: "Recolher",
             btn_collapse_title: "Recolher Cabeçalho",
             btn_expand: "Expandir",
@@ -25,6 +27,9 @@
             collapse_handle_title: "Toque para recolher ou expandir",
             lang_switch_title: "Mudar Idioma / Switch Language",
             canvas_help_title: "Ajuda",
+            install_already_installed: "O CuboFácil já está instalado e rodando em modo aplicativo!",
+            install_manual_guide: "Para instalar o CuboFácil no seu dispositivo:\n• No Chrome/Edge: Clique no ícone de instalar na barra de endereços ou no menu do navegador.\n• No iPhone/iPad (Safari): Toque em Compartilhar e selecione 'Adicionar à Tela de Início'.",
+            install_success: "CuboFácil instalado com sucesso!",
 
             // Controles do Cubo
             btn_solve: "Resolver",
@@ -204,6 +209,8 @@
             btn_timer_wca_title: "Speedcubing Timer",
             btn_help: "Help",
             btn_help_title: "How to Use",
+            btn_install_app: "Install App",
+            btn_install_title: "Install CuboFácil on your device (PWA)",
             btn_collapse: "Collapse",
             btn_collapse_title: "Collapse Header",
             btn_expand: "Expand",
@@ -211,6 +218,9 @@
             collapse_handle_title: "Tap to collapse or expand",
             lang_switch_title: "Switch Language / Mudar Idioma",
             canvas_help_title: "Help",
+            install_already_installed: "CuboFácil is already installed and running in app mode!",
+            install_manual_guide: "To install CuboFácil on your device:\n• In Chrome/Edge: Click the install icon in the address bar or browser menu.\n• In iPhone/iPad (Safari): Tap Share and select 'Add to Home Screen'.",
+            install_success: "CuboFácil installed successfully!",
 
             // Cube Controls
             btn_solve: "Solve",

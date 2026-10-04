@@ -1,55 +1,71 @@
-const CACHE_NAME = 'cubofacil-v19';
-const FILES_TO_CACHE = [
+const CACHE_NAME = 'cubofacil-v21';
+const PRECACHE_ASSETS = [
   './',
-  'index.html',
-  'i18n.js?v=19',
-  'rubiks.js?v=19',
-  'solver.js?v=19',
-  'flat.js?v=19',
-  'camera_scanner.js?v=19',
-  'speed_timer.js?v=19',
+  'index.php',
+  'i18n.js',
+  'rubiks.js',
+  'solver.js',
+  'flat.js',
+  'camera_scanner.js',
+  'speed_timer.js',
   'manifest.json',
   'icons/icon-192x192.png',
-  'icons/icon-512x512.png'
+  'icons/icon-512x512.png',
+  'icons/icon-maskable-192x192.png',
+  'icons/icon-maskable-512x512.png',
+  'icons/apple-touch-icon.png',
+  'icons/favicon-32x32.png',
+  'icons/favicon.ico'
 ];
 
-// 1. Instala o Service Worker e força ativação imediata
+// 1. Instalação e precache
 self.addEventListener('install', (evt) => {
   self.skipWaiting();
   evt.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(FILES_TO_CACHE);
+      return cache.addAll(PRECACHE_ASSETS).catch((err) => {
+        console.warn('[SW] Precache aviso:', err);
+      });
     })
   );
 });
 
-// 2. Ativa o Service Worker e limpa caches antigos
+// 2. Ativação e limpeza de versões antigas de cache
 self.addEventListener('activate', (evt) => {
   evt.waitUntil(
     caches.keys().then((keyList) => {
-      return Promise.all(keyList.map((key) => {
-        if (key !== CACHE_NAME) {
-          console.log('[ServiceWorker] Removendo cache antigo:', key);
-          return caches.delete(key);
-        }
-      }));
+      return Promise.all(
+        keyList.map((key) => {
+          if (key !== CACHE_NAME) {
+            console.log('[SW] Removendo cache obsoleto:', key);
+            return caches.delete(key);
+          }
+        })
+      );
     }).then(() => self.clients.claim())
   );
 });
 
-// 3. Estratégia Network-First: busca na rede primeiro, com fallback para cache offline
+// 3. Network-First com fallback inteligente para Cache Offline
 self.addEventListener('fetch', (evt) => {
   if (evt.request.method !== 'GET') return;
 
   evt.respondWith(
     fetch(evt.request)
       .then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200) {
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
           const responseClone = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(evt.request, responseClone));
         }
         return networkResponse;
       })
-      .catch(() => caches.match(evt.request))
+      .catch(() => {
+        return caches.match(evt.request, { ignoreSearch: true }).then((cachedResponse) => {
+          if (cachedResponse) return cachedResponse;
+          if (evt.request.mode === 'navigate') {
+            return caches.match('./', { ignoreSearch: true });
+          }
+        });
+      })
   );
 });
