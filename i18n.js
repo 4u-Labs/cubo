@@ -10,6 +10,8 @@
         pt: {
             // Cabeçalho e Geral
             app_title: "CuboFácil 4U",
+            brand_word_cubo: "Cubo",
+            brand_word_facil: "Fácil",
             app_subtitle: "Solucionador 3D Inteligente, Scanner por Câmera & Timer WCA",
             app_badge: "Speedcubing Suite",
             btn_scan_camera: "Escanear Câmera",
@@ -210,6 +212,8 @@
         en: {
             // Header and General
             app_title: "CuboFácil 4U",
+            brand_word_cubo: "Cubo",
+            brand_word_facil: "Fácil",
             app_subtitle: "Smart 3D Solver, Camera Scanner & WCA Timer",
             app_badge: "Speedcubing Suite",
             btn_scan_camera: "Camera Scanner",

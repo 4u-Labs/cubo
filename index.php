@@ -122,47 +122,44 @@ $antiCache = time();
         .header-title-box {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .header-logo-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
             background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
-            color: #fff;
             box-shadow: 0 4px 15px rgba(99, 102, 241, 0.45);
+            flex-shrink: 0;
+            overflow: hidden;
         }
 
-        .header-title-group h1 {
-            font-size: 1.35rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
+        .header-brand-stacked {
             display: flex;
-            align-items: center;
-            gap: 8px;
-            color: #fff;
+            flex-direction: column;
+            line-height: 1;
+            user-select: none;
+            justify-content: center;
         }
 
-        .header-badge {
-            font-size: 0.65rem;
+        .brand-word-cubo {
+            font-size: 0.95rem;
+            font-weight: 900;
+            letter-spacing: 0.02em;
+            color: #ffffff;
             text-transform: uppercase;
-            font-weight: 800;
-            padding: 2px 8px;
-            border-radius: 20px;
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--brand-primary);
-            border: 1px solid rgba(16, 185, 129, 0.3);
         }
 
-        .header-title-group p {
-            font-size: 0.82rem;
-            color: var(--text-muted);
-            margin-top: 2px;
+        .brand-word-facil {
+            font-size: 0.85rem;
+            font-weight: 900;
+            color: #38bdf8;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
         }
 
         .header-actions {
@@ -356,33 +353,30 @@ $antiCache = time();
             border-radius: 8px;
         }
 
-        #header.collapsed .header-title-group h1 {
-            font-size: 0.95rem;
-            margin: 0;
-            gap: 6px;
+        #header.collapsed .brand-word-cubo {
+            font-size: 0.80rem;
         }
 
-        #header.collapsed .header-title-group p,
-        #header.collapsed .header-badge {
-            display: none !important;
+        #header.collapsed .brand-word-facil {
+            font-size: 0.70rem;
         }
 
         #header.collapsed .header-actions {
             width: auto !important;
             justify-content: flex-end !important;
-            gap: 6px;
+            gap: 5px;
             flex-wrap: nowrap !important;
         }
 
         #header.collapsed .header-btn {
-            padding: 6px 10px;
-            font-size: 0.78rem;
+            padding: 6px 8px;
+            font-size: 0.82rem;
             border-radius: 8px;
-            gap: 5px;
+            gap: 4px;
         }
 
         #header.collapsed .header-toggle-btn {
-            padding: 6px 10px;
+            padding: 6px 8px;
             font-size: 0.78rem;
             border-radius: 8px;
             background: rgba(99, 102, 241, 0.25);
@@ -396,30 +390,75 @@ $antiCache = time();
         }
 
         #header.collapsed .lang-btn {
-            padding: 3px 6px;
-            font-size: 0.72rem;
+            padding: 3px 5px;
+            font-size: 0.70rem;
             border-radius: 6px;
         }
 
         @media (max-width: 650px) {
-            #header.collapsed {
-                padding: 5px 8px;
+            #header {
+                padding: 6px 8px !important;
             }
-            #header.collapsed .header-btn .btn-label {
-                display: none;
+            .header-inner {
+                flex-direction: row !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                flex-wrap: nowrap !important;
+                gap: 6px !important;
             }
-            #header.collapsed .header-btn {
-                padding: 6px 9px;
-                min-width: 32px;
-                justify-content: center;
+            .header-title-box {
+                flex-direction: row !important;
+                align-items: center !important;
+                gap: 6px !important;
+                flex-shrink: 0 !important;
             }
-            #header.collapsed .header-toggle-btn .toggle-btn-text {
-                display: none;
+            .header-logo-icon {
+                width: 28px !important;
+                height: 28px !important;
+                border-radius: 7px !important;
             }
-            #header.collapsed .header-toggle-btn {
-                padding: 6px 9px;
-                min-width: 32px;
-                justify-content: center;
+            .brand-word-cubo {
+                font-size: 0.80rem !important;
+            }
+            .brand-word-facil {
+                font-size: 0.70rem !important;
+            }
+            .header-actions {
+                width: auto !important;
+                justify-content: flex-end !important;
+                gap: 4px !important;
+                flex-wrap: nowrap !important;
+                flex-shrink: 1 !important;
+            }
+            .header-btn {
+                padding: 6px 8px !important;
+                min-width: 30px !important;
+                border-radius: 8px !important;
+                gap: 0 !important;
+                justify-content: center !important;
+                font-size: 0.85rem !important;
+            }
+            .header-btn .btn-label {
+                display: none !important;
+            }
+            .lang-switch-box {
+                padding: 2px !important;
+                gap: 1px !important;
+                border-radius: 8px !important;
+            }
+            .lang-btn {
+                padding: 3px 5px !important;
+                font-size: 0.68rem !important;
+                border-radius: 6px !important;
+            }
+            .header-toggle-btn {
+                padding: 6px 8px !important;
+                min-width: 30px !important;
+                border-radius: 8px !important;
+                justify-content: center !important;
+            }
+            .header-toggle-btn .toggle-btn-text {
+                display: none !important;
             }
         }
 
@@ -1818,43 +1857,7 @@ $antiCache = time();
         }
         .solve-del-btn:hover { color: #ef4444; }
 
-        /* ==================== FOOTER 4U ==================== */
-        .app-footer {
-            width: 100%;
-            text-align: center;
-            padding: 24px 15px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(15, 23, 42, 0.6);
-            margin-top: auto;
-        }
-
-        .footer-links {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            flex-wrap: wrap;
-            margin-bottom: 8px;
-            font-size: 0.85rem;
-        }
-
-        .footer-link-item {
-            color: #cbd5e1;
-            text-decoration: none;
-            transition: color 0.2s ease;
-        }
-
-        .footer-link-item:hover { color: var(--brand-primary); }
-
-        .footer-copy {
-            font-size: 0.8rem;
-            color: #64748b;
-        }
-
         @media (max-width: 768px) {
-            .header-inner { justify-content: center; text-align: center; }
-            .header-title-box { flex-direction: column; }
-            .header-actions { justify-content: center; width: 100%; }
             .timer-big-digits { font-size: 3.4rem; }
             .timer-stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
@@ -1867,14 +1870,13 @@ $antiCache = time();
         <div class="header-inner">
             <div class="header-title-box">
                 <div class="header-logo-icon">
-                    <img src="icons/icon-192x192.png" alt="CuboFácil" style="width:100%;height:100%;border-radius:12px;object-fit:cover;display:block;">
+                    <img src="icons/icon-192x192.png" alt="CuboFácil" style="width:100%;height:100%;border-radius:10px;object-fit:cover;display:block;">
                 </div>
                 <div class="header-title-group">
-                    <h1>
-                        <span data-i18n="app_title">CuboFácil 4U</span>
-                        <span class="header-badge" data-i18n="app_badge">Speedcubing Suite</span>
-                    </h1>
-                    <p data-i18n="app_subtitle">Solucionador 3D Inteligente, Scanner por Câmera & Timer WCA</p>
+                    <div class="header-brand-stacked">
+                        <span class="brand-word-cubo" data-i18n="brand_word_cubo">Cubo</span>
+                        <span class="brand-word-facil" data-i18n="brand_word_facil">Fácil</span>
+                    </div>
                 </div>
             </div>
 
@@ -1887,9 +1889,6 @@ $antiCache = time();
                 </button>
                 <button id="btnInstallPwa" class="header-btn btn-install" data-i18n-title="btn_install_title" title="Instalar CuboFácil no seu dispositivo">
                     <i class="fas fa-download"></i> <span class="btn-label" data-i18n="btn_install_app">Instalar App</span>
-                </button>
-                <button id="btnOpenHelp" class="header-btn" data-i18n-title="btn_help_title" title="Instruções de Uso">
-                    <i class="fas fa-circle-question"></i> <span class="btn-label" data-i18n="btn_help">Ajuda</span>
                 </button>
                 <div class="lang-switch-box" id="langSwitchBox" data-i18n-title="lang_switch_title" title="Mudar Idioma / Switch Language">
                     <button type="button" class="lang-btn" id="btnLangPT" data-lang="pt" onclick="if(window.setCubeLang) window.setCubeLang('pt')">PT</button>
@@ -2147,24 +2146,7 @@ $antiCache = time();
                     </button>
                 </div>
             </div>
-        </div>
     </div>
-
-    <!-- ==================== RODAPÉ 4U ==================== -->
-    <footer class="app-footer">
-        <div class="footer-links">
-            <a href="privacidade.html" class="footer-link-item" data-i18n="footer_privacy">Privacidade</a>
-            <span>•</span>
-            <a href="termos.php" class="footer-link-item" data-i18n="footer_terms">Termos de Uso</a>
-            <span>•</span>
-            <a href="suporte.html" class="footer-link-item" data-i18n="footer_support">Suporte</a>
-            <span>•</span>
-            <a href="https://github.com/4u-Labs/cubo" target="_blank" rel="noopener noreferrer" class="footer-link-item">
-                <i class="fab fa-github"></i> GitHub
-            </a>
-        </div>
-        <p class="footer-copy" data-i18n="footer_copy">&copy; 2026 4U.IA.BR Labs &bull; Desenvolvido por Fabiano Braga &bull; Todos os direitos reservados</p>
-    </footer>
 
     <!-- ==================== LOGICA PRINCIPAL ==================== -->
     <script type="text/javascript">
