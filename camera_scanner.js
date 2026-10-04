@@ -481,11 +481,10 @@ class CuboCameraScanner {
                 const sampleCenterY = Math.floor(cellY + cellSize / 2);
                 const sampleRadius = Math.max(3, Math.floor(cellSize * 0.12));
 
-                const rgb = this.getAverageRGB(sampleCenterX, sampleCenterY, sampleRadius);
-                const matchedColor = this.classifyColor(rgb.r, rgb.g, rgb.b);
-                detectedColors.push(matchedColor);
-
                 const isCenter = (row === 1 && col === 1);
+                const rgb = this.getAverageRGB(sampleCenterX, sampleCenterY, sampleRadius);
+                const matchedColor = this.classifyColor(rgb.r, rgb.g, rgb.b, isCenter ? step.centerColor : null);
+                detectedColors.push(matchedColor);
 
                 // Mira colorida no centro do sticker
                 this.ctx.fillStyle = matchedColor;
@@ -680,9 +679,9 @@ class CuboCameraScanner {
     /**
      * Classificador Espectral Inteligente de Cores do Cubo
      * Combina Espaço HSV com Dominância Direta de Canais RGB e Dispersão Cromática.
-     * Imune à iluminação ambiente e reflexos.
+     * Imune à iluminação ambiente, sombras, saturação de câmera de smartphone e reflexos.
      */
-    classifyColor(r, g, b) {
+    classifyColor(r, g, b, expectedCenter = null) {
         const { h, s, v } = this.rgbToHsv(r, g, b);
 
         const maxCh = Math.max(r, g, b);
@@ -712,25 +711,44 @@ class CuboCameraScanner {
         }
 
         // 4. DIFERENCIAÇÃO ROBUSTA ENTRE VERMELHO E LARANJA
-        // Em ambos, R é o canal dominante (r > g e r > b).
-        // No LARANJA:
-        // - O matiz é quente e positivo: 8° <= h < 42°
-        // - O canal Verde supera estritamente o Azul: (g - b) >= 10
-        // - A proporção de Verde em relação ao Vermelho é relevante: gRatio >= 0.30
+        // Em ambos os plásticos, R é o canal dominante (r > g e r > b).
+        // Diferenças físicas e ópticas fundamentais:
+        // - No Vermelho (carmesim/carmim/rubi): o pigmento absorve o verde intensamente.
+        //   O canal Azul é praticamente igual ou até maior que o canal Verde (g - b <= 4).
+        //   O matiz fica encostado em 0° ou no espectro magenta (h <= 4° ou h >= 340°).
+        // - No Laranja: o pigmento reflete luz amarela/laranja (vermelho + verde), absorvendo o azul.
+        //   Portanto, o canal Verde supera o canal Azul substancialmente (g - b >= 8 e g > b),
+        //   com matiz positivo quente (5° <= h < 45°).
         const gMinusB = g - b;
 
-        // Caso 1: Laranja nítido (8° <= h < 42°, verde superando azul e gRatio >= 0.30)
-        if ((h >= 8 && h < 42) && (gMinusB >= 10) && (gRatio >= 0.30)) {
+        // Se for o centro esperado desta etapa, reforça a estabilidade contra ruídos de borda
+        if (expectedCenter === 'ORANGE' && (h >= 5 && h < 50) && gMinusB >= 6) {
+            return this.CUBE_COLORS.ORANGE.hex;
+        }
+        if (expectedCenter === 'RED' && (h <= 8 || h >= 335) && (gMinusB <= 15 || gRatio <= 0.35)) {
+            return this.CUBE_COLORS.RED.hex;
+        }
+
+        // Regra de Vermelho estrito: se Azul >= Verde ou matiz em 0°/magenta
+        if (gMinusB <= 4 || h <= 4 || h >= 340) {
+            return this.CUBE_COLORS.RED.hex;
+        }
+
+        // Regra de Laranja (cobre iluminação padrão, sombras e plásticos profundos/escurecidos):
+        // Cobre laranjas com gRatio a partir de 0.18 quando gMinusB >= 8,
+        // ou laranjas onde o canal Verde é bem superior ao Azul (g > b * 1.35)
+        if ((h >= 5 && h < 45) && (gMinusB >= 8)) {
+            if (gRatio >= 0.18 || gMinusB >= 18 || (g > b * 1.35)) {
+                return this.CUBE_COLORS.ORANGE.hex;
+            }
+        }
+
+        // Laranja sob iluminação brilhante / quente
+        if (gMinusB >= 14 && (g > b * 1.25) && (h < 50)) {
             return this.CUBE_COLORS.ORANGE.hex;
         }
 
-        // Caso 2: Laranja brilhante com alta presença de verde sob iluminação quente/forte
-        if (gRatio >= 0.38 && gMinusB >= 14 && h < 45) {
-            return this.CUBE_COLORS.ORANGE.hex;
-        }
-
-        // Caso 3: VERMELHO
-        // (inclui h >= 330°, h <= 7°, b >= g, carmesim, escuro ou baixa proporção de verde)
+        // Fallback seguro: Vermelho
         return this.CUBE_COLORS.RED.hex;
     }
 
@@ -960,6 +978,7 @@ class CuboCameraScanner {
                     const startX = Math.round((displayW - boxSize) / 2);
                     const startY = Math.round((displayH - boxSize) / 2);
                     const cellSize = boxSize / 3;
+                    const step = this.FACE_STEPS[this.currentStep];
                     const colors = [];
 
                     for (let r = 0; r < 3; r++) {
@@ -967,13 +986,13 @@ class CuboCameraScanner {
                             const cx = Math.floor(startX + (c + 0.5) * cellSize);
                             const cy = Math.floor(startY + (r + 0.5) * cellSize);
                             const rgb = this.getAverageRGB(cx, cy, Math.max(3, Math.floor(cellSize * 0.12)));
-                            colors.push(this.classifyColor(rgb.r, rgb.g, rgb.b));
+                            const isCenter = (r === 1 && c === 1);
+                            colors.push(this.classifyColor(rgb.r, rgb.g, rgb.b, isCenter ? step.centerColor : null));
                         }
                     }
 
                     this.ctx.restore();
 
-                    const step = this.FACE_STEPS[this.currentStep];
                     this.scannedFaces[step.faceIndex] = [...colors];
                     this.currentFacePreviewColors = [...colors];
                     this.renderPreviewGrid();
