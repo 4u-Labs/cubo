@@ -539,10 +539,10 @@ class CuboCameraScanner {
         this.centerStatusEl.style.display = 'flex';
         if (isMatch) {
             this.centerStatusEl.className = 'scanner-center-badge match';
-            this.centerStatusEl.innerHTML = `<i class="fas fa-check-circle"></i> Centro Correto: <strong>${expectedName.toUpperCase()}</strong>`;
+            this.centerStatusEl.innerHTML = `<i class="fas fa-check-circle"></i><span>Centro Correto: <strong>${expectedName.toUpperCase()}</strong></span>`;
         } else {
             this.centerStatusEl.className = 'scanner-center-badge mismatch';
-            this.centerStatusEl.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Atenção: Centro detectado é <strong>${detectedName.toUpperCase()}</strong>! Aponte a Face <strong>${expectedName.toUpperCase()}</strong>`;
+            this.centerStatusEl.innerHTML = `<i class="fas fa-exclamation-triangle"></i><span>Atenção: Centro é <strong>${detectedName.toUpperCase()}</strong>! Aponte <strong>${expectedName.toUpperCase()}</strong></span>`;
         }
     }
 

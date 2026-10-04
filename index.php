@@ -1216,16 +1216,27 @@ $antiCache = time();
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 8px 14px;
+            padding: 7px 16px;
             margin: 0 auto 8px auto;
             border-radius: 12px;
             font-size: 0.82rem;
             font-weight: 700;
             text-align: center;
-            width: 100%;
-            max-width: 290px;
+            line-height: 1.35;
+            width: fit-content;
+            max-width: 95%;
             box-sizing: border-box;
             transition: all 0.25s ease;
+        }
+
+        .scanner-center-badge i {
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+
+        .scanner-center-badge span {
+            display: inline;
+            text-align: center;
         }
 
         .scanner-center-badge.match {
@@ -1240,7 +1251,12 @@ $antiCache = time();
             border: 1.5px solid rgba(239, 68, 68, 0.85);
             color: #fca5a5;
             box-shadow: 0 2px 12px rgba(239, 68, 68, 0.3);
-            animation: pulse-mismatch 1.5s infinite;
+            animation: pulse-mismatch 1.8s infinite;
+        }
+
+        .scanner-center-badge.mismatch strong {
+            color: #ffffff;
+            font-weight: 900;
         }
 
         @keyframes pulse-mismatch {
