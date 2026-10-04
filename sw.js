@@ -1,12 +1,12 @@
-const CACHE_NAME = 'cubofacil-v11';
+const CACHE_NAME = 'cubofacil-v12';
 const FILES_TO_CACHE = [
   './',
   'index.html',
-  'rubiks.js?v=11',
-  'solver.js?v=11',
-  'flat.js?v=11',
-  'camera_scanner.js?v=11',
-  'speed_timer.js?v=11',
+  'rubiks.js?v=12',
+  'solver.js?v=12',
+  'flat.js?v=12',
+  'camera_scanner.js?v=12',
+  'speed_timer.js?v=12',
   'manifest.json',
   'icons/icon-192x192.png',
   'icons/icon-512x512.png'

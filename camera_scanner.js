@@ -95,7 +95,7 @@ class CuboCameraScanner {
                 bottom: { name: 'Verde',    hex: '#009900', label: 'Verde' },
                 left:   { name: 'Vermelho', hex: '#cc0000', label: 'Vermelho' },
                 right:  { name: 'Laranja',  hex: '#ff8000', label: 'Laranja' },
-                instruction: 'Incline para cima: centro AMARELO • TETO: Azul • DIREITA: Laranja',
+                instruction: 'Gire à direita de volta para a face AZUL e incline para cima: AMARELO de frente • TETO: Azul • DIREITA: Laranja',
                 transform: [0, 1, 2, 3, 4, 5, 6, 7, 8]
             }
         ];
@@ -253,6 +253,27 @@ class CuboCameraScanner {
         return counts;
     }
 
+    checkTemporarySolvability() {
+        if (!this.flatCube || !this.flatCube.cube) return { valid: false, reason: 'Não inicializado' };
+        const currentFaceIdx = (this.FACE_STEPS && this.FACE_STEPS[this.currentStep]) ? this.FACE_STEPS[this.currentStep].faceIndex : -1;
+        for (let i = 0; i < this.FACE_STEPS.length; i++) {
+            const step = this.FACE_STEPS[i];
+            const camColors = (step.faceIndex === currentFaceIdx) ? this.currentFacePreviewColors : this.scannedFaces[step.faceIndex];
+            if (camColors && this.flatCube.faces[step.faceIndex]) {
+                const transform = step.transform || [0, 1, 2, 3, 4, 5, 6, 7, 8];
+                for (let s = 0; s < 9; s++) {
+                    const camIdx = transform[s];
+                    const colorHex = camColors[camIdx];
+                    if (this.flatCube.faces[step.faceIndex].stickers[s]) {
+                        this.flatCube.faces[step.faceIndex].stickers[s].setColor(colorHex);
+                    }
+                }
+            }
+        }
+        this.flatCube.cube.updateColors();
+        return this.flatCube.cube.validateState ? this.flatCube.cube.validateState() : { valid: true };
+    }
+
     updateParityTracker() {
         const counts = this.getParityCounts();
         let totalCount = 0;
@@ -280,8 +301,14 @@ class CuboCameraScanner {
         if (statusEl) {
             statusEl.classList.remove('valid', 'warning');
             if (totalCount === 54 && isAllNine) {
-                statusEl.textContent = '✓ 54/54 Válido!';
-                statusEl.classList.add('valid');
+                const solCheck = this.checkTemporarySolvability();
+                if (solCheck.valid) {
+                    statusEl.textContent = '✓ 54/54 Válido & Solucionável!';
+                    statusEl.classList.add('valid');
+                } else {
+                    statusEl.textContent = '⚠️ ' + (solCheck.reason || 'Desalinhado');
+                    statusEl.classList.add('warning');
+                }
             } else if (totalCount === 54 && !isAllNine) {
                 statusEl.textContent = '⚠️ Desbalanceado';
                 statusEl.classList.add('warning');
@@ -951,9 +978,6 @@ class CuboCameraScanner {
     }
 
     finishScanning() {
-        this.stopCamera();
-        this.close();
-
         // Mapear todas as 6 faces lidas para o FlatCube e Cubo 3D aplicando as transformações de rotação
         if (this.flatCube && this.flatCube.faces) {
             for (let i = 0; i < this.FACE_STEPS.length; i++) {
@@ -974,8 +998,31 @@ class CuboCameraScanner {
             this.flatCube.update();
         }
 
+        const cubeInstance = (this.flatCube && this.flatCube.cube) ? this.flatCube.cube : null;
+        const validation = (cubeInstance && cubeInstance.validateState) ? cubeInstance.validateState() : { valid: true };
+
+        if (!validation.valid) {
+            const confirmLeave = confirm(
+                `⚠️ Atenção: Detectamos inconsistências nas cores lidas:\n\n` +
+                `${validation.reason}\n${validation.details ? validation.details + '\n\n' : '\n'}` +
+                `Deseja finalizar assim mesmo para corrigir no modelo planificado?\n\n` +
+                `• Clique em 'OK' para ir ao modelo planificado e ajustar os adesivos com cliques.\n` +
+                `• Clique em 'Cancelar' para revisar e ajustar as faces aqui no scanner.`
+            );
+            if (!confirmLeave) {
+                return;
+            }
+        } else {
+            if (window.showCubeToast) {
+                window.showCubeToast('Cubo lido com sucesso! Abrindo Passo a Passo...', 'success');
+            }
+        }
+
+        this.stopCamera();
+        this.close();
+
         if (typeof this.onComplete === 'function') {
-            this.onComplete();
+            this.onComplete(validation.valid, validation);
         }
     }
 

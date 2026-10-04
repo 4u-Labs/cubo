@@ -89,13 +89,18 @@ FlatCube.prototype.getState = function() {
 }
 
 FlatCube.prototype.update = function() {
-	if(this.message.firstChild){
+	while(this.message.firstChild){
 		this.message.removeChild(this.message.firstChild);
 	}
 	if(this.cube){
 		this.cube.updateColors();
-		if(!this.cube.isSolvable()){
-			this.message.appendChild(document.createTextNode(this.cube.solver.currentState));
+		var val = this.cube.validateState ? this.cube.validateState() : { valid: this.cube.isSolvable() };
+		if(!val.valid){
+			this.message.style.color = '#f87171';
+			this.message.appendChild(document.createTextNode('⚠️ ' + (val.reason || this.cube.solver.currentState)));
+		} else {
+			this.message.style.color = '#4ade80';
+			this.message.appendChild(document.createTextNode('✓ Cubo válido e pronto'));
 		}
 	}
 };
@@ -459,6 +464,38 @@ var RubiksCubeControls = function(id, cube, width, controlsTop){
 	this.solveButton.className = 'rc-button rc-solve-button';
 	this.solveButton.appendChild(document.createTextNode('Resolver'));
 	this.solveButton.addEventListener('click', function(){
+		var val = me.cube.validateState ? me.cube.validateState() : { valid: me.cube.isSolvable() };
+		if (!val.valid) {
+			if (window.showCubeAlert) {
+				window.showCubeAlert({
+					title: 'Não foi possível resolver o cubo',
+					message: val.reason,
+					details: val.details || '',
+					type: 'warning',
+					showFixFlat: true,
+					showRescan: true
+				});
+			} else {
+				alert('⚠️ ' + val.reason + (val.details ? '\n' + val.details : ''));
+			}
+			return;
+		}
+
+		var state = me.cube.getState();
+		var sol = me.cube.solver.solve(state);
+		if (!sol || sol.trim().length === 0) {
+			if (window.showCubeAlert) {
+				window.showCubeAlert({
+					title: 'Cubo Já Resolvido!',
+					message: 'Todas as faces do cubo já estão 100% montadas com as cores certas.',
+					type: 'success'
+				});
+			} else {
+				alert('🎉 O cubo já está 100% resolvido!');
+			}
+			return;
+		}
+
 		me.progress.display = '';
 		me.cube.solve(function(data){
 			setProgress(data);
@@ -470,7 +507,39 @@ var RubiksCubeControls = function(id, cube, width, controlsTop){
 	this.solveSlowButton.className = 'rc-button rc-solve-slow-button';
 	this.solveSlowButton.appendChild(document.createTextNode('Passo a Passo'));
 	this.solveSlowButton.addEventListener('click', function(){
-		me.cube.getSolutionAsync(function(solution){me.setSolution(solution);},function(data){
+		var val = me.cube.validateState ? me.cube.validateState() : { valid: me.cube.isSolvable() };
+		if (!val.valid) {
+			if (window.showCubeAlert) {
+				window.showCubeAlert({
+					title: 'Não foi possível iniciar o Passo a Passo',
+					message: val.reason,
+					details: val.details || '',
+					type: 'warning',
+					showFixFlat: true,
+					showRescan: true
+				});
+			} else {
+				alert('⚠️ ' + val.reason + (val.details ? '\n' + val.details : ''));
+			}
+			return;
+		}
+
+		me.cube.getSolutionAsync(function(solution){
+			if (!solution || solution.trim().length === 0) {
+				if (window.showCubeAlert) {
+					window.showCubeAlert({
+						title: 'Cubo Já Resolvido!',
+						message: 'O cubo já está completamente montado. Embaralhe o cubo para ver os passos da solução!',
+						type: 'success'
+					});
+				} else {
+					alert('🎉 O cubo já está 100% resolvido!');
+				}
+				me.setSolution('');
+			} else {
+				me.setSolution(solution);
+			}
+		}, function(data){
 			setProgress(data);
 		});
 	});

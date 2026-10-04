@@ -1003,6 +1003,45 @@ $antiCache = time();
             }
         }
 
+        /* ==================== TOAST & ALERT NOTIFICATIONS ==================== */
+        .cube-toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(30px);
+            background: rgba(15, 23, 42, 0.96);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            color: #ffffff;
+            padding: 12px 22px;
+            border-radius: 14px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 99999;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+            max-width: 90vw;
+            text-align: center;
+        }
+        .cube-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .cube-toast.toast-success {
+            border-color: rgba(16, 185, 129, 0.6);
+            color: #4ade80;
+        }
+        .cube-toast.toast-warning {
+            border-color: rgba(245, 158, 11, 0.6);
+            color: #fbbf24;
+        }
+
         /* ==================== CAMERA SCANNER UI ==================== */
         /* Painel Superior Unificado de Orientação */
         .scanner-orient-card {
@@ -1722,6 +1761,34 @@ $antiCache = time();
         </div>
     </div>
 
+    <!-- ==================== MODAL DE ALERTA E VALIDAÇÃO ==================== -->
+    <div id="cubeAlertModal" class="modal-backdrop">
+        <div class="modal-window" style="max-width: 440px;">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i id="alertModalIcon" class="fas fa-exclamation-triangle" style="color:#f59e0b;"></i>
+                    <span id="alertModalTitle">Aviso</span>
+                </div>
+                <button class="modal-close-btn" id="alertModalBtnClose" title="Fechar">&times;</button>
+            </div>
+            <div class="modal-body" style="line-height:1.5;">
+                <p id="alertModalMessage" style="font-size:0.95rem; margin-bottom:12px; color:var(--text-main); font-weight:500;"></p>
+                <div id="alertModalDetailsBox" style="display:none; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:10px 14px; font-size:0.84rem; color:var(--text-muted); margin-bottom:16px; font-family:'JetBrains Mono', monospace; white-space:pre-wrap;"></div>
+                <div id="alertModalActions" style="display:flex; flex-direction:column; gap:8px;">
+                    <button id="alertBtnFixFlat" class="scanner-btn capture" style="display:none; width:100%; justify-content:center;">
+                        <i class="fas fa-th"></i> Ajustar no Modelo Planificado
+                    </button>
+                    <button id="alertBtnRescan" class="scanner-btn secondary" style="display:none; width:100%; justify-content:center;">
+                        <i class="fas fa-camera"></i> Escanear com a Câmera
+                    </button>
+                    <button id="alertBtnOk" class="scanner-btn secondary" style="width:100%; justify-content:center;">
+                        Entendido
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ==================== RODAPÉ 4U ==================== -->
     <footer class="app-footer">
         <div class="footer-links">
@@ -1742,6 +1809,104 @@ $antiCache = time();
     <script type="text/javascript">
         var cube, flatCube, controls;
         var modalOverlay = null;
+
+        window.showCubeToast = function(msg, type) {
+            var old = document.querySelector('.cube-toast');
+            if (old) old.remove();
+
+            var toast = document.createElement('div');
+            toast.className = 'cube-toast toast-' + (type || 'info');
+            var icon = (type === 'success') ? 'fa-check-circle' : (type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle');
+            toast.innerHTML = '<i class="fas ' + icon + '"></i> <span>' + msg + '</span>';
+            document.body.appendChild(toast);
+            setTimeout(function() { toast.classList.add('show'); }, 15);
+            setTimeout(function() {
+                toast.classList.remove('show');
+                setTimeout(function() { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 400);
+            }, 3800);
+        };
+
+        window.showCubeAlert = function(opts) {
+            var modal = document.getElementById('cubeAlertModal');
+            if (!modal) {
+                alert((opts.title ? opts.title + '\n\n' : '') + opts.message + (opts.details ? '\n\n' + opts.details : ''));
+                return;
+            }
+            var titleEl = document.getElementById('alertModalTitle');
+            var iconEl = document.getElementById('alertModalIcon');
+            var msgEl = document.getElementById('alertModalMessage');
+            var detailsBox = document.getElementById('alertModalDetailsBox');
+            var btnFixFlat = document.getElementById('alertBtnFixFlat');
+            var btnRescan = document.getElementById('alertBtnRescan');
+            var btnOk = document.getElementById('alertBtnOk');
+            var closeBtn = document.getElementById('alertModalBtnClose');
+
+            if (titleEl) titleEl.textContent = opts.title || 'Aviso';
+            if (msgEl) msgEl.innerHTML = opts.message || '';
+
+            if (iconEl) {
+                if (opts.type === 'success') {
+                    iconEl.className = 'fas fa-check-circle';
+                    iconEl.style.color = '#10b981';
+                } else if (opts.type === 'warning') {
+                    iconEl.className = 'fas fa-exclamation-triangle';
+                    iconEl.style.color = '#f59e0b';
+                } else {
+                    iconEl.className = 'fas fa-info-circle';
+                    iconEl.style.color = '#3b82f6';
+                }
+            }
+
+            if (detailsBox) {
+                if (opts.details) {
+                    detailsBox.innerText = opts.details;
+                    detailsBox.style.display = 'block';
+                } else {
+                    detailsBox.style.display = 'none';
+                }
+            }
+
+            var closeModal = function() { modal.classList.remove('active'); };
+
+            if (btnFixFlat) {
+                if (opts.showFixFlat) {
+                    btnFixFlat.style.display = 'flex';
+                    btnFixFlat.onclick = function() {
+                        closeModal();
+                        var flatEl = document.getElementById('flat-cube');
+                        if (flatEl) {
+                            flatEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            flatEl.style.boxShadow = '0 0 30px rgba(59, 130, 246, 0.9)';
+                            flatEl.style.borderColor = '#3b82f6';
+                            setTimeout(function() {
+                                flatEl.style.boxShadow = '';
+                                flatEl.style.borderColor = '';
+                            }, 3000);
+                        }
+                    };
+                } else {
+                    btnFixFlat.style.display = 'none';
+                }
+            }
+
+            if (btnRescan) {
+                if (opts.showRescan) {
+                    btnRescan.style.display = 'flex';
+                    btnRescan.onclick = function() {
+                        closeModal();
+                        if (window.cameraScanner) window.cameraScanner.open();
+                    };
+                } else {
+                    btnRescan.style.display = 'none';
+                }
+            }
+
+            if (btnOk) btnOk.onclick = closeModal;
+            if (closeBtn) closeBtn.onclick = closeModal;
+            modal.onclick = function(e) { if (e.target === modal) closeModal(); };
+
+            modal.classList.add('active');
+        };
 
         function openModal() {
             if (modalOverlay) modalOverlay.classList.add('active');
@@ -1841,9 +2006,29 @@ $antiCache = time();
                 });
             }
 
-            // Inicializar Camera Scanner
-            window.cameraScanner = new CuboCameraScanner(flatCube, function() {
-                if (controls) controls.setSolution('');
+            // Inicializar Camera Scanner com auto-lançamento do Passo a Passo
+            window.cameraScanner = new CuboCameraScanner(flatCube, function(isValid, validation) {
+                if (controls) {
+                    if (isValid) {
+                        setTimeout(function() {
+                            if (controls.solveSlowButton) {
+                                controls.solveSlowButton.click();
+                            }
+                        }, 350);
+                    } else {
+                        controls.setSolution('');
+                        if (window.showCubeAlert && validation) {
+                            window.showCubeAlert({
+                                title: 'Cores Inconsistentes Detectadas',
+                                message: 'O cubo lido pela câmera possui peças ou cores que não formam uma montagem válida:',
+                                details: validation.reason + (validation.details ? '\n' + validation.details : ''),
+                                type: 'warning',
+                                showFixFlat: true,
+                                showRescan: true
+                            });
+                        }
+                    }
+                }
             });
 
             var btnOpenScanner = document.getElementById('btnOpenScanner');

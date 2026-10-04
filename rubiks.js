@@ -590,6 +590,81 @@ RubiksCube.prototype.isSolvable = function () {
 	return !this.rotating && this.solver.setState(this.getState());
 }
 
+RubiksCube.prototype.validateState = function () {
+	if (this.rotating) {
+		return { valid: false, code: 'ROTATING', reason: 'O cubo ainda está girando.', details: 'Aguarde a animação terminar para validar ou resolver.' };
+	}
+
+	// 1. Verificar contagem de cores no flatCube (se disponível)
+	if (this.flatCube && this.flatCube.faces && this.flatCube.faces.length === 6) {
+		var counts = {};
+		for (var f = 0; f < 6; f++) {
+			if (this.flatCube.faces[f] && this.flatCube.faces[f].stickers) {
+				for (var s = 0; s < 9; s++) {
+					var st = this.flatCube.faces[f].stickers[s];
+					var c = (st && st.color ? st.color : '').toLowerCase();
+					if (c) counts[c] = (counts[c] || 0) + 1;
+				}
+			}
+		}
+		var colorNames = {
+			'#ffffff': 'Branco',
+			'#ffff00': 'Amarelo',
+			'#009900': 'Verde',
+			'#000099': 'Azul',
+			'#cc0000': 'Vermelho',
+			'#ff8000': 'Laranja'
+		};
+		var colorErrors = [];
+		var totalStickers = 0;
+		for (var hex in colorNames) {
+			var cnt = counts[hex] || 0;
+			totalStickers += cnt;
+			if (cnt !== 9) {
+				colorErrors.push(colorNames[hex] + ': ' + cnt + '/9');
+			}
+		}
+		if (totalStickers === 54 && colorErrors.length > 0) {
+			return {
+				valid: false,
+				code: 'UNBALANCED_COLORS',
+				reason: 'A contagem de cores está desbalanceada.',
+				details: 'Cada uma das 6 cores precisa ter exatamente 9 adesivos:\n' + colorErrors.join(' • ')
+			};
+		}
+	}
+
+	// 2. Verificar estado no solver
+	var state = this.getState();
+	var solvable = this.solver.setState(state);
+	if (!solvable) {
+		var err = this.solver.currentState || 'Estado inválido';
+		var friendly = err;
+		var details = '';
+		if (err === 'Cores inválidas') {
+			friendly = 'Peças ou cores incompatíveis';
+			details = 'Uma ou mais peças têm combinação fisicamente impossível de cores (ex: adesivos de lados opostos na mesma peça ou cubos repetidos). Verifique se algum adesivo foi lido errado no modelo planificado.';
+		} else if (err === 'Arestas invertidas') {
+			friendly = 'Orientação invertida em aresta (meio)';
+			details = 'Uma das peças de meio do cubo está virada ao contrário (orientação invertida).';
+		} else if (err === 'Cantos invertidos') {
+			friendly = 'Orientação invertida em canto (quina)';
+			details = 'Um dos cantos do cubo está girado em seu próprio eixo (torção de canto).';
+		} else if (err === 'Erro de paridade') {
+			friendly = 'Erro de paridade de posição';
+			details = 'Duas peças estão trocadas de lugar (situação impossível em cubo 3x3x3 sem desmontar).';
+		}
+		return {
+			valid: false,
+			code: err,
+			reason: friendly,
+			details: details
+		};
+	}
+
+	return { valid: true };
+};
+
 RubiksCube.prototype.scramble = function (num) {
 	var moves = 'u d f b l r'.split(' ');
 	var me = this;
