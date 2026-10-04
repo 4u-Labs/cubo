@@ -943,21 +943,26 @@ RubiksCubeControls.prototype.setWidth = function(width, controlsTop) {
 		current++;
 	}
 
+	var solveBtnHeight = Math.max(Math.min(Math.round(buttonWidth * 0.82), 48), 35);
+	var solveBtnBottomRow2 = Math.max(Math.round(width / 36), 10);
+	var solveBtnGap = Math.max(Math.round(width / 40), 9);
+	var solveBtnBottomRow1 = solveBtnBottomRow2 + solveBtnHeight + solveBtnGap;
+
 	function styleSolve(button, left, bottom){
 		button.style.position = 'absolute';
-		button.style.bottom = (bottom || width*3/28) + 'px';
+		button.style.bottom = bottom + 'px';
 		button.style.left = left + 'px';
 		button.style.width = buttonWidth*25/7 - 2 + 'px';
-		button.style.height = buttonWidth/2 + 'px';
-		button.style.lineHeight = buttonWidth/2 + 'px';
+		button.style.height = solveBtnHeight + 'px';
+		button.style.lineHeight = solveBtnHeight + 'px';
 		button.style.textAlign = 'center';
-		button.style.fontSize = buttonWidth/3+'px';
+		button.style.fontSize = Math.max(Math.round(buttonWidth * 0.34), 14) + 'px';
 	}
 
-	styleSolve(this.solveButton, width/28);
-	styleSolve(this.solveSlowButton, width*29/56);
-	styleSolve(this.scrambleButton, width/28, width/58);
-	styleSolve(this.resetButton, width*29/56, width/58);
+	styleSolve(this.solveButton, width/28, solveBtnBottomRow1);
+	styleSolve(this.solveSlowButton, width*29/56, solveBtnBottomRow1);
+	styleSolve(this.scrambleButton, width/28, solveBtnBottomRow2);
+	styleSolve(this.resetButton, width*29/56, solveBtnBottomRow2);
 
 	if(!this.solutionMoves || this.solutionMoves.length == 0){
 		this.overlay.style.display = 'none';

@@ -316,6 +316,13 @@ $antiCache = time();
                 justify-content: center !important;
                 font-size: 0.85rem !important;
             }
+            .header-btn.btn-scanner {
+                min-width: 68px !important;
+                padding: 6px 14px !important;
+                font-size: 1.05rem !important;
+                border-radius: 10px !important;
+                box-shadow: 0 4px 15px rgba(16, 185, 129, 0.45) !important;
+            }
             .header-btn .btn-label {
                 display: none !important;
             }
