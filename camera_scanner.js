@@ -707,43 +707,30 @@ class CuboCameraScanner {
 
         // 3. AMARELO: Ambos os canais R e G são muito altos, canal B é baixo
         const gRatio = g / Math.max(1, r);
-        if ((h >= 40 && h <= 75 && s >= 0.25) || (r > 140 && g > 130 && b < 125 && gRatio > 0.70)) {
+        if ((h >= 40 && h <= 75 && s >= 0.25) || (r > 140 && g > 130 && b < 125 && gRatio >= 0.70)) {
             return this.CUBE_COLORS.YELLOW.hex;
         }
 
         // 4. DIFERENCIAÇÃO ROBUSTA ENTRE VERMELHO E LARANJA
-        // Ambos possuem canal R dominante (r > g e r > b).
-        // Diferenças físicas e ópticas essenciais:
-        // - No Vermelho: o pigmento absorve o canal verde (gRatio < 0.38). O azul é próximo ou maior que o verde.
-        // - No Laranja: o pigmento reflete bastante verde (gRatio >= 0.38) e quase zero azul (g - b >= 35).
+        // Em ambos, R é o canal dominante (r > g e r > b).
+        // No LARANJA:
+        // - O matiz é quente e positivo: 8° <= h < 42°
+        // - O canal Verde supera estritamente o Azul: (g - b) >= 10
+        // - A proporção de Verde em relação ao Vermelho é relevante: gRatio >= 0.30
         const gMinusB = g - b;
 
-        // Regra A: Se o canal Azul for próximo ou superior ao Verde com matiz avermelhado, é 100% VERMELHO
-        // (Plástico laranja NUNCA tem componente azul próximo ou maior que o verde)
-        if ((b >= g - 6 && h < 25) || (b >= g)) {
-            return this.CUBE_COLORS.RED.hex;
-        }
-
-        // Regra B: Laranja evidente (matiz entre 15° e 42°, proporção expressiva de verde e g >> b)
-        if (h >= 15 && h < 42 && gRatio >= 0.38 && gMinusB >= 35) {
+        // Caso 1: Laranja nítido (8° <= h < 42°, verde superando azul e gRatio >= 0.30)
+        if ((h >= 8 && h < 42) && (gMinusB >= 10) && (gRatio >= 0.30)) {
             return this.CUBE_COLORS.ORANGE.hex;
         }
 
-        // Regra C: Laranja sob luz quente ou alta saturação/brilho
-        if (gRatio >= 0.42 && gMinusB >= 40 && h >= 12) {
+        // Caso 2: Laranja brilhante com alta presença de verde sob iluminação quente/forte
+        if (gRatio >= 0.38 && gMinusB >= 14 && h < 45) {
             return this.CUBE_COLORS.ORANGE.hex;
         }
 
-        // Regra D: Vermelho clássico (matiz nos extremos 335°-360° ou 0°-12°, ou baixa presença de verde)
-        if (h >= 335 || h <= 12 || gRatio < 0.38 || gMinusB < 35) {
-            return this.CUBE_COLORS.RED.hex;
-        }
-
-        // Regra E: Fronteira sutil (h entre 12° e 18°)
-        if (gRatio >= 0.40 && gMinusB >= 38) {
-            return this.CUBE_COLORS.ORANGE.hex;
-        }
-
+        // Caso 3: VERMELHO
+        // (inclui h >= 330°, h <= 7°, b >= g, carmesim, escuro ou baixa proporção de verde)
         return this.CUBE_COLORS.RED.hex;
     }
 
