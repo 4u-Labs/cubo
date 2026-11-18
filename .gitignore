@@ -1,3 +1,14 @@
 .DS_Store
 *.log
 scratch/
+.env
+.env.local
+.config.php
+data/*.db
+data/*.sqlite
+*.db
+*.sqlite
+api_logs.txt
+uploads/
+credentials.json
+.user_uploaded/

@@ -2277,6 +2277,7 @@ $antiCache = time();
         window.addEventListener('load', init, false);
 
         window.addEventListener('resize', function () {
+            if (typeof cube === 'undefined' || !cube || typeof controls === 'undefined' || !controls) return;
             var down = false;
             var parent = document.getElementById('app-container');
             var parentWidth = parent.offsetWidth - 30;
